@@ -1,0 +1,584 @@
+import React, { Component } from 'react';
+import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, TouchableWithoutFeedback} from 'react-native'
+import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Title, Header } from 'native-base';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+// Our custom files and classes import
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+import { RadioButton, Chip, Divider } from 'react-native-paper';
+//import { StackActions, NavigationActions } from 'react-navigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import moment from "moment";
+import Modal from 'react-native-modal';
+import TearLines from "react-native-tear-lines";  
+import NumberFormat from 'react-number-format';
+import Loader from '../components/Loader';
+import CustomHeader from './Header';
+import SegmentedControlTab from 'react-native-segmented-control-tab';
+import axios  from 'axios';
+
+import Rider_img from '../assets/rider.png';
+import customer_img from '../assets/customer.png';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { FlatGrid } from 'react-native-super-grid';
+import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
+MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
+Logger.setLogCallback(log => {
+  const { message } = log;
+
+  // expected warnings - see https://github.com/mapbox/mapbox-gl-native/issues/15341#issuecomment-522889062
+  if (
+    message.match('Request failed due to a permanent error: Canceled') ||
+    message.match('Request failed due to a permanent error: Socket Closed')
+  ) {
+    return true;
+  }
+  return false;
+});
+
+
+export default class OrderDetailsTranspo extends Component {
+  constructor(props) {
+      super(props);
+      this.updateref =  firestore();
+      this.updatecounts =  firestore();
+      this.updateUserOrders =  firestore();
+      this.checkoutref =  firestore();
+      this.storeRef  =   firestore(); 
+      this.paymentsRef  =   firestore(); 
+      this.billingRef  =   firestore();
+      this.paymentMethodRef =  firestore();
+      this.ordercounters =  firestore();
+      this.chargeref =  firestore().collection('charges').where('status', '==', 'on process' );
+      const cart = this.props.route.params.orders; 
+      this.state = {  
+            OrderStatus: cart.OrderStatus,
+     adminname: cart.adminname,
+      DeliveredBy: cart.DeliveredBy.Name,
+        cart:cart,
+     VisibleAddInfo: false,
+     cLong:cart.flat,
+     cLat:cart.flong,
+      driver_charge: 0,
+      xtra: 0,
+      labor: 0,
+      deliveryCharge: 0,
+      pickup: 0,
+      stores:[],
+      paymentMethod: 'Cash on Delivery (COD)',
+      billing_name:cart.Billing.name,
+      billing_street:cart.Billing.address,
+      billing_province:cart.Billing.province,
+      billing_city: cart.Billing.billing_city,
+      billing_barangay: cart.Billing.barangay,
+      billing_cluster: cart.city,
+      billing_nameTo: cart.billing_nameTo,
+      billing_postalTo: cart.billing_postalTo,
+      billing_phoneTo: cart.billing_phoneTo,
+      billing_streetTo: cart.billing_streetTo,
+      billing_countryTo: cart.billing_countryTo,
+      billing_provinceTo: cart.billing_provinceTo,
+      billing_cityTo: cart.billing_cityTo,
+      billing_barangayTo: cart.billing_barangayTo,
+      billing_clusterTo: cart.billing_clusterTo,
+      preffered_delivery_time: '',
+      currentDate: new Date(),
+      visibleModal: false,
+      isVisible: false,
+      payments: [],
+      methods: [],
+      palawan_name: '',
+      palawan_number: '',
+      bank_number: '',
+      bank_name: '',
+      gcash_number: '',
+      counter: 0,
+      account_name: '',
+      account_address: '',
+      account_city: '',
+      account_barangay: '',
+      account_province: '',
+      account_email: '',
+      account_number: '',
+      account_cluster: '',
+      account_status:'',
+      paypal_email:'',
+      paypal_uname:'',
+      note:'',
+      vouchers: [],
+      discount: 0,
+      voucherArray: [],
+      charge: 0,
+      xtraCharge: 0,
+      voucherCode: '',
+      loading: false,
+      address_list:[],
+      visibleAddressModal: false,
+      //subtotal: subtotal,
+      minimum: 0,
+      selectedIndex: 0,
+      selectedIndices: [0],  
+      customStyleIndex: 0,
+      isready:0,
+      visibleAddressModalTo: false,
+      passenger: cart.passengers,
+      note:cart.Note,
+      AlwaysOpen: cart.needAsap,
+      succeding: cart.succeding,
+      amount_base: cart.amount_base,
+      base_dist: cart.base_dist,
+      Tolat: cart.Tolat,
+      Tolong: cart.Tolong,
+      showURL:false,
+      ModalHelp: false,
+  };
+
+  }
+
+
+
+
+async componentDidMount() {
+     const getData= firestore().collection('charges').doc(this.props.route.params.orders.adminID);
+    const doc = await getData.get();
+    if (!doc.exists) {
+  console.log('No such document!');
+} else {
+  console.log('Document data:', doc.data());
+  this.setState({
+          Telephone_Help : doc.data().Telephone_Help,
+          email_help: doc.data().email_help,
+          fb_Help: doc.data().fb_Help,
+          mobile_help: doc.data().mobile_help,
+          
+       })}
+    this.getLocation();
+  
+  }
+  getLocation (){
+
+  }
+ footer= () => {
+    return(
+    <View>
+      <Button block  style={{alignSelf:'center', backgroundColor:'salmon'}}  onPress={()=>this.navigateAddress() }>
+            <Text style={{color: 'white'}}>Add Address</Text>
+      </Button>
+    </View>
+    )
+  }
+ReasonOfCancel(){
+
+    const ref = firestore().collection('orders').doc(this.props.route.params.orders.OrderId);
+    ref.update({ 
+        OrderStatus : "Cancelled",
+        rider_id:"",
+        DeliveredBy : "",
+        RiderCancel: firestore.FieldValue.arrayUnion({RiderId: '', RiderName: 'User', TimeCancelled: moment().unix(), CancelledReason: 'Cancelled By User'})
+    })
+    this.props.navigation.goBack();
+}
+
+  render() {
+   
+    let distance =  this.state.cart.distance/1000;
+    let newDistance = distance - this.state.base_dist;
+    let distanceAmount = newDistance*this.state.succeding;
+    let amountpay= this.state.amount_base +distanceAmount;
+
+    let from_lat = this.state.cLat
+    let from_long = this.state.cLong
+    let to_lat = this.state.Tolat
+    let to_long = this.state.Tolong
+
+
+console.log('cLat: ', this.state.cLat);
+    return(
+        <Root>
+          <Container style={{backgroundColor: '#CCCCCC'}}>   
+            <Header androidStatusBarColor="#2c3e50" style={{display:'none'}} style={{backgroundColor: '#183c57'}}>
+          <Left style={{flex:1}}>
+          <Button transparent onPress={()=> this.props.navigation.goBack()}>
+                 <MaterialIcons name="arrow-back" size={25} color="white" />
+                </Button> 
+          </Left>
+          <Body style={{flex: 3}}>
+            <Title style={{color:'white'}}>Trans. No: #00{this.props.route.params.orders.OrderNo}</Title>
+          </Body>
+           <Right style={{flex:1}}>
+          <Button transparent onPress={()=> this.setState({ModalHelp: true})}>
+                 <MaterialIcons name="help-outline" size={25} color="white" />
+                </Button> 
+                {this.props.route.params.orders.OrderStatus == 'Pending'?
+                <Button transparent onPress={()=> Alert.alert('Are you Sure to Cancel?', 'You cannot undo this process',[
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => this.ReasonOfCancel()}
+      ])}>
+                 <MaterialIcons name="cancel" size={25} color="white" />
+                </Button> 
+                :null
+                }
+                   
+          </Right>
+        </Header>
+          <Loader loading={this.state.loading}/>     
+     
+                      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <View style={{position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height/1.5,}}>
+
+
+ <MapboxGL.MapView 
+    zoomEnabled={true}
+        scrollEnabled={true}
+                pitchEnabled={true}
+        style={{ position: 'absolute',flex: 1,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0}}
+        attributionEnabled={false}
+        logoEnabled={false}
+  >
+  <MapboxGL.Camera 
+  centerCoordinate={[this.props.route.params.orders.flong,this.props.route.params.orders.flat]} 
+  zoomLevel={15}
+  />
+
+<MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true} />
+   <MapboxGL.PointAnnotation coordinate={[this.props.route.params.orders.flong, this.props.route.params.orders.flat]} />
+<MapboxGL.PointAnnotation coordinate={[this.props.route.params.orders.Tolong, this.props.route.params.orders.Tolat]} />
+ </MapboxGL.MapView>
+
+
+
+
+        </View>
+         </View>
+         <View>
+               <Card style={{height: SCREEN_HEIGHT/2.2}}>
+<CardItem> 
+
+<Body style={{flexDirection: 'row'}}>
+ <View style={{flexDirection: 'column', marginLeft: 0}}>
+ <TouchableOpacity onPress={()=> this.setState({showURL: true, SelectedURL:this.state.cart.DeliveredBy.image})}>
+   <Image style={{  width: 100, height: 100, borderRadius: 50, borderWidth: 5, borderColor: '#396ba0', overflow: "hidden", top: -50}} source={{uri: this.state.cart.DeliveredBy.image}} />
+</TouchableOpacity>
+{this.state.cart.DeliveredBy.rating > 4.5  ?   //5
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star" size={20} color={'#FFD700'} />
+       <MaterialIcons name="star" size={20} color={'#FFD700'} />
+       <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        </View>
+:this.state.cart.DeliveredBy.rating > 4.4 &&this.state.cart.DeliveredBy.rating < 5? //4.5
+ <View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-half" size={20} color={'#FFD700'} />
+        </View>
+:this.state.cart.DeliveredBy.rating > 3.9 && this.state.cart.DeliveredBy.rating < 4.5?  //4
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+        :this.state.cart.DeliveredBy.rating > 3.4 && this.state.cart.DeliveredBy.rating < 4 ?  //3.5
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+       <MaterialIcons name="star-half" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+        :this.state.cart.DeliveredBy.rating > 2.9 && this.state.cart.DeliveredBy.rating < 3.5?  //3
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+        :this.state.cart.DeliveredBy.rating > 2.4 && this.state.cart.DeliveredBy.rating < 3?  //2.5
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+           <MaterialIcons name="star-half" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+        :this.state.cart.DeliveredBy.rating > 1.9 && this.state.cart.DeliveredBy.rating < 2.5?  //2
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+    <MaterialIcons name="star" size={20} color={'#FFD700'} />
+      <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+      <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+        :this.state.cart.DeliveredBy.rating > 1.4 && this.state.cart.DeliveredBy.rating < 2?  //1.5
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+       <MaterialIcons name="star-half" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+       <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+        :this.state.cart.DeliveredBy.rating > 0.9 && this.state.cart.DeliveredBy.rating < 1.5?  //1
+<View  style={{flexDirection: 'row', top: -50}}>
+    <MaterialIcons name="star" size={20} color={'#FFD700'}/>
+  <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+       <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+        :
+<View  style={{flexDirection: 'row', top: -50}}>
+<MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+  <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+      <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+      <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+         <MaterialIcons name="star-outline" size={20} color={'#FFD700'} />
+        </View>
+}
+       <Text style={{fontSize: 12, top: -50, textAlign: 'center'}}>{this.state.cart.DeliveredBy.rating} </Text>
+    </View>
+ <View style={{flexDirection: 'column', marginLeft: 10}}>
+    <Text style={{fontWeight: 'bold', fontSize: 15}}>Accepted By :<Text style={{fontSize: 15}}>{this.state.DeliveredBy} ({this.state.cart.AdminName})</Text></Text>
+ <Text style={{fontWeight: 'bold', fontSize: 12, numberOfLines: 2}}>Vehicle: <Text style={{fontSize: 12}}>{this.state.cart.vehicle} {this.state.cart.DeliveredBy.ColorMotor} {this.state.cart.DeliveredBy.MBrand} {this.state.cart.DeliveredBy.VModel} {this.state.cart.DeliveredBy.plateNo} {this.state.cart.vehicle == 'Motorcycle'?this.state.cart.DeliveredBy.helmet+' Helmet '+this.state.cart.DeliveredBy.helmetNo :null}</Text> </Text> 
+  </View>
+</Body>
+<Right style={{top: -80,}}>
+<View style={{ backgroundColor: '#396ba0', borderRadius: 10, width: '40%'}}>
+<Text style={{textAlign: 'center', fontSize: 14, color: 'white'}}>ETA
+</Text>
+<Text style={{textAlign: 'center', fontSize: 14, color: 'white'}}>{this.state.cart.distance === undefined? null: Math.round(((this.state.cart.estTime/60)*10)/10)} mins</Text>
+</View>
+</Right>
+
+
+</CardItem>
+<TouchableOpacity style={{top: -63, flexDirection: 'row', marginLeft: 10}} onPress={()=>{this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({VisibleAddInfo: true})}}>
+  <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
+   <View style={{flexDirection: 'column', width: '90%'}}>
+
+   
+                    <Text style={{fontWeight: 'normal', fontSize: 14, color: 'green'}}>Pickup location </Text>
+                   <Text style={{fontSize: 14}}>{this.state.billing_street}, {this.state.billing_barangay}, {this.state.billing_city}, {this.state.billing_province}, {this.state.billing_postal}</Text>    
+                         </View>
+</TouchableOpacity>
+<TouchableOpacity style={{top: -65, flexDirection: 'row', marginLeft: 10}} onPress={()=>{this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({VisibleAddInfo: true})}}>
+ <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
+                <View style={{flexDirection: 'column'}}>
+              
+  
+                    <Text style={{fontWeight: 'normal', fontSize: 14, color: 'blue'}}>Drop-off location</Text>
+                    <Text style={{fontSize: 14}} >{this.state.billing_streetTo}, {this.state.billing_barangayTo}, {this.state.billing_cityTo}, {this.state.billing_provinceTo}, {this.state.billing_postalTo}</Text>
+                   </View>
+</TouchableOpacity>
+
+                <TouchableOpacity style={{top: -60, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
+                   <View style={{flexDirection: 'row'}}>
+                    <Text style={{fontWeight: 'bold', fontSize: 14}}>Passengers:  </Text>
+                        <Text style={{fontSize: 14}}>{this.state.cart.adult} Adult {this.state.cart.children == 0?null: ', '+this.state.cart.children+' '+'Children'  } </Text>
+                     </View>
+                  { this.state.cart.distance === undefined? null:    <View style={{flexDirection: 'row',position: 'absolute', right: 0, marginRight: 20}}>
+                        <Text style={{fontWeight: 'bold', fontSize: 14}}>Pickup Time:</Text>
+                        <Text style={{fontSize: 14,}}>{this.state.cart.needAsap === true? 'ASAP': moment(this.state.cart.pickupTime*1000).format('h:mm a')}</Text>
+                    </View>}
+                   
+                </TouchableOpacity>
+                <TouchableOpacity style={{top: -60, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
+                   <View style={{flexDirection: 'row',}}>
+                    <Text style={{fontWeight: 'bold', fontSize: 14,  width: '25%'}}>Passenger Description:  </Text>
+                        <Text style={{fontSize: 14,  width: '65%'}}>{this.state.cart.PassengerDescription}</Text>
+                     </View>
+                  { this.state.cart.distance === undefined? null:    <View style={{flexDirection: 'row',position: 'absolute', right: 0}}>
+                       <Text style={{fontSize: 20, fontWeight: 'bold', marginRight: 20}}>{this.state.cart.distance === undefined? null: distanceAmount < 1?this.props.route.params.orders.currency+' '+Math.round((this.props.route.params.orders.tip*10)/10+parseFloat(this.state.amount_base)): this.props.route.params.orders.currency+' '+Math.round((amountpay*10)/10+Math.round((this.props.route.params.orders.tip*10)/10))}</Text>
+                    </View>}
+                   {console.log('tip: ',this.props.route.params.orders.tip)}
+                </TouchableOpacity> 
+
+                <TouchableOpacity style={{top: -60, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
+                   <View style={{flexDirection: 'row'}}>
+                    <Text style={{fontWeight: 'bold', fontSize: 14}}>Note to Rider:  </Text>
+                        <Text style={{fontSize: 14}}>{this.state.cart.Note}</Text>
+                     </View>
+             
+                </TouchableOpacity>
+              
+
+</Card>
+               <ScrollView >
+
+        <Modal
+      isVisible={this.state.ModalHelp}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      onBackdropPress={() => this.setState({ModalHelp: false})} transparent={true}>
+     <Card style={{ backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+       
+        <ScrollView>
+       <View style={{justifyContent: 'center',alignItems: 'center'}}>
+     <Text style={{ fontSize: 15, fontWeight: 'bold'}}>Contact Us On</Text>
+            </View> 
+      <Text style={{marginTop: 15, fontSize: 10}}>Facebook</Text>
+                        <Item regular style={{marginTop: 7}}>
+             <Input value={this.state.fb_Help}/>
+         </Item>
+
+
+           <Text style={{marginTop: 15, fontSize: 10}}>Mobile Number</Text>
+                        <Item regular style={{marginTop: 7}}>
+             <Input value={this.state.mobile_help}/>
+         </Item>
+
+         <Text style={{marginTop: 15, fontSize: 10}}>Telephone Number</Text>
+                        <Item regular style={{marginTop: 7}}>
+             <Input value={this.state.Telephone_Help}/>
+         </Item>
+          
+
+           <Text style={{marginTop: 15, fontSize: 10}}>Email</Text>
+         <Item regular style={{marginTop: 7}}>
+             <Input value={this.state.email_help}/>
+         </Item>
+     </ScrollView>   
+  
+    </Card>
+    </Modal>
+           <Modal
+      isVisible={this.state.VisibleAddInfo}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      onBackdropPress={() => this.setState({VisibleAddInfo: false})} transparent={true}>
+     {this.state.cart.OrderStatus=='Pending'?<Card style={{ backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+       
+        <List>
+        
+         <Text style={{marginTop: 15, fontSize: 10}}>Passengers Photo</Text>
+                    <Item regular style={{marginTop: 7, padding: 10}}>
+                    <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:this.state.cart.Customerimage})}>
+                    <Image style={{  width: 160, height: 160, resizeMode: 'contain',margin: 10}}  source={this.state.cart.Customerimage === '' ? {uri: 'https://icon-library.com/images/no-photo-icon/no-photo-icon-1.jpg'}:{uri: this.state.cart.Customerimage}} />
+</TouchableWithoutFeedback>
+                    </Item>
+                    
+           </List>   
+    
+    </Card>: <Card style={{ backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+       <ScrollView>
+        <List>
+        
+        <Text style={{marginTop: 15, fontSize: 10}}>Passengers Photo</Text>
+                    <Item regular style={{marginTop: 7, padding: 10}}>
+                    <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:this.state.cart.Customerimage})}>
+                    <Image style={{  width: 160, height: 160, resizeMode: 'contain',margin: 10}}  source={this.state.cart.Customerimage === '' ? {uri: 'https://icon-library.com/images/no-photo-icon/no-photo-icon-1.jpg'}:{uri: this.state.cart.Customerimage}} />
+</TouchableWithoutFeedback>
+                    </Item>
+               
+                      
+       
+                    <Text style={{marginTop: 15, fontSize: 10}}>Car Photo</Text>
+                        <Item regular style={{marginTop: 7}}>
+                        <FlatGrid
+      itemDimension={120}
+      data={this.state.cart.imagesVehicle}
+      // staticDimension={300} 
+      // fixed
+      spacing={10}
+      renderItem={({ item }) => (item =='AddImage'?null:
+        <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:item})}>
+              <Image style={{  width: 160, height: 160, resizeMode: 'contain',margin: 10}} source={{uri: item}} />
+         </TouchableWithoutFeedback>
+      )}
+    />
+          </Item>
+        
+           </List>   
+           </ScrollView>
+    </Card>}
+    </Modal>
+
+
+    <Modal
+      isVisible={this.state.showURL}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      style={{marginLeft: 0}}
+      useNativeDriver={true}
+      onBackdropPress={() => this.setState({showURL: false})} transparent={true}>
+    <TouchableWithoutFeedback onPress={()=> this.setState({showURL: false})}>
+     <Image style={{  width: SCREEN_WIDTH, height:SCREEN_HEIGHT, resizeMode: 'contain'}} source={{uri: this.state.SelectedURL}} />
+   </TouchableWithoutFeedback>
+    </Modal>
+               </ScrollView >
+               </View>
+          </Container>
+          </Root>
+    );
+  }
+}
+
+
+const styles = {
+  line: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#bdc3c7',
+    marginBottom: 10,
+    marginTop: 10
+  },
+   view: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  invoice: {
+      padding: 20,
+      backgroundColor:"#FFFFFF",
+      borderWidth: 0.2,
+      borderBottomColor: '#ffffff',
+      borderTopColor: '#ffffff',
+
+    },
+    centerElement: {justifyContent: 'center', alignItems: 'center'},
+    content: {
+      backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',
+    },
+};
