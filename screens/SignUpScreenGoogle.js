@@ -194,7 +194,7 @@ console.log('city.length: ',city.length)
               Barangay: this.state.selectedBarangay,
               City: this.state.selectedCity.trim(),
               Province: this.state.province,
-              Country: this.state.Country,
+              Country: this.state.Country.trim(),
               lat:this.state.userPoint.latitude,
               long:this.state.userPoint.longitude,
             },

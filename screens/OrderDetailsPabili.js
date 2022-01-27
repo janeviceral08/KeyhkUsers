@@ -438,7 +438,7 @@ this.setState({ItemList: NewListItem})
           <Container style={{backgroundColor: '#CCCCCC'}}>   
           <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#396ba0'}}>
           <Left style={{flex:3, width: '70%'}}>
-      <Title style={{color:'white', marginLeft: 20}}>KeyHK</Title>
+      <Title style={{color:'white', marginLeft: 20}}>KeyS</Title>
           </Left>
           <Body style={{flex: 3}}>
             
@@ -770,7 +770,7 @@ Reason of Cancellation:
     </View>
   <View style={{flexDirection: 'column', marginLeft: 10}}>
    <Text style={{fontSize: 15}}>{this.state.DriverInfo.Name} </Text>
-  <Text style={{fontSize: 12}}>{this.state.DriverInfo.ColorMotor} {this.state.DriverInfo.MBrand} {this.state.DriverInfo.VModel}</Text>
+  <Text style={{fontSize: 12}}>{this.state.DriverInfo.ColorMotor} {this.state.DriverInfo.MBrand} {this.state.DriverInfo.VModel} {this.state.DriverInfo.ownerRider == true? null:this.state.DriverInfo.selectedDeliveryApp+ ' Rider' }</Text>
   <Text style={{fontSize: 12}}>Plate Number :<Text style={{fontSize: 10}}>{this.state.DriverInfo.PlateNo} </Text></Text>
   </View>
 </Body>

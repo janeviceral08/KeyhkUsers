@@ -1382,7 +1382,7 @@ console.log("province", province)
               onBackdropPress={() => this.OrderSuccess()} transparent={true}>
             <View style={styles.content}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyHK!</Text>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyS!</Text>
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
               <Image

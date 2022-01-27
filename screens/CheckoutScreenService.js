@@ -709,7 +709,7 @@ console.log('out: ', out);
                 </Button> 
           </Left>
           <Body style={{flex: 3}}>
-            <Title style={{color:'white'}}>KeyHK</Title>
+            <Title style={{color:'white'}}>KeyS</Title>
           </Body>
         
         </Header>
@@ -1021,7 +1021,7 @@ console.log('out: ', out);
               onBackdropPress={() => this.OrderSuccess()} transparent={true}>
             <View style={styles.content}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyHK!</Text>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyS!</Text>
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
               <Image

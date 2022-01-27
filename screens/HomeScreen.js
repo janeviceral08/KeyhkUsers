@@ -717,7 +717,7 @@ let Address ='';
             <View style={{flex:1, alignSelf: 'flex-end', position: 'absolute', right: 0,}}>
                       <CartBadge navigation={this.props.navigation} fromPlace={this.state.fromPlace} currency={this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency == undefined? '':this.state.CountryNow[0].currency}/>
           </View>
-         {/* <Text style={{color: 'white', fontSize: 22}}>KeyHK</Text>
+         {/* <Text style={{color: 'white', fontSize: 22}}>KeyS</Text>
           <Text style={{color: '#4bccac', fontSize: 15,width: '100%'}}>Shared Booking Portal</Text>*/}
            <View style={{width: SCREEN_WIDTH/2.5,marginTop: 10 }}>
              {console.log('Dropdown cities: ', this.state.cities)}

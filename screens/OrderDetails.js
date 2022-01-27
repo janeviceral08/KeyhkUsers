@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {StyleSheet, FlatList, ScrollView,Dimensions, TouchableOpacity, TouchableWithoutFeedback, Image} from 'react-native';
+import {StyleSheet, FlatList, ScrollView,Dimensions, TouchableOpacity, TouchableWithoutFeedback, Image, Alert} from 'react-native';
 import { Container, Header, Item,Input,Icon, Accordion, Text, View, Card, CardItem, Thumbnail, Body, Left, Right, Button,Toast,List,ListItem, Title } from "native-base";
 import StepIndicator from 'react-native-step-indicator'
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -674,7 +674,16 @@ logoEnabled={false}
               </Text>
             </Right>
           </CardItem>       
-       
+       {this.props.route.params.orders.USERAdd> 0? <CardItem>
+            <Body>
+              <Text style={{fontSize: 15, color: 'tomato'}}>Reservation Charge</Text>
+            </Body>
+            <Right>
+              <Text style={{fontSize: 15, color:'tomato'}}>
+             {this.props.route.params.orders.USERAdd}
+              </Text>
+            </Right>
+          </CardItem>:null}
           <CardItem>
             <Body>
               <Text style={{fontSize: 15, color: 'tomato'}}>Discount</Text>

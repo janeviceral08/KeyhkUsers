@@ -1226,7 +1226,7 @@ this.setState({ItemList: NewListItem})
              
       <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#396ba0'}}>
           <Left style={{flex:3, width: '70%'}}>
-      <Title style={{color:'white', marginLeft: 20}}>KeyHK</Title>
+      <Title style={{color:'white', marginLeft: 20}}>KeyS</Title>
           </Left>
           <Body style={{flex: 3}}>
             

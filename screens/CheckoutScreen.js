@@ -910,7 +910,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                             <Text style={{color:'gray', fontSize: 14}}>Send to:</Text>
                             <Input  placeholderTextColor="#687373"  value={this.state.gcash_number}  disabled/>
                         </Item>
-                        <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                        <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                     </Form>}
                     {paymentMethod === 'Bank Transfer' && 
                     <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
@@ -932,7 +932,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                             <Text style={{color:'gray' , fontSize: 13}}>Accnt. Number:</Text>
                             <Input style={{fontSize: 16}}    placeholderTextColor="#687373"  value={this.state.bank_number2} numberOfLines={2}  disabled/>
                         </Item>
-                       <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                       <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                     </Form>}
                     {paymentMethod === 'Palawan Remittance' && 
                     <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
@@ -944,7 +944,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                             <Text style={{color:'gray', fontSize: 13}}>Receiver Number:</Text>
                             <Input value={this.state.palawan_number}  disabled numberOfLines={2}/>
                         </Item>
-                       <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                       <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                     </Form>}
                     {paymentMethod === 'Paypal' && 
                     <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
@@ -956,7 +956,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                             <Text style={{color:'gray', fontSize: 13}}>Paypal Username:</Text>
                             <Input value={this.state.paypal_uname}  disabled numberOfLines={2}/>
                         </Item>
-                       <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                       <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                     </Form>}
                 </Card> 
                 <View> 
@@ -1223,7 +1223,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                               <Text style={{color:'gray', fontSize: 14}}>Send to:</Text>
                               <Input  placeholderTextColor="#687373"  value={this.state.gcash_number}  disabled/>
                           </Item>
-                          <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                          <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                       </Form>}
                       {paymentMethod === 'Bank Transfer' && 
                       <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
@@ -1245,7 +1245,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                               <Text style={{color:'gray' , fontSize: 13}}>Accnt. Number:</Text>
                               <Input style={{fontSize: 16}}    placeholderTextColor="#687373"  value={this.state.bank_number2} numberOfLines={2}  disabled/>
                           </Item>
-                         <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                         <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                       </Form>}
                       {paymentMethod === 'Palawan Remittance' && 
                       <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
@@ -1257,7 +1257,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                               <Text style={{color:'gray', fontSize: 13}}>Receiver Number:</Text>
                               <Input value={this.state.palawan_number}  disabled numberOfLines={2}/>
                           </Item>
-                         <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                         <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                       </Form>}
                       {paymentMethod === 'Paypal' && 
                       <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
@@ -1269,7 +1269,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                               <Text style={{color:'gray', fontSize: 13}}>Paypal Username:</Text>
                               <Input value={this.state.paypal_uname}  disabled numberOfLines={2}/>
                           </Item>
-                         <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyHK@gmail.com.</Text>
+                         <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
                       </Form>}
                   </Card> 
                   <View> 
@@ -1480,7 +1480,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
               onBackdropPress={() => this.OrderSuccess()} transparent={true}>
             <View style={styles.content}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyHK!</Text>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyS!</Text>
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
               <Image
