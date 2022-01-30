@@ -638,7 +638,7 @@ async addonsdeleteCart(item){
 
        }}>
               
-          <Header androidStatusBarColor={'#696969'}  style={{backgroundColor:'#019fe8', height: 46}}>
+          <Header androidStatusBarColor={'#696969'}  style={{backgroundColor:'#f06767', height: 46}}>
           <View style={{flex: 1,flexDirection:'row', width: 200, height: 36, justifyContent: "center", alignItems: 'center',backgroundColor:'white', marginTop: 5,borderRadius: 30}}>
           <TouchableOpacity style={{alignItems:'center',justifyContent:'center', flexDirection:'row',  }} onPress = {()=>{this.props.navigation.navigate('Search', {'storeId': this.props.storeId, 'store_name': this.props.store})}} underlayColor = 'transparent'>
               <View style={{flex: 1}}>

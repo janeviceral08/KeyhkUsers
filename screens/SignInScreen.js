@@ -64,32 +64,45 @@ export default class SignInScreen extends Component  {
           auth()
           .signInWithEmailAndPassword(this.state.email, this.state.password)
           .then((res) => {
-            const usersRef = firestore().collection('users').doc(auth().currentUser.uid)
-            const updateRef = firestore().collection('users').doc(auth().currentUser.uid);
-            updateRef.update({
-              token: firestore.FieldValue.arrayUnion(token),
-            });
-            usersRef.get()
-            .then((docSnapshot) => {
-              if (docSnapshot.exists) {
-                usersRef.onSnapshot((doc) => {
-                 
-         console.log('working here 2')
-         console.log('current: ', auth().currentUser.uid)
-              AsyncStorage.setItem('uid',  auth().currentUser.uid);
-      this.setState({
-          loading: false,
-          email: '', 
-          password: ''
-        })
-        this.props.navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],})
-                });
-              } else {
-                this.setState({ errorMessage: 'Invalid Email or Password', loading: false })
-              }
-          });
+
+              firestore().collection('users').where('userId', '==', userId).onSnapshot(querySnapshot => {
+
+                    querySnapshot.forEach(doc => {
+                      if(doc.data().userId == auth().currentUser.uid){
+                        
+                                      const usersRef = firestore().collection('users').doc(auth().currentUser.uid)
+                                      const updateRef = firestore().collection('users').doc(auth().currentUser.uid);
+                                      updateRef.update({
+                                        token: firestore.FieldValue.arrayUnion(token),
+                                      });
+                                  usersRef.get()
+                                      .then((docSnapshot) => {
+                                        if (docSnapshot.exists) {
+                                          usersRef.onSnapshot((doc) => {
+                                          
+                                  console.log('working here 2')
+                                  console.log('current: ', auth().currentUser.uid)
+                                        AsyncStorage.setItem('uid',  auth().currentUser.uid);
+                                this.setState({
+                                    loading: false,
+                                    email: '', 
+                                    password: ''
+                                  })
+                                  this.props.navigation.reset({
+                                      index: 0,
+                                      routes: [{ name: 'Home' }],})
+                                          });
+                                        } else {
+                                          this.setState({ errorMessage: 'Invalid Email or Password', loading: false })
+                                        }
+                                    });
+
+                      }
+                    })
+              })
+
+            
+    
 
 
 
@@ -123,7 +136,12 @@ export default class SignInScreen extends Component  {
       
         // Sign-in the user with the credential
          auth().signInWithCredential(facebookCredential).then((res) => {
-            this.setState({
+
+  firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
+
+                    querySnapshot.forEach(doc => {
+                      if(doc.data().userId == auth().currentUser.uid){
+                           this.setState({
                 loading: false,
               })
             console.log('fb')
@@ -131,8 +149,18 @@ export default class SignInScreen extends Component  {
                 console.log('current: ', auth().currentUser)
                 this.props.navigation.navigate('SignUpScreenFB', {'uid':auth().currentUser.uid, 'email':auth().currentUser.email, 'displayName':auth().currentUser.displayName})
                
+                      }
+                    })
+              })
+
+
+         
            }).catch(error => this.setState({ errorMessage: error.message, loading: false }));
       }
+
+
+
+
     async onGoogleButtonPress() {
         // Get the users ID token
         console.log('Pressed')
@@ -152,7 +180,17 @@ export default class SignInScreen extends Component  {
             console.log('working google')
                 console.log('current: ', auth().currentUser.uid)
                 console.log('current: ', auth().currentUser)
-                this.props.navigation.navigate('SignUpScreenGoogle', {'uid':auth().currentUser.uid, 'email':auth().currentUser.email})
+
+                  firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
+
+                    querySnapshot.forEach(doc => {
+                      if(doc.data().userId == auth().currentUser.uid){
+                         this.props.navigation.navigate('SignUpScreenGoogle', {'uid':auth().currentUser.uid, 'email':auth().currentUser.email})
+                      }
+                    })
+              })
+
+               
                
            }).catch(error => this.setState({ errorMessage: error.message, loading: false }))
            

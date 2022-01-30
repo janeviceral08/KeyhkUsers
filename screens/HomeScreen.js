@@ -30,9 +30,8 @@ import axios from 'axios'
 import Province  from './Province.json';
 import HomeScreenRentals from './HomeScreenRentals';
 import HomeScreenService from './HomeScreenService';
-import { useIsFocused } from '@react-navigation/native';
 import CartBadge from '../components/CartBadge';
-
+import auth from '@react-native-firebase/auth';
 import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
@@ -51,16 +50,7 @@ Logger.setLogCallback(log => {
 
 const BannerWidth = Dimensions.get('window').width;
 
-function ProfileScreen() {
-  // This hook returns `true` if the screen is focused, `false` otherwise
-  const isFocused = useIsFocused();
 
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-     {console.log('isFocused: ',isFocused)}
-    </View>
-  );
-}
 
 
 export async function request_device_location_runtime_permission() {
@@ -163,6 +153,7 @@ export default class HomeScreen extends Component {
       searchCountry:'',
       selectedCountry:'',
       CountryNow:[{labelRider: '', currency: '', currencyPabili:''}],
+      customerInfo: {},
     }
     this.arrayholder = [];
     this.FetchProfile();
@@ -277,13 +268,19 @@ const UserLocationCountry = arr[newarrLenghtCountry]
             );
      // this.getUserCity();
      
-      this.unsubscribe = this.ref.where('city','==',asyncselectedCity == null?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: asyncselectedCity).onSnapshot(this.onCollectionUpdate);
+      this.unsubscribe = this.ref.where('city','==',this.state.customerInfo.selectedCity == 'none'?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity).onSnapshot(this.onCollectionUpdate);
       this.subscribe = this.catref.onSnapshot(this.onCategoriesUpdate);
   }
+
+
+
  async  componentDidMount() {
      this.setState({loading: true})
-     const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
+     //const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
 //console.log('asyncselectedCity: ', asyncselectedCity)
+
+
+
          if(Platform.OS === 'android')
     {
 
@@ -303,7 +300,7 @@ const UserLocationCountry = arr[newarrLenghtCountry]
 let arr = str.split(',');
 const newarrLenghtCountry= arr.length-1
 const UserLocationCountry = arr[newarrLenghtCountry]
-//console.log("UserLocationCountry ", UserLocationCountry)
+console.log("UserLocationCountry ", UserLocationCountry)
 
 
              this.setState({
@@ -322,6 +319,24 @@ const UserLocationCountry = arr[newarrLenghtCountry]
                 maximumAge: 3600000
             }
         )
+       
+   if(auth().currentUser.uid != undefined){
+      console.log('userId: ', auth().currentUser.uid)
+   const userId =  auth().currentUser.uid;
+   firestore().collection('users').where('userId', '==', userId).onSnapshot(
+                querySnapshot => {
+                  
+                    querySnapshot.forEach(doc => {
+                         this.setState({   customerInfo : doc.data() })
+                        console.log('customerInfo ',doc.data())    
+                    });
+               
+                   
+                },
+                error => {
+                 //   console.log(error)
+                }
+            );}
      firestore().collection('AvailableOn').where('status', '==', true).orderBy('label', 'asc').onSnapshot(
                 querySnapshot => {
                     const AvailableOn = []
@@ -355,9 +370,10 @@ const UserLocationCountry = arr[newarrLenghtCountry]
             );
      // this.getUserCity();
      
-      this.unsubscribe = this.ref.where('city','==',asyncselectedCity == null?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: asyncselectedCity).onSnapshot(this.onCollectionUpdate);
+      this.unsubscribe = this.ref.where('city','==', 
+      this.state.customerInfo.selectedCity == 'none'?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity).onSnapshot(this.onCollectionUpdate);
       this.subscribe = this.catref.onSnapshot(this.onCategoriesUpdate);
-      
+      console.log('city show ', this.state.customerInfo.selectedCity == 'none'?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity)
     }
    
     onPrentals = (querySnapshot) => {
@@ -413,13 +429,14 @@ const UserLocationCountry = arr[newarrLenghtCountry]
     }
     
   _bootstrapAsync =async(selected,item, typeOfRate, city) =>{
-   // console.log(selected)
+    console.log('Reading bootstrapasync')
       
       const NewCityItem = item.trim();
+      console.log('NewCityItem: ',NewCityItem.trim())
 //console.log('cities: ', city)
 //console.log('cities find: ',  city.find( (items) => items.label === NewCityItem))
       const NewValueofCityUser = city.find( (items) => items.label === NewCityItem);
-//console.log('items: ',NewCityItem.trim())
+
 //console.log('NewValueofCityUser: ',NewValueofCityUser)
  //console.log('typeOfRates: ',NewValueofCityUser.typeOfRate)
     this.setState({selectedCityUser: item, typeOfRate: NewValueofCityUser.typeOfRate})
@@ -431,18 +448,14 @@ const UserLocationCountry = arr[newarrLenghtCountry]
     this.cityRef.collection('products').where('rentalType','==', 'Property').where('city','==',NewCityItem).onSnapshot(this.onPrentals)
     this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('city','==',NewCityItem).onSnapshot(this.onVrentals)
      
-  
       firestore().collection('stores').where('city','==',NewCityItem).where('Account', '==', 'Food Delivery').where('wallet', '>', 0).onSnapshot(querySnapshot=>{
-      
         const city = [];
-        
             querySnapshot.docs.forEach(doc => {
             city.push(doc.data());
-            
           });
         console.log('Stores: ',city )
         this.setState({
-          dataSource: city.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
+          dataSource: city,//.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
           loading: false
         }) 
       });
@@ -499,7 +512,7 @@ async getCountryCity(PressedCountrycode){
     async getAllCity() {
   this.setState({loading: true})
       const city = [];
-      const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
+     // const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
       const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.toString()+'.city';
      //  console.log('collect: ', collect)
       //     console.log('UserLocationCountry: ', this.state.UserLocationCountry)
@@ -540,7 +553,7 @@ async getCountryCity(PressedCountrycode){
 let arr = str.split(',');
 //console.log('arr: ', arr)
 const newarrLenght= arr.length-3
-const UserLocation = asyncselectedCity == null? arr[newarrLenght]:asyncselectedCity
+const UserLocation = this.state.customerInfo.selectedCity == 'none'? arr[newarrLenght]:this.state.customerInfo.selectedCity
 //console.log("newarrLenght value", arr[newarrLenght])
 
 const province = Province.ZipsCollection.find( (items) => items.zip === res.data.features[0].context[0].text);
@@ -697,8 +710,7 @@ let Address ='';
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
    //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
    //  console.log('CountryNow: ', this.state.CountryNow)
-     const { isFocused } = this.props;
-     console.log('isFocused: ', isFocused)
+
     return (
       <Container style={{backgroundColor: '#a3b6c9'}}>
         
@@ -715,12 +727,12 @@ let Address ='';
           
           <View style={{flexDirection: 'column',width: '90%', marginLeft: 15, marginTop: 20,paddingLeft: 10}}>
             <View style={{flex:1, alignSelf: 'flex-end', position: 'absolute', right: 0,}}>
-                      <CartBadge navigation={this.props.navigation} fromPlace={this.state.fromPlace} currency={this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency == undefined? '':this.state.CountryNow[0].currency}/>
+                      <CartBadge navigation={this.props.navigation} fromPlace={this.state.fromPlace} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow.length == 0? '':this.state.CountryNow[0].currency}/>
           </View>
          {/* <Text style={{color: 'white', fontSize: 22}}>KeyS</Text>
           <Text style={{color: '#4bccac', fontSize: 15,width: '100%'}}>Shared Booking Portal</Text>*/}
            <View style={{width: SCREEN_WIDTH/2.5,marginTop: 10 }}>
-             {console.log('Dropdown cities: ', this.state.cities)}
+             {/*console.log('Dropdown cities: ', this.state.cities)*/}
            {/*  <TouchableOpacity onPress={()=> this.setState({modalSelectedCity: true})}>
              <Text style={{ fontSize: 18,
                   textAlign: 'center',
@@ -880,7 +892,7 @@ let Address ='';
               style={{ height: 60, width: SCREEN_WIDTH/2, marginLeft: -10}}
               attributionEnabled={false}
               logoEnabled={false}
-           onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency,'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
+           onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency,'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
               >
 <MapboxGL.Camera 
 centerCoordinate={[this.state.x.longitude, this.state.x.latitude]} 
@@ -891,10 +903,10 @@ followUserMode={'normal'}
          <MapboxGL.PointAnnotation coordinate={[this.state.x.longitude, this.state.x.latitude]} />
 </MapboxGL.MapView>
 <TouchableOpacity style={{justifyContent: "center", alignContent: "center", width: SCREEN_WIDTH/2.2, flexDirection: 'column',paddingTop:8, paddingLeft: 10}}
- onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency, 'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
+ onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
 >
 
-<Text style={{ fontSize: 20,paddingLeft: 5, color: 'white'}}>{ this.state.CountryNow[0].labelRider}    {this.state.CountryNow[0].currencyPabili} {this.state.CountryNow[0].pabiliminim}</Text>
+<Text style={{ fontSize: 20,paddingLeft: 5, color: 'white'}}>{ this.state.CountryNow.length == 0? '':this.state.CountryNow[0].labelRider}    {this.state.CountryNow.length == 0? '':this.state.CountryNow[0].currencyPabili} {this.state.CountryNow.length == 0? '':this.state.CountryNow[0].pabiliminim}</Text>
 <Text style={{ fontSize: 11,paddingLeft: 5, color: 'white', left: 80}}>Starts at </Text>
           </TouchableOpacity>
           </View>  
@@ -962,7 +974,7 @@ enableEmptySections={true}
 <MaterialCommunityIcons name={'menu'}  size={this.state.selectedIndex == 4? 35:30} color={this.state.selectedIndex == 4?'#396ba0':'#525252'} style={{alignSelf: 'center', backgroundColor: 'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
-    <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedIndex == 1?this.props.navigation.navigate('SearchRentals',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace }):this.state.selectedIndex == 3?this.props.navigation.navigate('SearchServices',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency, 'fromPlace':  this.state.fromPlace}):this.props.navigation.navigate('SearchAll',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
+    <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedIndex == 1?this.props.navigation.navigate('SearchRentals',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace }):this.state.selectedIndex == 3?this.props.navigation.navigate('SearchServices',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace':  this.state.fromPlace}):this.props.navigation.navigate('SearchAll',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
         
         <Fontisto name="search" size={20} color={"#525252"} style={{alignSelf: 'flex-start', backgroundColor: 'white',borderRadius: 15, padding: 9}}/>
         </TouchableOpacity>
@@ -1014,7 +1026,7 @@ tabsContainerStyle={{width: SCREEN_WIDTH-30,alignSelf: 'center',}}
     })}
                   renderItem={({ item }) => (
                     <Card transparent style={{borderRadius: 10,marginTop: 0, width: SCREEN_WIDTH-30, alignSelf: 'center'}}>
-                        <StoreCard product={item} navigation={this.props.navigation} typeOfRate={this.state.typeOfRate} fromPlace={this.state.fromPlace} currency={this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency}/>
+                        <StoreCard product={item} navigation={this.props.navigation} typeOfRate={this.state.typeOfRate} fromPlace={this.state.fromPlace} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/>
                     </Card>
                   )}
                   keyExtractor = { (item,index) => index.toString() }
@@ -1062,7 +1074,7 @@ tabsContainerStyle={{width: SCREEN_WIDTH-30,alignSelf: 'center',}}
         </View>
         </View>*/}
      </View>:
-     this.state.selectedIndex == 1?<View style={{ flex: 1 }}><HomeScreenRentals navigation={this.props.navigation}  typeOfRate={this.state.typeOfRate} selectedCityUser={this.state.selectedCityUser} cLat={this.state.x.latitude} cLong={this.state.x.longitude} currency={this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency}/></View>:
+     this.state.selectedIndex == 1?<View style={{ flex: 1 }}><HomeScreenRentals navigation={this.props.navigation}  typeOfRate={this.state.typeOfRate} selectedCityUser={this.state.selectedCityUser} cLat={this.state.x.latitude} cLong={this.state.x.longitude} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/></View>:
      this.state.selectedIndex == 2?
      <FlatList
           data={this.state.carsAvailable}
@@ -1074,7 +1086,7 @@ tabsContainerStyle={{width: SCREEN_WIDTH-30,alignSelf: 'center',}}
           columnWrapperStyle={{justifyContent:'space-between'}}
           keyExtractor={(item, index) => index.toString()}
           />:
-<HomeScreenService navigation={this.props.navigation} selectedCityUser={this.state.selectedCityUser} typeOfRate={this.state.typeOfRate} currency={this.state.CountryNow == undefined?'':this.state.CountryNow[0].currency}/>
+<HomeScreenService navigation={this.props.navigation} selectedCityUser={this.state.selectedCityUser} typeOfRate={this.state.typeOfRate} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/>
     }
    </Container>
     );

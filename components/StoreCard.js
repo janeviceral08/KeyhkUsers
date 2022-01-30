@@ -54,7 +54,7 @@ console.log('res: ', valid = startDate < currentDate && endDate > currentDate)
 }
 console.log('fromPlace: ', this.props.fromPlace  )
     return(
-   
+   this.props.product.status == false? null:
         <Card style={{  flex:1, marginHorizontal: 10, flexDirection: 'row',backgroundColor: '#313131'}} >
                 <TouchableHighlight underlayColor='rgba(73,182,77,1,0.8)' onPress={status && !this.props.product.AlwaysOpen && Closing == true ? () => this.props.navigation.navigate("Fastfood", {'store': this.props.product,'slongitude': this.props.product.slongitude,'slatitude': this.props.product.slatitude, "navigation" :this.props.navigation, 'name': this.props.product.name,'fromPlace': this.props.fromPlace,'currency':this.props.currency == undefined?'':this.props.currency}): this.props.product.AlwaysOpen? () => this.props.navigation.navigate("Fastfood", {'store': this.props.product,'slongitude': this.props.product.slongitude,'slatitude': this.props.product.slatitude, "navigation" :this.props.navigation, 'name': this.props.product.name,'currency':this.props.currency == undefined?'':this.props.currency, 'fromPlace': this.props.fromPlace}):null}>         
                       <FastImage

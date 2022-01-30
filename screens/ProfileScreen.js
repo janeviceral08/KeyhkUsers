@@ -103,7 +103,8 @@ export default class ProfileScreen extends Component {
       searchCountry:'',
       selectedCountry:'',
       CountryNow:[{labelRider: '', currency: '', currencyPabili:''}],
-      
+      ViewCountry:false,
+      photo:'',
       };
       this.FetchProfile();
   }
@@ -116,21 +117,31 @@ export default class ProfileScreen extends Component {
  this.setState({
         loggedIn : userId
       })
-    const ref =  firestore().collection('users').doc(userId);  
-    ref.get().then((doc) => {
-      if (doc.exists) { 
-        const data = doc.data();
-        this.setState({
-          key: doc.id,
-          name: data.Name,
-          email: data.Email,
-          mobile: data.Mobile,
-          address: data.Address,
-          username: data.Username,
-          wallet: data.wallet,
-        });
-      }
-    });
+       firestore().collection('users').where('userId', '==', userId).onSnapshot(
+                querySnapshot => {
+                   
+                    querySnapshot.forEach(doc => {
+                     const data = doc.data();
+                      this.setState({
+                        key: doc.id,
+                        name: data.Name,
+                        email: data.Email,
+                        mobile: data.Mobile,
+                        address: data.Address,
+                        username: data.Username,
+                        photo: data.photo,
+                        wallet: data.wallet,
+                        selectedCity: data.selectedCity,
+                      });
+                    });
+                
+                   
+                },
+                error => {
+                 //   console.log(error)
+                }
+            );
+
 
   }
 
@@ -284,11 +295,11 @@ console.log("UserLocationCountry ", UserLocationCountry)
       Alert.alert('S.O.S is sent to all riders')
     }
     _bootstrapAsync =async(selected,item, typeOfRate, city) =>{
-      const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
-      console.log('asyncselectedCity: ',asyncselectedCity)
+   //   const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
+    //  console.log('asyncselectedCity: ',asyncselectedCity)
         const NewCityItem = item.trim();
         const NewValueofCityUser = city.find( (items) => items.label === NewCityItem);
-      this.setState({selectedCityUser: asyncselectedCity == null? item:asyncselectedCity, typeOfRate: NewValueofCityUser.typeOfRate})
+      this.setState({selectedCityUser: this.state.selectedCity == 'none'? item:this.state.selectedCity, typeOfRate: NewValueofCityUser.typeOfRate})
      const newUserLocationCountry = this.state.UserLocationCountry =='Philippines'?'vehicles':this.state.UserLocationCountry+'.vehicles';
       firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
 
@@ -399,7 +410,12 @@ console.log("UserLocationCountry ", UserLocationCountry)
            
       }
 
-
+changeCity (item){
+    const userId =  auth().currentUser.uid;
+  firestore().collection('users').doc(userId).update({  selectedCity: this.state.currentLocation.trim() == item.label? 'none':item.label,})
+  this._bootstrapAsync(true, item.label, item.typeOfRate, this.state.cities);
+  this.setState({modalSelectedCity: false,newCity:[], searchcity:''})
+}
 
 
   render() {
@@ -477,7 +493,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
                      <FlatList
                   data={this.state.newCity.length < 1? this.state.cities:this.state.newCity}
                   renderItem={({ item,index }) => (
-                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH,}} key={index} button  onPress={() => {this._bootstrapAsync(true, item.label, item.typeOfRate, this.state.cities);    AsyncStorage.setItem('asyncselectedCity',item.label);this.setState({modalSelectedCity: false,newCity:[], searchcity:''})}}>
+                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH,}} key={index} button  onPress={() => {this.changeCity(item)}}>
                       <Text style={{fontSize: 17}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
                     </CardItem>
                   )}
@@ -494,8 +510,8 @@ console.log("UserLocationCountry ", UserLocationCountry)
       {uid ?
         <ScrollView>
         <Card>
-     
-        <Card.Title
+     {this.state.photo == ''?
+      <Card.Title
             title={this.state.name}
             subtitle={this.state.username}
             left={(props) => <Avatar.Text size={64} color="white" style={{backgroundColor: 'gray'}} {...props} label={this.state.name.slice(0, 1).toUpperCase()} />}
@@ -511,6 +527,27 @@ console.log("UserLocationCountry ", UserLocationCountry)
            
           </Card>}
           />
+     :
+     
+      <Card.Title
+            title={this.state.name}
+            subtitle={this.state.username}
+            left={(props) => <Avatar.Image size={64} color="white" style={{backgroundColor: 'gray'}} {...props} source={{uri: this.state.photo}} />}
+            right={ (props) =><Card transparent onPress={()=> this.signOut()} style={{marginRight: 20}}>
+            <Left>
+           
+              <AntDesign name="logout" size={25} color="gray" />
+            
+            </Left>
+            <Body>
+              <Text style={{fontSize: 12, color: 'gray', marginTop: 10}}>Logout</Text>
+            </Body>
+           
+          </Card>}
+          />
+     
+     }
+       
            
           
           </Card>

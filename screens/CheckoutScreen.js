@@ -1569,7 +1569,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
       }).then(async r => {
         let data = await r.json()
                     console.log('url: ', 'https'+data.url.slice(4))
-        firestore().collection('users').doc(userId).update({ ValidId:'https'+data.url.slice(4), IDType: this.state.vID , ApprovalRequest: true, })
+        firestore().collection('users').doc(userId).update({ ValidId:'https'+data.url.slice(4), IDType: this.state.vID , ApprovalRequest: true, RequestTime: moment().unix()})
         this.setState({loading: false,UploadId: false})
 Alert.alert('Submission Complete!', 'We will process your verification')
       }).catch((err)=>Alert.alert(

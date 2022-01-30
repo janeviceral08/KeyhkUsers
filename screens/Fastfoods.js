@@ -61,7 +61,7 @@ render() {
           </Right>
 </Header>*/}
         <Header androidStatusBarColor="#396ba0" style={{height: 150}}>
-         <ImageBackground source={{/* uri: this.props.route.params.store.foreground */}} resizeMode="cover" style={{height: 150, backgroundColor: 'rgba(49,49,49, 0.8)'}}>
+         <ImageBackground source={{/* uri: this.props.route.params.store.foreground */}} resizeMode="cover" style={{height: 150, backgroundColor: '#ee4e4e'}}>
 
           <Left style={{flex:2, width: '100%',marginTop: 20, flexDirection: 'row'}}>
     

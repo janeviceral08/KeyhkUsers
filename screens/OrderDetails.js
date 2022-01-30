@@ -676,10 +676,10 @@ logoEnabled={false}
           </CardItem>       
        {this.props.route.params.orders.USERAdd> 0? <CardItem>
             <Body>
-              <Text style={{fontSize: 15, color: 'tomato'}}>Reservation Charge</Text>
+              <Text style={{fontSize: 15, color: 'gray'}}>Reservation Charge</Text>
             </Body>
             <Right>
-              <Text style={{fontSize: 15, color:'tomato'}}>
+              <Text style={{fontSize: 15, color:'gray'}}>
              {this.props.route.params.orders.USERAdd}
               </Text>
             </Right>
