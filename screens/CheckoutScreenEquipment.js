@@ -339,7 +339,7 @@ export default class CheckoutScreenEquipment extends Component {
   getAdminCharge =async()=> {
    console.log('Get AdminId: ', this.state.cartItems[0])
    const getAdminId = this.state.cartItems[0];
-    this.ordercounters.collection('charges').where('id', '==', getAdminId.adminID ).onSnapshot((querySnapshot) => {
+    this.ordercounters.collection('charges').where('id', '==', getAdminId.adminID).onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
   
         this.setState({
@@ -351,7 +351,7 @@ export default class CheckoutScreenEquipment extends Component {
           succeding: doc.data().succeding,
           amount_base: doc.data().del_charge,
           base_dist: doc.data().base_dist,
-        
+          
        });
       })
     })
@@ -378,12 +378,26 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
         this.setState({
           notification_token : doc.data().notification_token,
          storewallet : doc.data().wallet,
-        
+      
        });
       })
     })
   
   this.setState({ 'uid': userId })
+
+let collection = this.props.route.params.datas.Country.trim()=='Philippines'?'charges':this.props.route.params.datas.Country.trim()+'.charges'
+console.log('collection: ', collection)
+firestore().collection(collection).where('id', '==', this.props.route.params.datas.adminID).onSnapshot((querySnapshot) => {
+  console.log('h: ',querySnapshot)
+  querySnapshot.forEach((doc) => {
+console.log('adminname: ',doc.data().name)
+      this.setState({
+        adminname:  doc.data().name,
+        
+     });
+    })
+  })
+
   };
 
 
@@ -814,8 +828,14 @@ const a =moment(in_check_extension.toString());
 const b = moment(out_check_extension.toString());  
 const diff = b.diff(a, 'hours');  
 console.log('diff',diff)
+const diffdays = b.diff(a, 'days'); 
+console.log('diffdays: ', diffdays)
+console.log('in_check_extension: ', in_check_extension)
+console.log('out_check_extension: ', out_check_extension)
 
-const total = this.state.SelectedPricing=='Day'?(diff/24)*parseFloat(this.state.datas.DayPrice):this.state.SelectedPricing=='Hour'?diff*parseFloat(this.state.datas.HourPrice): this.state.SelectedPricing=='Weekly'?parseFloat(this.state.Duration)*parseFloat(this.state.datas.WeeklyPrice):parseFloat(this.state.Duration)*parseFloat(this.state.datas.MonthlyPrice);
+const total = this.state.SelectedPricing=='Day'?(Math.round((diff/24)*10)/10)*(Math.round((this.state.datas.DayPrice)*10)/10):this.state.SelectedPricing=='Hour'?(Math.round((diff)*10)/10)*(Math.round((this.state.datas.HourPrice)*10)/10): this.state.SelectedPricing=='Weekly'?(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.WeeklyPrice)*10)/10):(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.MonthlyPrice)*10)/10);
+
+
 if(this.state.datas.rentalType =='Vehicle'){
     if(this.state.ImageLicenseLink == undefined){
         Alert.alert('Upload Driver License', 'Plase make sure the details are clear')
@@ -1060,7 +1080,7 @@ console.log('imageArray: ', this.state.datas.imageArray);
      
                     <Text style={{marginTop: 15, fontSize: 10}}>Price</Text>
                         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.SelectedPricing==undefined?'Select Mode of Pricing':pricetoPay.toString()} placeholderTextColor="#687373" />
+             <Input value={this.state.SelectedPricing==undefined?'Select Mode of Pricing':parseFloat(pricetoPay).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').toString()+ ' /'+this.state.SelectedPricing} placeholderTextColor="#687373" />
          </Item>  
          {this.state.datas.rentalType =='Vehicle'? <Text style={{marginTop: 15, fontSize: 10}}>Number of Person</Text>:null}
          {this.state.datas.rentalType =='Vehicle'?        <Item regular style={{marginTop: 7}}>
@@ -1275,7 +1295,7 @@ console.log('imageArray: ', this.state.datas.imageArray);
                             </Col>
                             <Col>
                            
-                              <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={this.state.SelectedPricing=='Day'?Math.round(parseFloat(this.state.numberofhours/24)*10)/10:this.state.SelectedPricing=='Hour'?Math.round(parseFloat(this.state.numberofhours)*10)/10: this.state.SelectedPricing=='Weekly'?Math.round(parseFloat(this.state.Duration)*10)/10:Math.round(parseFloat(this.state.Duration)*10)/10} displayType={'text'} thousandSeparator={true} />
+                              <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={this.state.SelectedPricing=='Day'?Math.round((this.state.numberofhours/24)*10)/10:this.state.SelectedPricing=='Hour'?Math.round((this.state.numberofhours)*10)/10: this.state.SelectedPricing=='Weekly'?Math.round((this.state.Duration)*10)/10:Math.round((this.state.Duration)*10)/10} displayType={'text'} thousandSeparator={true} />
                             
                             </Col>
                         </Grid>
@@ -1286,9 +1306,10 @@ console.log('imageArray: ', this.state.datas.imageArray);
                             <Col>
                                 <Text style={{fontSize: 13,  color:'green'}}>Total</Text>
                             </Col>
-                            <Col>                        
-                                 <Text style={{textAlign: 'right', fontSize: 15 ,color: 'green'}}>{this.props.route.params.currency}{(Math.round(this.state.total*10)/10) - this.state.discount}</Text>             
-                            </Col>
+                            <Col>   
+                            <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={(Math.round((this.state.total)*10)/10)} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency}/>
+                                                 
+                             </Col>
                         </Grid>
                         </View>
                     </ScrollView>  
@@ -1369,6 +1390,7 @@ const b = moment(out_check_extension.toString());
 const diff = b.diff(a, 'hours'); 
 
     const dataNow={
+      adminname:this.state.adminname,
       currency:this.props.route.params.currency,
       admin_token:this.state.admin_token.concat(this.state.notification_token).filter((a)=>a),
       city:this.state.datas.city.trim(),
@@ -1380,9 +1402,9 @@ const diff = b.diff(a, 'hours');
         OrderId: newDocumentID,
         OrderStatus: 'Pending',
         numberofhours:diff,
-        total:this.state.total,
+        total:Math.round((this.state.total)*10)/10,
         SelectedPricing:this.state.SelectedPricing,
-        pricetoPay:this.state.datas.rentalType =='Vehicle'?Math.round(this.state.total*10)/10 - this.state.discount:pricetoPay,
+        pricetoPay:pricetoPay,
         passenger:this.state.passenger,
         startDate:moment(this.state.startDate).unix(),
         Duration:this.state.Duration,

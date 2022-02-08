@@ -82,7 +82,7 @@ export default class HotelsMap extends Component {
                 </Button> 
           </Left>
           <Body style={{flex: 3}}>
-            <Title style={{color:'white'}}>MY DELIVERY APP</Title>
+            <Title style={{color:'white'}}>KeyS</Title>
           </Body>
         
         </Header>

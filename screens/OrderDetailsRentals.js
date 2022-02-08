@@ -694,7 +694,8 @@ let StatMonthlyPrice = this.state.datas.StatMonthlyPrice == true?'Monthly':null;
     let DropdownSelect =[StatHourPrice,StatDayPrice,StatWeeklyPrice,StatMonthlyPrice ];
     let pricetoPay = this.state.SelectedPricing =='Hour'?this.state.datas.HourPrice:this.state.SelectedPricing =='Day'?this.state.datas.DayPrice:this.state.SelectedPricing =='Weekly'?this.state.datas.WeeklyPrice:this.state.datas.MonthlyPrice;
 console.log('cLat: ', this.state.cLat);
-let pricetoPayAmount = this.state.SelectedPricing =='Hour'?this.state.datas.total*this.state.datas.numberofhours:this.state.SelectedPricing =='Day'?this.state.datas.total*(this.state.datas.numberofhours/24):this.state.SelectedPricing =='Weekly'?this.state.datas.total:this.state.datas.total;
+//let pricetoPayAmount = this.state.SelectedPricing =='Hour'?this.state.datas.total*this.state.datas.numberofhours:this.state.SelectedPricing =='Day'?this.state.datas.total*(this.state.datas.numberofhours/24):this.state.SelectedPricing =='Weekly'?this.state.datas.total:this.state.datas.total;
+let pricetoPayAmount = this.state.datas.total;
 let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add(7*parseInt(this.state.Duration), 'days').unix(): this.state.SelectedPricing =='Monthly'?moment(this.state.startDate).add(30*parseInt(this.state.Duration), 'days').unix():moment(this.state.Dateend).unix();
 console.log('out: ', out);
     return(
@@ -737,7 +738,7 @@ console.log('out: ', out);
     right: 0,
     bottom: 0,
  width: Dimensions.get('window').width,
- height: SCREEN_HEIGHT/2}}>
+ height: SCREEN_HEIGHT/1.5}}>
       
   <MapboxGL.MapView
       zoomEnabled={true}
@@ -890,7 +891,7 @@ console.log('out: ', out);
                  <CardItem button  onPress={()=> this.setState({visibleAddressModalTo: true})}>
                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Rate:  </Text>
                     <Left>
-                       <Text style={{fontSize: 12}}>{this.state.datas.currency}{this.state.datas.SelectedPricing=='Weekly'?Math.round(parseFloat(this.state.datas.WeeklyPrice)*10)/10:this.state.datas.SelectedPricing=='Monthly'?Math.round(parseFloat(this.state.datas.MonthlyPrice)*10)/10:this.state.datas.SelectedPricing=='Hour'?Math.round(parseFloat(this.state.datas.HourPrice)*10)/10:Math.round(parseFloat(this.state.datas.DayPrice)*10)/10}</Text>
+                       <Text style={{fontSize: 12}}>{this.state.datas.currency}{this.state.datas.SelectedPricing=='Weekly'?parseFloat(this.state.datas.WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Monthly'?parseFloat(this.state.datas.MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Hour'?parseFloat(this.state.datas.HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):parseFloat(this.state.datas.DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
                     </Left>
                  <Body>
                         <Text style={{fontWeight: 'bold',fontSize: 12}}>Mode:</Text>
@@ -899,7 +900,8 @@ console.log('out: ', out);
                    <Right>
                   
                    <Text style={{fontWeight: 'bold',fontSize: 12}}>Amount To Pay:</Text>
-                   <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.currency}{Math.round(parseFloat(pricetoPayAmount)*10)/10}</Text>
+                   <Text style={{fontSize: 13, fontWeight: 'bold',}}>{this.state.datas.currency}{parseFloat(pricetoPayAmount).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                   <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.PaymentMethod}</Text>
                     </Right>
                 </CardItem>
             </Card> 

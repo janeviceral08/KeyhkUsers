@@ -135,7 +135,7 @@ export default class CheckoutScreenRentals extends Component {
       customStyleIndex: 0,
       isready:0,
       visibleAddressModalTo: false,
-      passenger: '1',
+      passenger: datas.minGuest.toString(),
       note: '',
       AlwaysOpen: true,
       Customerimage:null,
@@ -168,6 +168,8 @@ export default class CheckoutScreenRentals extends Component {
           ]
         },
         admin_token:[],
+        modeOfPayment:[],
+        PaymentMethod: 'Over the counter'
    
   };
 
@@ -385,7 +387,7 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
         this.setState({
           notification_token : doc.data().notification_token,
          storewallet : doc.data().wallet,
-        
+          modeOfPayment : doc.data().modeOfPayment == undefined? []:doc.data().modeOfPayment,
        });
       })
     })
@@ -678,7 +680,8 @@ navigateAddress(){
 }
 
 FinalCheckouts (){
-
+   
+    
 let in_check_extension =  moment(this.state.newstartDate*1000).format('YYYY-MM-D hh:mm:ss')
 let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D hh:mm:ss')
 
@@ -687,7 +690,7 @@ const b = moment(out_check_extension.toString());
 const diff = b.diff(a, 'hours');  
 console.log('diff',diff)
 
-const total = this.state.SelectedPricing=='Day'?(diff/24)*parseFloat(this.state.datas.DayPrice):this.state.SelectedPricing=='Hour'?diff*parseFloat(this.state.datas.HourPrice): this.state.SelectedPricing=='Weekly'?parseFloat(this.state.Duration)*parseFloat(this.state.datas.WeeklyPrice):parseFloat(this.state.Duration)*parseFloat(this.state.datas.MonthlyPrice);
+const total = this.state.SelectedPricing=='Day'?(Math.round((diff/24)*10)/10)*(Math.round((this.state.datas.DayPrice)*10)/10):this.state.SelectedPricing=='Hour'?(Math.round((diff)*10)/10)*(Math.round((this.state.datas.HourPrice)*10)/10): this.state.SelectedPricing=='Weekly'?(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.WeeklyPrice)*10)/10):(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.MonthlyPrice)*10)/10);
 
     if(this.state.SelectedPricing == undefined){
 this.setState({warningText: 'Choose Rate', warningModal: true})
@@ -698,13 +701,13 @@ return;
         return;
             }
             if(this.state.startDate == undefined){
-                this.setState({warningText: 'Enter Start Date of REntal', warningModal: true})
+                this.setState({warningText: 'Enter Start Date of Rental', warningModal: true})
                 return;
                     }
             
                     if(this.state.SelectedPricing == 'Day' ||this.state.SelectedPricing == 'Hour'  ){
                         if(this.state.Dateend== undefined){
-                            this.setState({warningText: 'Enter End Date of REntal', warningModal: true})
+                            this.setState({warningText: 'Enter End Date of Rental', warningModal: true})
                             return;
                         }
                     }
@@ -731,11 +734,11 @@ let StatWeeklyPrice = this.state.datas.StatWeeklyPrice == true?'Weekly':null;
 let StatMonthlyPrice = this.state.datas.StatMonthlyPrice == true?'Monthly':null;
     let DropdownSelect =[StatHourPrice,StatDayPrice,StatWeeklyPrice,StatMonthlyPrice ];
     let pricetoPay = this.state.SelectedPricing =='Hour'?this.state.datas.HourPrice:this.state.SelectedPricing =='Day'?this.state.datas.DayPrice:this.state.SelectedPricing =='Weekly'?this.state.datas.WeeklyPrice:this.state.datas.MonthlyPrice;
-console.log('cLat: ', this.state.cLat);
+//console.log('cLat: ', this.state.cLat);
 
 let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add(7*parseInt(this.state.Duration), 'days').unix(): this.state.SelectedPricing =='Monthly'?moment(this.state.startDate).add(30*parseInt(this.state.Duration), 'days').unix():moment(this.state.Dateend).unix();
-console.log('out: ', out);
-console.log('imageArray ', this.state.datas.imageArray)
+//console.log('out: ', out);
+//console.log('imageArray ', this.state.datas.imageArray)
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -902,7 +905,9 @@ console.log('imageArray ', this.state.datas.imageArray)
          </Item>  
                         <Text style={{marginTop: 15, fontSize: 10}}>Number of Person</Text>
                         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: this.setState({passenger: text})}} placeholderTextColor="#687373" />
+             <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null:parseFloat(text)<this.state.datas.minGuest?
+             Alert.alert('Invalid Input', 'Minimum Guest is '+this.state.datas.minGuest,)
+            :parseFloat(text)>this.state.datas.maxGuest?  Alert.alert('Invalid Input', 'Maximum Guest is '+this.state.datas.maxGuest,): this.setState({passenger: text})}} placeholderTextColor="#687373" />
          </Item>
          <Text style={{marginTop: 15, fontSize: 10}}>Start Date of Rental</Text>
                     <Item regular style={{marginTop: 7, padding: 10}}>
@@ -953,6 +958,40 @@ console.log('imageArray ', this.state.datas.imageArray)
   ))        }
                     </Picker>
             </Item>
+
+                 <Text style={{marginTop: 15, fontSize: 10}}>Mode of payment</Text>
+                    <Item>
+                   
+                   <Picker
+                         selectedValue={this.state.PaymentMethod}
+                         onValueChange={(itemValue, itemIndex) => this.setState({PaymentMethod: itemValue}) }>         
+                            <Picker.Item label = {this.state.PaymentMethod}  value={this.state.PaymentMethod}  />
+                            <Picker.Item label = {'Over the counter'}  value= {'Over the counter'} />
+                              {this.state.modeOfPayment.map((user, index) => (
+                                              user.Paymentstatus == true?
+     <Picker.Item label={user.label} value={user.label} key={index}/>
+     :null
+  ))        }
+                    </Picker>
+            </Item>
+            {this.state.PaymentMethod != 'Over the counter'?
+            this.state.modeOfPayment.map((user, index) => (
+              user.label == this.state.PaymentMethod?
+ <Card transparent>
+                            <CardItem style={{borderRadius: 10, borderWidth: 0.1, marginHorizontal: 10, borderColor:'tomato'}} button onPress={()=> this.changePaymentMethod(user)}>                     
+                              <View style={{flex: 1,}}>
+                                <Text style={{fontSize: 16, fontWeight: 'bold'}}> {user.label}</Text>
+                                  <Text style={{fontSize: 14, fontWeight: 'bold'}}>Account Name: <Text style={{fontSize: 14}}> {user.accname}</Text></Text>
+                                <Text style={{fontSize: 14, fontWeight: 'bold'}}>Account Number: <Text style={{fontSize: 14}}> {user.accno}</Text></Text>
+                                <Text style={{fontSize: 14, fontWeight: 'bold'}}>Note: <Text style={{fontSize: 14}}> {user.bankNote}</Text></Text>
+                            
+                              </View>          
+                                       
+                            </CardItem>
+                          </Card>
+  :null))      
+           
+            :null}
                     <Text style={{marginTop: 15, fontSize: 10}}>Note</Text>
                         <Item regular style={{marginTop: 7}}>
              <Input  value={this.state.note} onChangeText={(text) => {this.setState({note: text})}} placeholderTextColor="#687373" />
@@ -1138,7 +1177,7 @@ console.log('imageArray ', this.state.datas.imageArray)
                             </Col>
                             <Col>
                            
-                              <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={this.state.SelectedPricing=='Day'?Math.round(parseFloat(this.state.numberofhours/24)*10)/10:this.state.SelectedPricing=='Hour'?Math.round(parseFloat(this.state.numberofhours)*10)/10: this.state.SelectedPricing=='Weekly'?Math.round(parseFloat(this.state.Duration)*10)/10:Math.round(parseFloat(this.state.Duration)*10)/10} displayType={'text'} thousandSeparator={true} />
+                              <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={this.state.SelectedPricing=='Day'?Math.round((this.state.numberofhours/24)*10)/10:this.state.SelectedPricing=='Hour'?Math.round(this.state.numberofhours*10)/10: this.state.SelectedPricing=='Weekly'?Math.round(this.state.Duration*10)/10:Math.round(this.state.Duration*10)/10} displayType={'text'} thousandSeparator={true} />
                             
                             </Col>
                         </Grid>
@@ -1170,7 +1209,18 @@ console.log('imageArray ', this.state.datas.imageArray)
 
 
   async checkOut(){
-      
+    
+ console.log('workinghere ')
+const newData = this.state.modeOfPayment.filter(item => {
+          const itemData = item.label;
+          const textData = this.state.PaymentMethod;
+         
+          return itemData.indexOf(textData) > -1
+        });
+
+
+      console.log('newData: ', newData[0])
+  
 let StatDayPrice = this.state.datas.StatDayPrice == true?'Day':null;
 let StatHourPrice = this.state.datas.StatHourPrice == true?'Hour':null;
 let StatWeeklyPrice = this.state.datas.StatWeeklyPrice == true?'Weekly':null;
@@ -1232,6 +1282,10 @@ const b = moment(out_check_extension.toString());
 const diff = b.diff(a, 'hours'); 
 
     const dataNow={
+      accname:newData.length>0? newData[0].accname:'',
+      accno:newData.length>0? newData[0].accno:'',
+      bankNote:newData.length>0? newData[0].bankNote:'',
+      labelPayment:newData.length>0? newData[0].label:'',
       currency:this.props.route.params.currency,
       admin_token:this.state.admin_token.concat(this.state.notification_token).filter((a)=>a),
       city:this.state.datas.city.trim(),
@@ -1241,7 +1295,7 @@ const diff = b.diff(a, 'hours');
         OrderId: newDocumentID,
         OrderStatus: 'Pending',
         numberofhours:diff,
-        total:this.state.total,
+        total:Math.round((this.state.total)*10)/10,
         SelectedPricing:this.state.SelectedPricing,
         pricetoPay:pricetoPay,
         passenger:this.state.passenger,
@@ -1313,7 +1367,7 @@ const diff = b.diff(a, 'hours');
         Timestamp: moment().unix(),
         user_token : this.state.notification_token,
         Note: this.state.note,
-        PaymentMethod: this.state.paymentMethod,
+        PaymentMethod: this.state.PaymentMethod,
         DeliveredBy: '',
         rider_id:'',
         isCancelled: false,

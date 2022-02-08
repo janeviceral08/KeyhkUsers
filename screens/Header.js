@@ -11,7 +11,7 @@ class CustomHeader extends Component {
 
 
         
-      <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#396ba0'}}>
+      <Header androidStatusBarColor="#ee4e4e" style={{backgroundColor: '#ee4e4e'}}>
           <Left style={{flex:3, width: '70%'}}>
       <Title style={{color:'white', marginLeft: 20}}>KeyS</Title>
           </Left>

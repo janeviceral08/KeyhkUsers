@@ -399,7 +399,7 @@ export default class HomeScreenService extends Component {
   ItemSeparatorComponent={this.ListViewItemSeparator}
   renderItem={({ item }) => this.rowRendererPrentals(item)}
   enableEmptySections={true}
-  style={{ marginTop: 10 }}
+  style={{ marginTop: -5 }}
   numColumns={2}
   columnWrapperStyle={{justifyContent:'space-between'}}
   keyExtractor={(item, index) => index.toString()}

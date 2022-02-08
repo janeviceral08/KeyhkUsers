@@ -78,7 +78,7 @@ export default class FFCard extends Component {
   );
 
    async deleteCart(item) {
-    const userId= await AsyncStorage.getItem('uid');
+    const userId= auth().currentUser.uid;
     AsyncStorage.setItem('cluster', item.cluster);
      firestore().collection('cart').doc(userId).delete()  
     .catch(function(error) {
@@ -101,7 +101,7 @@ export default class FFCard extends Component {
 }
 
 async addonsdeleteCart(item){
-  const userId= await AsyncStorage.getItem('uid');
+  const userId= auth().currentUser.uid;
   AsyncStorage.setItem('cluster', item.cluster);
    firestore().collection('cart').doc(userId).delete()  
   .catch(function(error) {
@@ -136,8 +136,9 @@ async addonsdeleteCart(item){
 }
 
   async addonsAddtoCart(item){
+
     const {cart} = this.state;
-    const userId= await AsyncStorage.getItem('uid');
+    const userId= auth().currentUser.uid;
     if(userId){
       let id = item.id;
       let cluster = item.cluster
@@ -203,7 +204,7 @@ async addonsdeleteCart(item){
  
  	async onAddToCart(item) {
     const {cart} = this.state;
-		const userId= await AsyncStorage.getItem('uid');
+		const userId= auth().currentUser.uid;
 	  if(userId){ 
       let id = item.id;
       let cluster = item.cluster
@@ -503,7 +504,7 @@ async addonsdeleteCart(item){
   }
 
   async componentDidMount(){  
-    const userId= await AsyncStorage.getItem('uid');
+    const userId= auth().currentUser.uid;
     this.setState({ loading: true });   
     
     this.getAddonsDefault();
@@ -640,7 +641,7 @@ async addonsdeleteCart(item){
               
           <Header androidStatusBarColor={'#696969'}  style={{backgroundColor:'#f06767', height: 46}}>
           <View style={{flex: 1,flexDirection:'row', width: 200, height: 36, justifyContent: "center", alignItems: 'center',backgroundColor:'white', marginTop: 5,borderRadius: 30}}>
-          <TouchableOpacity style={{alignItems:'center',justifyContent:'center', flexDirection:'row',  }} onPress = {()=>{this.props.navigation.navigate('Search', {'storeId': this.props.storeId, 'store_name': this.props.store})}} underlayColor = 'transparent'>
+          <TouchableOpacity style={{alignItems:'center',justifyContent:'center', flexDirection:'row',  }} onPress = {()=>{this.props.navigation.navigate('Search', {'storeId': this.props.storeId, 'store_name': this.props.store, 'currency': this.props.currency,'slongitude': this.props.slongitude,'slatitude': this.props.slatitude,'token': this.props.token})}} underlayColor = 'transparent'>
               <View style={{flex: 1}}>
                 <Text style={{justifyContent: "center", alignSelf: "center"}}>Search</Text>
               </View>

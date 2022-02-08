@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {StyleSheet,TouchableWithoutFeedback, TextInput, ToastAndroid,TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid} from 'react-native'
-import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List, ListItem,Header, Title, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
+import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List,Picker, ListItem,Header, Title, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import Clipboard from '@react-native-clipboard/clipboard';
 
@@ -99,7 +99,7 @@ export default class Pabili extends Component {
       deliveryCharge: 0,
       pickup: 0,
       stores:[],
-      paymentMethod: 'Cash on Delivery (COD)',
+      paymentMethod: 'Cash',
       billing_name: '',
       billing_postal: '',
       billing_phone: '',
@@ -217,6 +217,11 @@ export default class Pabili extends Component {
         listModal: true,
    avoildingViewList:false,
    ItemList:[],
+    paymentMethods:[],
+    VisibleAddInfo:false,
+    listNo: 5,
+    ListValue: [],
+    pabiliList: [],
       
   };
   this.getLocation();
@@ -602,6 +607,16 @@ console.log('UserLocation: ', UserLocation)
                 maximumAge: 3600000
             }
         )
+         const newUserLocationCountry = this.props.route.params.UserLocationCountry.trim() =='Philippines'?'AppShare':this.props.route.params.UserLocationCountry.trim()+'.AppShare';
+
+    firestore().collection(newUserLocationCountry).where('label', '==', 'rides').onSnapshot((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+  console.log('modeOfPayment', doc.data().modeOfPayment)
+        this.setState({
+          paymentMethods: doc.data().modeOfPayment == undefined? []:doc.data().modeOfPayment,
+       });
+      })
+    })
    this.chargeref.onSnapshot((querySnapshot) => {
     querySnapshot.forEach((doc) => {
 console.log('doc.data(): ', doc.data())
@@ -621,7 +636,27 @@ console.log('doc.data(): ', doc.data())
   })
     this._bootstrapAsync();
 
-
+    firestore()
+    .collection('Pabili')
+    .where('uid','==', auth().currentUser.uid)
+    .orderBy('timeStamp')
+    .onSnapshot( QuerySnapshot=>{
+      const list = [];
+     
+      QuerySnapshot.forEach(documentSnapshot => {
+        
+        list.push({
+            ...documentSnapshot.data(),
+            key: documentSnapshot.id,
+          });
+          
+        });
+     
+      this.setState({
+        pabiliList : list
+      })
+    } 
+   );
   }
 
   
@@ -1170,6 +1205,105 @@ this.setState({ItemList: ItemList,pabiliItem: ''})
 
 
 }
+
+  updateTextInput = (text, field) => {
+    const state = this.state
+    state[field] = text;
+    console.log('field: ', field)
+    
+    this.setState({ ListValue: { ...this.state.ListValue, [field]: text }});
+  }
+
+
+
+  
+onNameUpdate =(item, value)=> {
+  firestore()
+  .collection('Pabili')
+  .doc(item.key)
+  .update({
+    name: value,
+  })
+  .then(() => {
+    console.log('User updated!');
+  });
+}
+
+onQtyUpdate =(item, value)=> {
+  firestore()
+  .collection('Pabili')
+  .doc(item.key)
+  .update({
+
+    qty: parseInt(value),
+  
+  })
+  .then(() => {
+    console.log('User updated!');
+  });
+}
+
+onUnitUpdate =(item, value)=> {
+  firestore()
+  .collection('Pabili')
+  .doc(item.key)
+  .update({
+  
+    unit: value,
+ 
+  })
+  .then(() => {
+    console.log('User updated!');
+  });
+}
+
+
+async  pushAItem() {
+
+  // Create a new batch instance
+  const batch = firestore().batch();
+
+  this.state.ItemList.forEach((doc) => {
+    var docRef = firestore().collection("Pabili").doc(); //automatically generate unique id
+    batch.set(docRef, doc);
+  });
+
+  return batch.commit();
+}
+
+
+addList(){
+  firestore()
+  .collection('Pabili')
+  .add({
+      name: "Added Item",
+      qty: 0,
+      unit: 'unit',
+      uid: auth().currentUser.uid,
+      timeStamp: moment().unix()
+  })
+  .then(() => {
+    console.log('User added!');
+  });
+}
+
+addListBulk(){
+      for ( i=0; i < 3; i++) {
+      firestore()
+      .collection('Pabili')
+      .add({
+          name: "Added Item",
+          qty: 0,
+          unit: 'unit',
+          uid: auth().currentUser.uid,
+          timeStamp: moment().unix()
+      })
+      .then(() => {
+        console.log('User added!');
+      });
+    }
+}
+
   render() {
     const { paymentMethod, minimum, selectedIndex, selectedIndices, customStyleIndex, slatitude, slongitude, lat, ULat,summary } = this.state;
  
@@ -1210,16 +1344,6 @@ const copyToClipboard = () => {
   ToastAndroid.show("Copied to clipboard", ToastAndroid.SHORT);
 };
 
-const deleteListItem =(item)=>{
-  console.log('pressed')
-  console.log(item)
-  const NewListItem = this.state.ItemList.filter(value => {
-    return value.indexOf(item) == -1 ;
-});
-console.log('NewListItem: ', NewListItem)
-this.setState({ItemList: NewListItem})
-
-}
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -1244,28 +1368,41 @@ this.setState({ItemList: NewListItem})
     height: Dimensions.get('window').height,
     marginLeft: -20,
     backgroundColor:'white'}}>
-    <Item regular style={{top: this.state.avoildingViewList == true ? 130: 0,}}>
-<Input value={this.state.pabiliItem} placeholder="Pabili Item" style={{fontSize: 17,}}  onChangeText={(text) => this.setState({pabiliItem: text})} onFocus={()=>this.setState({avoildingViewList: true})} onBlur={()=>this.setState({avoildingViewList: false})}/>
-<Button  style={{alignSelf:'center', backgroundColor:'#019fe8'}}  onPress={()=>this.pushAItem()}>
-            <Text style={{color: 'white'}}>Add</Text>
-      </Button>
-       </Item>     
-       <Text style={{marginLeft: 10}}>Item List</Text>       
-       <FlatList
-                                 style={{display:this.state.avoildingViewList == true ?'none':'flex'}}
-                                 data={this.state.ItemList}
-                                 renderItem={ ({ item }) => (
-                                   <View style={{marginLeft: 40, flexDirection: 'row', backgroundColor: 'rgba(232,231,232, 0.5)', width: '80%'}}>
-                                  <TouchableOpacity  style={{flexDirection: 'row'}} onPress={copyToClipboard}>
-                                 <Text style={{padding: 10, width: '95%'}}>{item}</Text>
-        </TouchableOpacity >
-        <MaterialCommunityIcons name={'delete-circle-outline'} size={30} color={'white'} onPress={()=>deleteListItem(item)} style={{backgroundColor: '#cf5149',right:0,marginLeft: 'auto', padding: 5}}/>
-         
-       </View>
-       )}
-       keyExtractor={item => item.id}
-     />
-
+    
+     
+       
+       {this.state.pabiliList.length == 0?null:<View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginTop: 10}}>
+         <View style={{flex: 3,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
+          <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: SCREEN_HEIGHT< 767?15:18}}>Item</Text>
+          </View>
+          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
+          <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: SCREEN_HEIGHT< 767?15: 17}}>Quantity</Text>
+          </View> 
+          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
+          <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: SCREEN_HEIGHT< 767?15:18}}>Unit</Text>
+          </View>
+       </View>}
+       
+      {this.state.pabiliList.length == 0?
+       <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addListBulk()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>Add List</Text></Button></View>
+      :<FlatList
+        data={this.state.pabiliList}
+        renderItem={
+          ({item,index}) => 
+          {
+            return(
+              <View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginVertical: 1}}>
+              <Text style={{color: 'black', marginTop: 30}}>{index+1}.</Text>
+              <Input onSubmitEditing={(e)=> this.onNameUpdate(item, e.nativeEvent.text)} placeholder={item.name} style={{flex: 3, borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
+              <Input keyboardType={'number-pad'}   onSubmitEditing={(e)=> { isNaN(e.nativeEvent.text)? null: this.onQtyUpdate(item, e.nativeEvent.text)}} placeholder={`${item.qty}`} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
+              <Input  onSubmitEditing={(e)=> this.onUnitUpdate(item, e.nativeEvent.text)} placeholder={item.unit} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
+           </View> 
+            )
+          }
+        }
+        keyExtractor={(item) => item.id}
+        ListFooterComponent={() => <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addList()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>+</Text></Button></View>}
+      />}
 <Button  style={{alignSelf:'center', backgroundColor:'#019fe8', width: '100%', alignContent: 'center'}}  onPress={()=>this.setState({listModal:false})}>
             <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>Done</Text>
       </Button>
@@ -1844,7 +1981,7 @@ zoomTapEnabled={false}
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "OK", onPress: () => this.checkOut() }
+        { text: "OK", onPress: () =>this.setState({VisibleAddInfo: true}) }
       ]
     )}}>
 								<Text style={{color: '#ffffff'}}>{this.state.uid == null?'Log in to Continue':'Book Now  '+ this.props.route.params.currency+ ' '+Math.round((actualAmountPay*10)/10)}</Text>
@@ -1855,7 +1992,50 @@ zoomTapEnabled={false}
                </View>
 
              
+              <Modal
+      isVisible={this.state.VisibleAddInfo}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      onBackButtonPress={() => this.setState({ VisibleAddInfo: false })}
+      onBackdropPress={() => this.setState({VisibleAddInfo: false})} transparent={true}>
+     <Card style={{ backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+       
+        <View>
+                  
              
+                
+           
+         <Text style={{marginTop: 15, fontSize: 10}}>Mode of payment</Text>
+                    <Item>
+                   
+                   <Picker
+                         selectedValue={this.state.paymentMethod}
+                         onValueChange={(itemValue, itemIndex) => this.setState({paymentMethod: itemValue}) }>         
+                            <Picker.Item label = {this.state.paymentMethod}  value={this.state.paymentMethod}  />
+                            <Picker.Item label = {'Cash'}  value= {'Cash'} />
+                              {this.state.paymentMethods.map((user, index) => (
+                                            
+     <Picker.Item label={user.Label} value={user.Label} key={index}/>
+    
+  ))        }
+                    </Picker>
+            </Item>
+            
+           </View>   
+    
+      <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
+        onPress={() => this.checkOut() }
+      >
+       <Text style={{color:'white'}}>Procceed</Text>
+      </Button>
+    </Card>
+    </Modal>
           </Container>
           </Root>
     );
@@ -1906,7 +2086,7 @@ const DatasValue = {
   PickupNotifRider: false,
   DropoffNotifUser: false,
   DropoffNotifRider: false,
-  ItemList:this.state.ItemList,
+  ItemList:this.state.pabiliList,
   currency:this.props.route.params.currency,
         Customerimage:this.state.photo,
      OrderNo : this.state.counter,
@@ -1989,7 +2169,12 @@ extraKmCharge:0,
 subtotal:0,
     ProductType: 'Foods',
     SubProductType: 'Pabili',
+    
     }
+
+    this.state.pabiliList.map((info)=>
+    firestore().collection('Pabili').doc(info.key).delete()
+    )
 
     this.checkoutref.collection('orders').doc(newDocumentID).set(DatasValue).then(
       updatecounts.update({ counter:   firestore.FieldValue.increment(1) }),

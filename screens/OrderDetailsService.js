@@ -815,7 +815,7 @@ console.log('out: ', out);
                  <CardItem button  onPress={()=> this.setState({visibleAddressModalTo: true})}>
                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Rate:  </Text>
                     <Left>
-                       <Text style={{fontSize: 12}}>{this.state.datas.currency}{this.state.datas.SelectedPricing=='Weekly'?Math.round(parseFloat(this.state.datas.WeeklyPrice)*10)/10:this.state.datas.SelectedPricing=='Monthly'?Math.round(parseFloat(this.state.datas.MonthlyPrice)*10)/10:this.state.datas.SelectedPricing=='Hour'?Math.round(parseFloat(this.state.datas.HourPrice)*10)/10:Math.round(parseFloat(this.state.datas.DayPrice)*10)/10}</Text>
+                       <Text style={{fontSize: 12}}>{this.state.datas.currency}{this.state.datas.SelectedPricing=='Weekly'?parseFloat(this.state.datas.WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Monthly'?parseFloat(this.state.datas.MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Hour'?parseFloat(this.state.datas.HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):parseFloat(this.state.datas.DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
                     </Left>
                  <Body>
                         <Text style={{fontWeight: 'bold',fontSize: 12}}>Mode:</Text>
@@ -824,7 +824,8 @@ console.log('out: ', out);
                    <Right>
                   
                    <Text style={{fontWeight: 'bold',fontSize: 12}}>Amount To Pay:</Text>
-                   <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.currency}{Math.round(parseFloat(this.state.datas.pricetoPay)*10)/10}</Text>
+                   <Text style={{fontSize: 13, fontWeight: 'bold'}}>{this.state.datas.currency}{parseFloat(this.state.datas.pricetoPay).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                                <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.PaymentMethod}</Text>
                     </Right>
                 </CardItem>
             </Card> 

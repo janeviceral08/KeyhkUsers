@@ -150,6 +150,8 @@ export default class CheckoutScreenService extends Component {
       admin_token:[],
       showURL:false,
       phone: 'Select Phone Number',
+      modeOfPayment:[],
+        PaymentMethod: 'Over the counter'
   };
 
   }
@@ -358,7 +360,7 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
         this.setState({
           notification_token : doc.data().notification_token,
          storewallet: doc.data().wallet,
-        
+        modeOfPayment : doc.data().modeOfPayment == undefined? []:doc.data().modeOfPayment,
        });
       })
     })
@@ -913,6 +915,39 @@ console.log('out: ', out);
   ))        }
                     </Picker>
             </Item>
+            <Text style={{marginTop: 15, fontSize: 10}}>Mode of payment</Text>
+                    <Item>
+                   
+                   <Picker
+                         selectedValue={this.state.PaymentMethod}
+                         onValueChange={(itemValue, itemIndex) => this.setState({PaymentMethod: itemValue}) }>         
+                            <Picker.Item label = {this.state.PaymentMethod}  value={this.state.PaymentMethod}  />
+                            <Picker.Item label = {'Over the counter'}  value= {'Over the counter'} />
+                              {this.state.modeOfPayment.map((user, index) => (
+                                              user.Paymentstatus == true?
+     <Picker.Item label={user.label} value={user.label} key={index}/>
+     :null
+  ))        }
+                    </Picker>
+            </Item>
+            {this.state.PaymentMethod != 'Over the counter'?
+            this.state.modeOfPayment.map((user, index) => (
+              user.label == this.state.PaymentMethod?
+ <Card transparent>
+                            <CardItem style={{borderRadius: 10, borderWidth: 0.1, marginHorizontal: 10, borderColor:'tomato'}} button onPress={()=> this.changePaymentMethod(user)}>                     
+                              <View style={{flex: 1,}}>
+                                <Text style={{fontSize: 16, fontWeight: 'bold'}}> {user.label}</Text>
+                                  <Text style={{fontSize: 14, fontWeight: 'bold'}}>Account Name: <Text style={{fontSize: 14}}> {user.accname}</Text></Text>
+                                <Text style={{fontSize: 14, fontWeight: 'bold'}}>Account Number: <Text style={{fontSize: 14}}> {user.accno}</Text></Text>
+                                <Text style={{fontSize: 14, fontWeight: 'bold'}}>Note: <Text style={{fontSize: 14}}> {user.bankNote}</Text></Text>
+                            
+                              </View>          
+                                       
+                            </CardItem>
+                          </Card>
+  :null))      
+           
+            :null}
          
                     <Text style={{marginTop: 15, fontSize: 10}}>Note</Text>
                         <Item regular style={{marginTop: 7}}>
@@ -1124,7 +1159,16 @@ console.log('out: ', out);
 
 
   async checkOut(){
-      
+       console.log('workinghere ')
+const newData = this.state.modeOfPayment.filter(item => {
+          const itemData = item.label;
+          const textData = this.state.PaymentMethod;
+         
+          return itemData.indexOf(textData) > -1
+        });
+
+
+      console.log('newData: ', newData[0])
 let StatDayPrice = this.state.datas.StatDayPrice == true?'Day':null;
 let StatHourPrice = this.state.datas.StatHourPrice == true?'Hour':null;
 let StatWeeklyPrice = this.state.datas.StatWeeklyPrice == true?'Weekly':null;
@@ -1188,6 +1232,10 @@ const b = moment(out_check_extension.toString());
 const diff = b.diff(a, 'hours'); 
 
     const dataNow={
+      accname:newData.length>0? newData[0].accname:'',
+      accno:newData.length>0? newData[0].accno:'',
+      bankNote:newData.length>0? newData[0].bankNote:'',
+      labelPayment:newData.length>0? newData[0].label:'',
       currency:this.props.route.params.currency,
       admin_token:this.state.admin_token.concat(this.state.notification_token).filter((a)=>a),
       city:this.state.datas.city.trim(),

@@ -108,7 +108,7 @@ export async function request_device_location_runtime_permissions() {
 }
  
 
-export default class HomeScreen extends Component {
+export default class HomeScreen2 extends Component {
   constructor(props){
     super(props)
   
@@ -157,7 +157,7 @@ export default class HomeScreen extends Component {
       searchCountry:'',
       selectedCountry:'',
       CountryNow:[{labelRider: '', currency: '', currencyPabili:''}],
-      customerInfo: {},
+  
       orders:0,
     }
     this.arrayholder = [];
@@ -273,7 +273,7 @@ const UserLocationCountry = arr[newarrLenghtCountry]
             );
      // this.getUserCity();
      
-      this.unsubscribe = this.ref.where('city','==',this.state.customerInfo.selectedCity == 'none' || this.state.customerInfo.selectedCity == undefined ?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity).onSnapshot(this.onCollectionUpdate);
+      this.unsubscribe = this.ref.where('city','==',this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser).onSnapshot(this.onCollectionUpdate);
       this.subscribe = this.catref.onSnapshot(this.onCategoriesUpdate);
   }
 
@@ -284,43 +284,7 @@ const UserLocationCountry = arr[newarrLenghtCountry]
      //const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
 //console.log('asyncselectedCity: ', asyncselectedCity)
 
-console.log('userId: ', auth().currentUser.uid)
-const userId =  auth().currentUser.uid;
-firestore().collection('users').where('userId', '==', userId).onSnapshot(
-             querySnapshot => {
-               
-                 querySnapshot.forEach(doc => {
-                      this.setState({   customerInfo : doc.data() })
-                     console.log('customerInfo ',doc.data())    
-                 });
-            
-                
-             },
-             error => {
-              //   console.log(error)
-             }
-         );
-         firestore().collection('orders').where('userId', '==', userId).onSnapshot(
-           querySnapshot => {
-             const orders = []
-               querySnapshot.forEach(doc => {
-                 orders.push(doc.data())
-                   
-                   
-               });
-               orders.filter(item => {
-                 const itemData = item.OrderStatus;
-                 const textData = 'Pending';
-                 const textDataProcessing =  'Processing';
-                
-                 return itemData === 'Processing' ? itemData.indexOf(textDataProcessing ) > -1 :  itemData.indexOf(textData ) > -1
-               })
-               this.setState({   orders : orders.length})
-           },
-           error => {
-            //   console.log(error)
-           }
-       );
+
 
          if(Platform.OS === 'android')
     {
@@ -345,7 +309,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
 
 
              this.setState({
-               UserLocationCountry: this.state.customerInfo.selectedCountry == undefined? UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
+               UserLocationCountry: UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(),
            })
            this.getAllCity()
        }).catch(err => {
@@ -362,9 +326,6 @@ console.log("UserLocationCountry ", UserLocationCountry)
         )
       
 
-
-          
-          
      firestore().collection('AvailableOn').where('status', '==', true).orderBy('label', 'asc').onSnapshot(
                 querySnapshot => {
                     const AvailableOn = []
@@ -399,9 +360,9 @@ console.log("UserLocationCountry ", UserLocationCountry)
      // this.getUserCity();
   
       this.unsubscribe = this.ref.where('city','==', 
-      this.state.customerInfo.selectedCity == 'none'|| this.state.customerInfo.selectedCity == undefined?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity).onSnapshot(this.onCollectionUpdate);
+    this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser).onSnapshot(this.onCollectionUpdate);
       this.subscribe = this.catref.onSnapshot(this.onCategoriesUpdate);
-      console.log('city show ', this.state.customerInfo.selectedCity == 'none'|| this.state.customerInfo.selectedCity == undefined?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity)
+      console.log('city show ', this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser)
     }
    
     onPrentals = (querySnapshot) => {
@@ -507,7 +468,7 @@ async getCountryCity(PressedCountrycode){
     //   console.log('collect: ', collect)
       //     console.log('UserLocationCountry: ', this.state.UserLocationCountry)
        //          console.log('selectedCountry: ', this.state.selectedCountry)
-      await  firestore().collection(collect).where('country', '==', PressedCountrycode)
+        firestore().collection(collect).where('country', '==', PressedCountrycode)
         .onSnapshot(querySnapshot => {
           querySnapshot.docs.forEach(doc => {
           city.push(doc.data());
@@ -581,7 +542,7 @@ async getCountryCity(PressedCountrycode){
 let arr = str.split(',');
 //console.log('arr: ', arr)
 const newarrLenght= arr.length-3
-const UserLocation = this.state.customerInfo.selectedCity == 'none'|| this.state.customerInfo.selectedCity == undefined? arr[newarrLenght]:this.state.customerInfo.selectedCity
+const UserLocation = arr[newarrLenght]
 //console.log("newarrLenght value", arr[newarrLenght])
 
 const province = Province.ZipsCollection.find( (items) => items.zip === res.data.features[0].context[0].text);
@@ -738,7 +699,7 @@ let Address ='';
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
    //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
    //  console.log('CountryNow: ', this.state.CountryNow)
-   console.log('this.state.customerInfo.selectedCity: ', this.state.customerInfo.selectedCity)
+
     return (
       <Container style={{backgroundColor: '#a3b6c9'}}>
         
@@ -920,7 +881,7 @@ let Address ='';
               style={{ height: 60, width: SCREEN_WIDTH/2, marginLeft: -10}}
               attributionEnabled={false}
               logoEnabled={false}
-           onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency,'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
+           onPress = {()=> this.props.navigation.navigate("Login")} 
               >
 <MapboxGL.Camera 
 centerCoordinate={[this.state.x.longitude, this.state.x.latitude]} 
@@ -931,7 +892,7 @@ followUserMode={'normal'}
          <MapboxGL.PointAnnotation coordinate={[this.state.x.longitude, this.state.x.latitude]} />
 </MapboxGL.MapView>
 <TouchableOpacity style={{justifyContent: "center", alignContent: "center", width: SCREEN_WIDTH/2.2, flexDirection: 'column',paddingTop:0, paddingLeft: 10}}
- onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
+ onPress = {()=>this.props.navigation.navigate("Login")} 
 >
 <Text style={{ fontSize: 11,paddingLeft: 5, color: 'white', left: 80}}>Starts at </Text>
 <Text style={{ fontSize: 20,paddingLeft: 5, color: 'white'}}>{ this.state.CountryNow.length == 0? '':this.state.CountryNow[0].labelRider}    {this.state.CountryNow.length == 0? '':this.state.CountryNow[0].currencyPabili} {this.state.CountryNow.length == 0? '':this.state.CountryNow[0].pabiliminim}</Text>

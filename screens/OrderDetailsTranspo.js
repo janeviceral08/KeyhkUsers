@@ -135,6 +135,7 @@ export default class OrderDetailsTranspo extends Component {
       Tolong: cart.Tolong,
       showURL:false,
       ModalHelp: false,
+      
   };
 
   }
@@ -269,13 +270,13 @@ console.log('cLat: ', this.state.cLat);
         </View>
          </View>
          <View>
-               <Card style={{height: SCREEN_HEIGHT/2.2}}>
+               <Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/2:SCREEN_HEIGHT/2.2}}>
 <CardItem> 
 
 <Body style={{flexDirection: 'row'}}>
  <View style={{flexDirection: 'column', marginLeft: 0}}>
  <TouchableOpacity onPress={()=> this.setState({showURL: true, SelectedURL:this.state.cart.DeliveredBy.image})}>
-   <Image style={{  width: 100, height: 100, borderRadius: 50, borderWidth: 5, borderColor: '#396ba0', overflow: "hidden", top: -50}} source={{uri: this.state.cart.DeliveredBy.image}} />
+   <Image style={{  width: SCREEN_HEIGHT < 767?80:100, height: SCREEN_HEIGHT < 767?80:100, borderRadius: 50, borderWidth: 5, borderColor: '#396ba0', overflow: "hidden", top: -50}} source={{uri: this.state.cart.DeliveredBy.image}} />
 </TouchableOpacity>
 {this.state.cart.DeliveredBy.rating > 4.5  ?   //5
 <View  style={{flexDirection: 'row', top: -50}}>
@@ -360,12 +361,12 @@ console.log('cLat: ', this.state.cLat);
 }
        <Text style={{fontSize: 12, top: -50, textAlign: 'center'}}>{this.state.cart.DeliveredBy.rating} </Text>
     </View>
- <View style={{flexDirection: 'column', marginLeft: 10}}>
-    <Text style={{fontWeight: 'bold', fontSize: 15}}>Accepted By :<Text style={{fontSize: 15}}>{this.state.DeliveredBy} ({this.state.cart.AdminName})</Text></Text>
- <Text style={{fontWeight: 'bold', fontSize: 12, numberOfLines: 2}}>Vehicle: <Text style={{fontSize: 12}}>{this.state.cart.vehicle} {this.state.cart.DeliveredBy.ColorMotor} {this.state.cart.DeliveredBy.MBrand} {this.state.cart.DeliveredBy.VModel} {this.state.cart.DeliveredBy.plateNo} {this.state.cart.vehicle == 'Motorcycle'?this.state.cart.DeliveredBy.helmet+' Helmet '+this.state.cart.DeliveredBy.helmetNo :null}</Text> </Text> 
+ <View style={{flexDirection: 'column', marginLeft: SCREEN_HEIGHT < 767?0:10}}>
+    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:15}}>Accepted By :<Text style={{fontSize: SCREEN_HEIGHT < 767?12:15}}>{this.state.DeliveredBy} ({this.state.cart.AdminName})</Text></Text>
+ <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?10:12, numberOfLines: 2}}>Vehicle: <Text style={{fontSize: 12}}>{this.state.cart.vehicle} {this.state.cart.DeliveredBy.ColorMotor} {this.state.cart.DeliveredBy.MBrand} {this.state.cart.DeliveredBy.VModel} {this.state.cart.DeliveredBy.plateNo} {this.state.cart.vehicle == 'Motorcycle'?this.state.cart.DeliveredBy.helmet+' Helmet '+this.state.cart.DeliveredBy.helmetNo :null}</Text> </Text> 
   </View>
 </Body>
-<Right style={{top: -80,}}>
+<Right style={{top: SCREEN_HEIGHT < 767?-70:-80,}}>
 <View style={{ backgroundColor: '#396ba0', borderRadius: 10, width: '40%'}}>
 <Text style={{textAlign: 'center', fontSize: 14, color: 'white'}}>ETA
 </Text>
@@ -375,51 +376,61 @@ console.log('cLat: ', this.state.cLat);
 
 
 </CardItem>
-<TouchableOpacity style={{top: -63, flexDirection: 'row', marginLeft: 10}} onPress={()=>{this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({VisibleAddInfo: true})}}>
+<TouchableOpacity style={{top: -75, flexDirection: 'row', marginLeft: 10}} onPress={()=>{this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({VisibleAddInfo: true})}}>
   <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
    <View style={{flexDirection: 'column', width: '90%'}}>
 
    
-                    <Text style={{fontWeight: 'normal', fontSize: 14, color: 'green'}}>Pickup location </Text>
-                   <Text style={{fontSize: 14}}>{this.state.billing_street}, {this.state.billing_barangay}, {this.state.billing_city}, {this.state.billing_province}, {this.state.billing_postal}</Text>    
+                    <Text style={{fontWeight: 'normal', fontSize: SCREEN_HEIGHT < 767?12:14, color: 'green'}}>Pickup location </Text>
+                   <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14}}>{this.state.billing_street}, {this.state.billing_barangay}, {this.state.billing_city}, {this.state.billing_province}, {this.state.billing_postal}</Text>    
                          </View>
 </TouchableOpacity>
-<TouchableOpacity style={{top: -65, flexDirection: 'row', marginLeft: 10}} onPress={()=>{this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({VisibleAddInfo: true})}}>
+<TouchableOpacity style={{top: -75, flexDirection: 'row', marginLeft: 10}} onPress={()=>{this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({VisibleAddInfo: true})}}>
  <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
                 <View style={{flexDirection: 'column'}}>
               
   
-                    <Text style={{fontWeight: 'normal', fontSize: 14, color: 'blue'}}>Drop-off location</Text>
-                    <Text style={{fontSize: 14}} >{this.state.billing_streetTo}, {this.state.billing_barangayTo}, {this.state.billing_cityTo}, {this.state.billing_provinceTo}, {this.state.billing_postalTo}</Text>
+                    <Text style={{fontWeight: 'normal', fontSize: SCREEN_HEIGHT < 767?12:14, color: 'blue'}}>Drop-off location</Text>
+                    <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14}} >{this.state.billing_streetTo}, {this.state.billing_barangayTo}, {this.state.billing_cityTo}, {this.state.billing_provinceTo}, {this.state.billing_postalTo}</Text>
                    </View>
 </TouchableOpacity>
 
-                <TouchableOpacity style={{top: -60, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
+                <TouchableOpacity style={{top: -70, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
                    <View style={{flexDirection: 'row'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 14}}>Passengers:  </Text>
-                        <Text style={{fontSize: 14}}>{this.state.cart.adult} Adult {this.state.cart.children == 0?null: ', '+this.state.cart.children+' '+'Children'  } </Text>
+                    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14}}>Passengers:  </Text>
+                        <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14}}>{this.state.cart.adult} Adult {this.state.cart.children == 0?null: ', '+this.state.cart.children+' '+'Children'  } </Text>
                      </View>
                   { this.state.cart.distance === undefined? null:    <View style={{flexDirection: 'row',position: 'absolute', right: 0, marginRight: 20}}>
-                        <Text style={{fontWeight: 'bold', fontSize: 14}}>Pickup Time:</Text>
-                        <Text style={{fontSize: 14,}}>{this.state.cart.needAsap === true? 'ASAP': moment(this.state.cart.pickupTime*1000).format('h:mm a')}</Text>
+                        <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14}}>Pickup Time:</Text>
+                        <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14,}}>{this.state.cart.needAsap === true? 'ASAP': moment(this.state.cart.pickupTime*1000).format('h:mm a')}</Text>
                     </View>}
                    
                 </TouchableOpacity>
-                <TouchableOpacity style={{top: -60, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
-                   <View style={{flexDirection: 'row',}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 14,  width: '25%'}}>Passenger Description:  </Text>
-                        <Text style={{fontSize: 14,  width: '65%'}}>{this.state.cart.PassengerDescription}</Text>
+                <TouchableOpacity style={{top: -70, flexDirection: 'row', marginLeft: 10,}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
+                   <View style={{flexDirection: 'row'}}>
+                    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14}}>Tip:   <Text style={{fontSize: 14}}>{parseFloat(this.state.cart.tip).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text></Text>
+                    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14, paddingLeft: SCREEN_WIDTH/4}}>Charge:   <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14}}>{this.state.cart.total.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text></Text>
+                      
                      </View>
-                  { this.state.cart.distance === undefined? null:    <View style={{flexDirection: 'row',position: 'absolute', right: 0}}>
-                       <Text style={{fontSize: 20, fontWeight: 'bold', marginRight: 20}}>{this.state.cart.distance === undefined? null: distanceAmount < 1?this.props.route.params.orders.currency+' '+Math.round((this.props.route.params.orders.tip*10)/10+parseFloat(this.state.amount_base)): this.props.route.params.orders.currency+' '+Math.round((amountpay*10)/10+Math.round((this.props.route.params.orders.tip*10)/10))}</Text>
+          
+                </TouchableOpacity>
+                <TouchableOpacity style={{top: -70, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
+                   <View style={{flexDirection: 'row',}}>
+                    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14,  width: '25%'}}>Passenger Description:  </Text>
+                        <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14,  width: '65%'}}>{this.state.cart.PassengerDescription}</Text>
+                     </View>
+                     
+                  { this.state.cart.distance === undefined? null:    <View style={{flexDirection: 'column',position: 'absolute', right: 0, top: 20}}>
+                       <Text style={{fontSize: SCREEN_HEIGHT < 767?18:20, fontWeight: 'bold', marginRight: 20}}>{this.state.cart.distance === undefined? null: distanceAmount < 1?this.props.route.params.orders.currency+' '+Math.round((this.props.route.params.orders.tip*10)/10+parseFloat(this.state.amount_base)).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'): this.props.route.params.orders.currency+' '+Math.round((amountpay*10)/10+Math.round((this.props.route.params.orders.tip*10)/10)).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                          <Text style={{fontSize: SCREEN_HEIGHT < 767?11:13, fontWeight: 'bold', marginBottom: 10, textAlign: 'right', paddingRight: 10}}>{this.props.route.params.orders.PaymentMethod}</Text>
                     </View>}
                    {console.log('tip: ',this.props.route.params.orders.tip)}
                 </TouchableOpacity> 
 
-                <TouchableOpacity style={{top: -60, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
+                <TouchableOpacity style={{top: -70, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
                    <View style={{flexDirection: 'row'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 14}}>Note to Rider:  </Text>
-                        <Text style={{fontSize: 14}}>{this.state.cart.Note}</Text>
+                    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14}}>Note to Rider:  </Text>
+                        <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14}}>{this.state.cart.Note}</Text>
                      </View>
              
                 </TouchableOpacity>

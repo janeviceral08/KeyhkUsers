@@ -18,10 +18,10 @@ import { RadioButton, Divider } from 'react-native-paper';
 export default class Searchbar extends Component {
     constructor(props) {
         super(props);
-        const storeId = this.props.navigation.getParam('storeId', 'NO-ID');
-        const store_name = this.props.navigation.getParam('store_name', 'NO-ID');
+        const storeId =this.props.route.params.storeId;
+        const store_name = this.props.route.params.store_name;
 
-        const notification_token = this.props.navigation.getParam('notification_token', 'NO-ID');
+        const notification_token =this.props.route.params.notification_token;
         this.ref =  firestore().collection('products').where('storeId', '==', storeId);
         this.state = {
           loading: false,      
@@ -50,226 +50,174 @@ export default class Searchbar extends Component {
     
         this.arrayholder = [];
     }
+  openModal (){
+    this.setState({   
+        visibleModal: true,
+    })
+   }
 
-    _incrementCount = () => {
-      this.setState(prevState => ({ count: prevState.count + 1 }));
-    }
+   renderImage = ({ item }) => (
+    <TouchableHighlight>
+      <View style={styles.imageContainer}>
+        <Image style={styles.image} source={{ uri: item }} />
+      </View>
+    </TouchableHighlight>
+  );
 
-  _decrementCount = () => {
-      this.setState(prevState => ({ count: prevState.count - 1 }));
-    }
-
-  checkDrink(drink, object) {
-      const {choice} = this.state;
-      var i;
-      for (i = 0; i < object.length; i++) {
-        if (object[i].isChecked === 'checked') {
-          
-          object[i].isChecked = 'unchecked';
-        }
-      }
-      drink.isChecked = "checked";
-
-          let updatedCart = choice;
-          let item =  updatedCart.find(item => drink.id === item.id);
-          if(item){
-              let itemIndex = updatedCart.findIndex(item => drink.id === item.id);
-              updatedCart.splice(itemIndex, 1);
-              choice.push(drink) 
-          }else{
-              choice.push(drink)
-          }
-      console.log(choice)
-      this.setState({ refresh: true });
-    }
-  
-    getAddonsTotal=()=>{
-      const {choice, productss} = this.state;
-      let  total = 0;
-      productss.map((object, d) =>
-      object.data.map((drink, i) =>{ 
-          if(drink.isChecked === "checked"){
-              total += drink.price
-          }
-      })
-  )
-  console.log(total)
-  return total;
-  }
-
-  getAddonsDefault=()=>{
-      const {choice,productss} = this.state;
-      let item =[]
-      productss.map((object, d) =>
-          object.data.map((drink, i) =>{ 
-              if(drink.isChecked === "checked"){
-                  choice.push(drink)
-              }
-          })
-      )
-      return choice;
-  }
-
-  async addonsdeleteCart(item){
-    const userId= await AsyncStorage.getItem('uid');
+   async deleteCart(item) {
+    const userId= auth().currentUser.uid;
     AsyncStorage.setItem('cluster', item.cluster);
      firestore().collection('cart').doc(userId).delete()  
     .catch(function(error) {
         console.log("Error deleting documents: ", error);
     });
-    let name = item.name.concat(' Added to Cart');
-    let newItem = {
-              id: item.id,
-              store_name: this.state.store_name,
-              notification_token: this.state.token,
-              slongitude: this.props.slongitude,
-                slatitude: this.props.slatitude,
-              total_addons: this.getAddonsTotal(),
-              note: '',
-              cluster: item.cluster,
-              choice: this.getAddonsDefault(),
-              qty: this.state.count,
-              adminID: item.adminID,
-            };
-            let cartRef =  firestore().collection('cart');
-            let updatedCart =[];
-            /* Push new cart item */
-            updatedCart.push(newItem); 
-            cartRef.doc(userId).set(Object.assign({}, updatedCart))
-
-            this.setState({
-              isVisibleAddons: false,
-              productss:[],
-              count:1,
-              choice:[]
-          })
-  }
-
-    async addonsAddtoCart(item){
-      const {cart} = this.state;
-      const userId= await AsyncStorage.getItem('uid');
-      if(userId){
-        let id = item.id;
-       let cluster = item.cluster
-      let cluster_is_existing =Object.keys(cart).length && Object.values(cart).find(item => cluster === item.cluster);
-      if ( cluster_is_existing == 0 || cluster_is_existing){
-      let newItem = {
-            id: item.id,
-            store_name: this.state.store_name,
-            notification_token: this.state.token,
-            slongitude: this.props.slongitude,
-                slatitude: this.props.slatitude,
-            total_addons: this.getAddonsTotal(),
-            note: '',
-            qty: 1,
-            cluster: item.cluster,
-            choice: this.getAddonsDefault(),
-            qty: this.state.count,
-            adminID: item.adminID,
-        };
-        let updatedCart = Object.values(cart); /* Clone it first */
-        let cartRef =  firestore().collection('cart');
-        
-        /* Push new cart item */
-        updatedCart.push(newItem); 
-        
-        /* Set updated cart in firebase, no need to use setState because we already have a realtime cart listener in the componentDidMount() */
-        cartRef.doc(userId).set(Object.assign({}, updatedCart)).then(() => {
-        
-        });
-  
-        this.setState({
-          isVisibleAddons: false,
-          productss:[],
-          count:1,
-          choice:[]
-      })
-    }else{
-      Alert.alert(
-        'Discard Changes?',
-         'This product belongs to other store, adding this product will delete the items in your cart.',
-        [
-          {
-            text: 'Cancel',
-            onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel'
-          },
-          { text: 'OK', onPress: () => this.addonsdeleteCart(item)}
-        ],
-        { cancelable: false }
-      );
-    }
-    }
-      else {
-        this.setState({
-          isVisibleAddons: false,
-          productss:[],
-          count:1,
-          choice:[]
-      })
-        this.props.navigation.navigate('Auth');
-      }
-    }
-
-    renderImage = ({ item }) => (
-      <TouchableHighlight>
-        <View style={styles.imageContainer}>
-          <Image style={styles.image} source={{ uri: item }} />
-        </View>
-      </TouchableHighlight>
-    );
-
-  async deleteCart(item) {
-    const userId= await AsyncStorage.getItem('uid');
-    AsyncStorage.setItem('cluster', item.cluster);
-     firestore().collection('cart').doc(userId).delete()  
-    .catch(function(error) {
-        console.log("Error deleting documents: ", error);
-    });
-    let name = item.name.concat(' Added to Cart');
+   
     let newItem = {
                 id: item.id,
-                store_name: this.state.store_name,
-                notification_token: this.state.token,
-                slongitude: this.props.slongitude,
-                slatitude: this.props.slatitude,
+                store_name: this.props.store,
+                notification_token: this.props.token,
                 note: '',
-                qty: 1,
-                adminID: item.adminID,
-                cluster: item.cluster
+                qty: this.state.count,
+                cluster: item.cluster,                
             };
             let cartRef =  firestore().collection('cart');
             let updatedCart =[];
             /* Push new cart item */
             updatedCart.push(newItem); 
-            cartRef.doc(userId).set(Object.assign({}, updatedCart))
-    
- 
+            cartRef.doc(userId).set(Object.assign({}, updatedCart));
 }
+
+async addonsdeleteCart(item){
+  const userId= auth().currentUser.uid;
+  AsyncStorage.setItem('cluster', item.cluster);
+   firestore().collection('cart').doc(userId).delete()  
+  .catch(function(error) {
+      console.log("Error deleting documents: ", error);
+  });
+ 
+  let newItem = {
+              id: item.id,
+              store_name: this.props.store,
+              total_addons: this.getAddonsTotal(),
+              notification_token: this.props.token,
+              note: '',
+              cluster: item.cluster,     
+              choice: this.getAddonsDefault(),
+              qty: this.state.count,           
+                slongitude: this.props.route.params.slongitude,
+                slatitude: this.props.route.params.slatitude,
+                adminID: item.adminID,
+          };
+          let cartRef =  firestore().collection('cart');
+          let updatedCart =[];
+          /* Push new cart item */
+          updatedCart.push(newItem); 
+          cartRef.doc(userId).set(Object.assign({}, updatedCart));
+
+          this.setState({
+            isVisibleAddons: false,
+            productss:[],
+            count:1,
+            choice:[]
+        })
+}
+
+  async addonsAddtoCart(item){
+
+    const {cart} = this.state;
+    const userId= auth().currentUser.uid;
+    if(userId){
+      let id = item.id;
+      let cluster = item.cluster
+      let cluster_is_existing =Object.keys(cart).length && Object.values(cart).find(item => cluster === item.cluster);
+      if ( cluster_is_existing == 0 || cluster_is_existing){
+    let newItem = {
+          id: item.id,
+          store_name: this.props.route.params.store_name,
+          notification_token: this.props.route.params.token,
+          total_addons: this.getAddonsTotal(),
+          note: '',
+          cluster: item.cluster,
+          adminID: item.adminID,
+          choice: this.getAddonsDefault(),
+          qty: this.state.count,
+          slongitude: this.props.route.params.slongitude,
+          slatitude: this.props.route.params.slatitude,
+      };
+      let updatedCart = Object.values(cart); /* Clone it first */
+      let cartRef =  firestore().collection('cart');
+      
+      /* Push new cart item */
+      updatedCart.push(newItem); 
+      
+      /* Set updated cart in firebase, no need to use setState because we already have a realtime cart listener in the componentDidMount() */
+      cartRef.doc(userId).set(Object.assign({}, updatedCart)).then(() => {
+      
+      });
+
+      this.setState({
+        isVisibleAddons: false,
+        productss:[],
+        count:1,
+        choice:[]
+    })
+  }else{
+    Alert.alert(
+      'Note',
+       'This product belongs to other store, adding this product will delete the items in your cart.',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel'
+        },
+        { text: 'OK', onPress: () => this.addonsdeleteCart(item)}
+      ],
+      { cancelable: false }
+    );
+  }
+  }
+    else {
+      this.setState({
+        isVisibleAddons: false,
+        productss:[],
+        count:1,
+        choice:[]
+    })
+		this.props.navigation.navigate('Login');
+    }
+   
+  }
  
  	async onAddToCart(item) {
-     const {cart} = this.state;
-		const userId= await AsyncStorage.getItem('uid');
-    const cluster = await AsyncStorage.getItem('cluster');
-		if(userId){ 
+    const {cart} = this.state;
+		const userId= auth().currentUser.uid;
+    console.log(item.id)
+    console.log(this.props.route.params.store_name)
+    console.log(this.props.route.params.slongitude)
+    console.log(this.props.route.params.slatitude)
+    console.log(this.props.route.params.token)
+    console.log(item.cluster)
+    console.log(item.adminID)
+	  if(userId){ 
       let id = item.id;
-       let cluster = item.cluster
+      let cluster = item.cluster
       let cluster_is_existing =Object.keys(cart).length && Object.values(cart).find(item => cluster === item.cluster);
       if ( cluster_is_existing == 0 || cluster_is_existing){
-          
+          AsyncStorage.setItem('cluster', item.cluster);
           let is_existing = Object.keys(cart).length && Object.values(cart).find(item => id === item.id); /* Check if item already exists in cart from state */
           if(!is_existing){
-           
             let newItem = {
                 id: item.id,
-                store_name: this.state.store_name,
-                notification_token: this.state.token,
-                slongitude: this.props.slongitude,
-                slatitude: this.props.slatitude,
+                store_name: this.props.route.params.store_name,
+                slongitude: this.props.route.params.slongitude,
+                slatitude: this.props.route.params.slatitude,
+                notification_token: this.props.route.params.token,
                 note: '',
                 qty: 1,
+                cluster: item.cluster,
                 adminID: item.adminID,
-                cluster: item.cluster
+                
             };
             let updatedCart = Object.values(cart); /* Clone it first */
             let cartRef =  firestore().collection('cart');
@@ -278,7 +226,10 @@ export default class Searchbar extends Component {
             updatedCart.push(newItem); 
             
             /* Set updated cart in firebase, no need to use setState because we already have a realtime cart listener in the componentDidMount() */
-            cartRef.doc(userId).set(Object.assign({}, updatedCart))
+            cartRef.doc(userId).set(Object.assign({}, updatedCart)).then(() => {
+            
+            });
+            
           }
       else{
         let product = Object.keys(cart).length && Object.values(cart).find(item => id === item.id); /* Check if item exists in cart from state */
@@ -286,7 +237,7 @@ export default class Searchbar extends Component {
             if(product){
               if(product.qty >= item.quantity){
                 /* Do not allow save if user is trying to checkout more than what is available on stock */
-                
+               
               }
                else if (product.qty <= item.quantity){
                 let cartRef =  firestore().collection('cart');
@@ -298,7 +249,7 @@ export default class Searchbar extends Component {
                   
                   /* Set item quantity */
                   updatedCart[itemIndex]['qty'] = updatedCart[itemIndex]['qty'] + 1; 
-                  
+
                   /* Set updated cart in firebase, no need to use setState because we already have a realtime cart listener in the componentDidMount() */
                   cartRef.doc(userId).set(Object.assign({}, updatedCart))
                 });
@@ -307,8 +258,8 @@ export default class Searchbar extends Component {
       }
 		} else {
 			Alert.alert(
-        'Discard Changes?',
-        'This product belongs to another cluster, continuing will lose all your products in cart.',
+        'Note',
+         'This product belongs to other store, adding this product will delete the items in your cart.',
         [
           {
             text: 'Cancel',
@@ -322,10 +273,146 @@ export default class Searchbar extends Component {
 		}
 	}
   else {
-			this.props.navigation.navigate('Auth');
-		}
+		this.props.navigation.navigate('Login');
+        }
+   
 }
 
+    getAddonsTotal=()=>{
+        const {choice, productss} = this.state;
+        let  total = 0;
+        productss.map((object, d) =>
+        object.data.map((drink, i) =>{ 
+            if(drink.isChecked === "checked"){
+                total += drink.price
+            }
+        })
+    )
+    console.log(total)
+    return total;
+    }
+
+    getAddonsDefault=()=>{
+        const {choice,productss} = this.state;
+        let item =[]
+        productss.map((object, d) =>
+            object.data.map((drink, i) =>{ 
+                if(drink.isChecked === "checked"){
+                    choice.push(drink)
+                }
+            })
+        )
+        for(var value of choice){
+          if(item.indexOf(value) === -1){
+              item.push(value);
+          }
+      }
+        return item;
+    }
+
+
+    FoodAddons(item){
+        let img=[];
+        let add=[];
+        this.setState({ isVisibleAddons: true,
+          slongitude: this.props.route.params.slongitude,
+          slatitude: this.props.route.params.slatitude,
+                        name: item.name,
+                        price: item.price,
+                        image: img.concat(item.featured_image),
+                        id: item.id,
+                        sale_price: item.sale_price,
+                        unit: item.unit,
+                        brand: item.brand,
+                        productss: item.addons,
+                        addonss: item,
+                        adminID: item.adminID,
+        })
+
+    }
+
+    _incrementCount = () => {
+        this.setState(prevState => ({ count: prevState.count + 1 }));
+      }
+
+    _decrementCount = () => {
+        this.setState(prevState => ({ count: prevState.count - 1 }));
+      }
+      checkDrinkm(drink, object) {
+        const {choice} = this.state;
+        var i;
+        for (i = 0; i < object.length; i++) {
+          if (object[i].isChecked === 'checked') {
+            
+            object[i].isChecked = 'checked';
+          }
+        }
+        drink.isChecked = "checked";
+
+            let updatedCart = choice;
+            let item =  updatedCart.find(item => drink.id === item.id);
+            if(item){
+                let itemIndex = updatedCart.findIndex(item => drink.id === item.id);
+                updatedCart.splice(itemIndex, 1);
+                choice.push(drink) 
+            }else{
+                choice.push(drink)
+            }
+        console.log(choice)
+        this.setState({ refresh: true });
+      }
+      checkDrinkmunchecked(drink, object) {
+        const {choice} = this.state;
+        var i;
+        for (i = 0; i < object.length; i++) {
+          if (object[i].isChecked === 'unchecked') {
+            
+            object[i].isChecked = 'unchecked';
+          }
+        }
+        drink.isChecked = "unchecked";
+
+            let updatedCart = choice;
+            let item =  updatedCart.find(item => drink.id === item.id);
+            if(item){
+                let itemIndex = updatedCart.findIndex(item => drink.id === item.id);
+                updatedCart.splice(itemIndex, 1);
+                choice.push(drink) 
+            }else{
+                choice.push(drink)
+            }
+        console.log(choice)
+        this.setState({ refresh: true });
+      }
+  
+    checkDrink(drink, object) {
+        const {choice} = this.state;
+        var i;
+        for (i = 0; i < object.length; i++) {
+          if (object[i].isChecked === 'checked') {
+            
+            object[i].isChecked = 'unchecked';
+          }
+        }
+        drink.isChecked = "checked";
+
+            let updatedCart = choice;
+            let item =  updatedCart.find(item => drink.id === item.id);
+            if(item){
+                let itemIndex = updatedCart.findIndex(item => drink.id === item.id);
+                updatedCart.splice(itemIndex, 1);
+                choice.push(drink) 
+            }else{
+                choice.push(drink)
+            }
+        console.log(choice)
+        this.setState({ refresh: true });
+      }
+  
+    onSelectionsChange = (selectedFruits) => {
+        // selectedFruits is array of { label, value }
+        this.setState({ selectedFruits })
+      }
     onCollectionUpdate = (querySnapshot) => {
       const products = [];
       querySnapshot.forEach((doc) => {
@@ -339,11 +426,10 @@ export default class Searchbar extends Component {
     }
   
    async componentDidMount() {
-     const userId= await AsyncStorage.getItem('uid');
-      this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
+     const userId= auth().currentUser.uid;
+    this.unsubscribe = this.ref.onSnapshot(this.onCollectionUpdate);
 
        if(userId){
-				/* Listen to realtime cart changes */
 				this.unsubscribeCartItems =  firestore().collection('cart').doc(userId).onSnapshot(snapshotCart => {
 					if(snapshotCart.data()){
 						this.setState({cart: snapshotCart.data()});
@@ -352,6 +438,7 @@ export default class Searchbar extends Component {
 					}
 				});
 			}
+      
     }
   
     componentWillUnMount(){
@@ -375,28 +462,13 @@ export default class Searchbar extends Component {
      
     };
 
-    FoodAddons(item){
-      let img=[];
-      let add=[];
-      this.setState({ isVisibleAddons: true,
-                      name: item.name,
-                      price: item.price,
-                      image: img.concat(item.featured_image),
-                      id: item.id,
-                      sale_price: item.sale_price,
-                      unit: item.unit,
-                      brand: item.brand,
-                      productss: item.addons,
-                      addonss: item
-      })
-
-  }
 
   router(item){
+
     if(!item.status || item.quantity<= 0  || !item.admin_control){
         return null;
     }else{
-        if(item.addons == null|| item.addons  == 0){
+        if(item.addons == null || item.addons.length == 0){
           this.onAddToCart(item)
         }else{
           this.FoodAddons(item)
@@ -405,10 +477,73 @@ export default class Searchbar extends Component {
 }
 
     rowRenderer = (data) => {
-        const { name, price, quantity, featured_image, unit, status, id,admin_control, storeId, sale_price,sale_description, brand} = data;
+        const { name, price, quantity, featured_image, unit, status, id,admin_control, storeId, sale_price,sale_description, brand,cluster,addons} = data;
         return (
-          <Card transparent style={{flex: 1, justifyContent: "center", alignContent: "center"  }}>
-      <CardItem style={{paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:1 ,width:SCREEN_WIDTH/2-5}}>
+
+ <Card style={{borderRadius: 20, }}>
+      <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20,width:SCREEN_WIDTH/2-5}}>
+      <TouchableOpacity style={{width:SCREEN_WIDTH/2, flex: 1}} onPress={()=> this.router(data) }>
+ <FastImage style={{    width: '100%',
+    height: 150,
+    shadowColor: '#cccccc',
+    backgroundColor:'#cccccc',
+    shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    borderRadius: 20,
+    shadowRadius: 5,
+    shadowOpacity: 1.0,
+    elevation: 3}} source={{ uri: featured_image, headers: { Authorization: 'someAuthToken' },
+                  priority: FastImage.priority.normal, }} 
+                  resizeMode={FastImage.resizeMode.cover}
+      >
+      <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
+  bottom:0, width: '100%'}}>
+      <View style={{height:20,flexShrink: 1, flexDirection: 'row' }}>
+        <Text  numberOfLines={1} style={{fontSize: 14,
+    fontWeight: 'bold',
+    color: 'black',
+    padding : 1,
+    paddingHorizontal: 20,width:SCREEN_WIDTH/3.5}}>{name}</Text>
+         <Text style={{fontStyle: "italic",  fontSize: 13,  Top: 10,width:100}}>Stock :{quantity}</Text>
+      </View>  
+            {!admin_control || !status ? 
+         <View style={styles.text}>
+         <Text style={styles.title}>Unavailable</Text>
+       </View>
+        :   quantity  <= 0  ?
+        <View style={styles.text}>
+        <Text style={styles.title}>Out of Stock</Text>
+      </View>
+        : 
+         null
+      }
+     
+     
+        <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>
+       
+
+        {sale_price ? 
+        <View style={{flexDirection: "row"}}>
+        <Text style={styles.categoriesPrice}>{this.props.route.params.currency}{sale_price}</Text>
+        <Text style={styles.categoriesPriceSale}>{this.props.route.params.currency}{price}</Text>
+        </View> :
+        <View>
+        <Text style={styles.categoriesPrice}>{this.props.route.params.currency}{price}</Text>
+        </View>
+        }
+        </View>
+        </FastImage>
+    </TouchableOpacity>
+    </CardItem>
+    </Card>
+
+
+
+
+      /* <Card style={{borderRadius: 20, }}>
+      <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20,width:SCREEN_WIDTH/2-5}}>
       <TouchableOpacity style={{width:SCREEN_WIDTH/2-5, flex: 1}} onPress={()=> this.router(data) }>
       <FastImage style={styles.productPhoto} source={{ uri: featured_image, headers: { Authorization: 'someAuthToken' },
                   priority: FastImage.priority.normal, }} 
@@ -456,7 +591,7 @@ export default class Searchbar extends Component {
         }
     </TouchableOpacity>
     </CardItem>
-    </Card>
+    </Card>*/
         )
       }
     
@@ -465,8 +600,8 @@ export default class Searchbar extends Component {
     const {selectedFilter, activeSlide, productss} = this.state;
     return (
       <Container style={{flex: 1}}>
-       <CustomHeader title={'Search from '+this.state.store_name}  navigation={this.props.navigation}/>
-        <Header searchBar rounded androidStatusBarColor={'#696969'} style={{backgroundColor: '#019fe8', elevation: 0}}>
+       <CustomHeader title={'Search from '+this.state.store_name}  navigation={this.props.navigation} currency={this.props.route.params.currency}/>
+        <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#f06767', elevation: 0}}>
           <Item style={{padding: 5}}>
                 <Fontisto name="search" size={20} color={"#000000"}/>
                 <Input placeholder="Search..."
@@ -488,20 +623,20 @@ export default class Searchbar extends Component {
           columnWrapperStyle={{justifyContent:'space-between'}}
           keyExtractor={(item, index) => index.toString()}
           /> }
-          <Modal
+         <Modal
           isVisible={this.state.isVisibleAddons}
           onBackButtonPress={() => this.setState({ isVisibleAddons: false })}
           animationInTiming={500}
           animationOutTiming={500}
-          useNativeDriver={true}
           animationIn="slideInRight"
           animationOut="slideOutRight"
+          useNativeDriver={true}
           style={style.modal}>
                
         <ScrollView style={styles.container}>
         
         <View style={styles.carouselContainer}>
-          <View style={styles.carousel}>      
+          <View style={[styles.carousel,{height: 200}]}>      
           
            <Carousel
               ref={c => {
@@ -535,26 +670,43 @@ export default class Searchbar extends Component {
           </View>
         </View>
         <View>
+          <View style={{flexDirection: 'row', width: SCREEN_WIDTH}}>
             <Text style={styles.infoRecipeName}>{this.state.name}</Text>
-            <Text style={{fontSize: 17, textAlign: 'center'}}>{this.props.route.params.currency}{this.state.price}</Text>
+            <Text style={{fontSize: 17,fontWeight:'bold', position: 'absolute', right:20, top:10}}>{this.props.currency} {this.state.price}</Text>
+            </View>
           <View style={{ flex: 1, padding: 10, backgroundColor: "white" }}>
         {productss.map((object, d) =>       
           <View key={d}>
-            <Divider />
-            <Text style={{ fontSize: 15, marginVertical: 5, fontWeight:'bold', marginLeft: 10 }}>{object.title}</Text>
+            <Divider style={{height: 1}}/>
+            <Text style={{ fontSize: 17, marginVertical: 2, fontWeight:'bold', marginLeft: 10 }}>{object.title}</Text>
+            <Text style={{ fontSize: 12, marginVertical: 2, marginLeft: 10 }}>({object.mode == 'Single'? 'Select one':'Select up to 2'})</Text>
             {object.data.map((drink, i) =>
               <View key={i}>
+                {object.mode == 'Single'?
                 <CardItem style={{ flexDirection: 'row',flex:1}} button onPress={() => this.checkDrink(drink, object.data)} >
                     <View  style={{justifyContent: "flex-start"}}>
-                        <RadioButton value={drink.price} status={drink.isChecked} onPress={() => this.checkDrink(drink, object.data)}/>
+                        <RadioButton value={drink.price} status={drink.isChecked} color={'red'} onPress={() => this.checkDrink(drink, object.data)}/>
                     </View>
                     <View style={{justifyContent: "flex-start", flex: 5}}>
-                        <Text style={{ fontSize: 12}}>{drink.label}</Text>
+                        <Text style={{ fontSize: 14}}>{drink.label}</Text>
                     </View>
                     <View style={{justifyContent: "flex-end", flex:1}}>
-                        <Text style={{ fontSize: 13 }}>{this.props.route.params.currency}{drink.price}</Text>
+                        <Text style={{ fontSize: 15,fontWeight:'bold' }}>{this.props.currency}{drink.price}</Text>
                     </View>                  
                 </CardItem>
+                :
+                <CardItem style={{ flexDirection: 'row',flex:1}} button onPress={() => {drink.isChecked=='checked'?this.checkDrinkmunchecked(drink, object.data):this.checkDrinkm(drink, object.data)}} >
+                    <View  style={{justifyContent: "flex-start"}}>
+                        <Checkbox value={drink.price} status={drink.isChecked} color={'red'} onPress={() => {drink.isChecked=='checked'?this.checkDrinkmunchecked(drink, object.data):this.checkDrinkm(drink, object.data)}}/>
+                    </View>
+                    <View style={{justifyContent: "flex-start", flex: 5}}>
+                        <Text style={{ fontSize: 14}}>{drink.label}</Text>
+                    </View>
+                    <View style={{justifyContent: "flex-end", flex:1}}>
+                        <Text style={{ fontSize: 15, fontWeight:'bold' }}>{this.props.currency}{drink.price}</Text>
+                    </View>                  
+                </CardItem>
+                }
               </View>
             )}
           </View>
@@ -565,18 +717,18 @@ export default class Searchbar extends Component {
       </ScrollView>
       <CardItem style={{flexDirection:'row', justifyContent:"space-around"}}>
         <Left style={{flexDirection:'row', justifyContent:"space-evenly"}}>
-         <Button  transparent onPress={()=> this._decrementCount()}>
-            <AntDesign name="minus" size={30} color={"tomato"}/>
-          </Button>
+         <Pressable onPress={()=> {this.state.count<2?null:this._decrementCount()}} style={{backgroundColor: this.state.count<2?"gray":"#019fe8", borderRadius: 30,}}>
+            <AntDesign name="minus" size={25} color={'white'} style={{textAlign: 'center',padding: 10}}/>
+          </Pressable>
           <Button transparent>
-            <Text style={{ fontSize: 25, textAlign: "center", color: "black"}}>{this.state.count}</Text>
+            <Text style={{ fontSize: 25, textAlign: "center", color:'black'}}>{this.state.count}</Text>
           </Button>
-          <Button  transparent onPress={()=> this._incrementCount()}>
-            <AntDesign name="plus" size={30} color={"tomato"}/>
-          </Button>
+          <Pressable onPress={()=> this._incrementCount()} style={{backgroundColor: "#019fe8", borderRadius: 30,}}>
+            <AntDesign name="plus" size={25} color={"white"} style={{textAlign: 'center',padding: 10}}/>
+          </Pressable>
         </Left>
         <Right>
-            <Button block style={{backgroundColor: 'tomato'}} onPress={()=> this.addonsAddtoCart(this.state.addonss)}>
+            <Button block style={{backgroundColor: '#019fe8', borderRadius: 10}} onPress={()=> this.addonsAddtoCart(this.state.addonss)}>
                 <Text>Add to Cart</Text>
             </Button>
         </Right>  

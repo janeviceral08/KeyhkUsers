@@ -12,6 +12,8 @@ import {
     BackHandler,
     Alert
 } from 'react-native';
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 import firestore from '@react-native-firebase/firestore';
 import {Card, Container, Content} from 'native-base'
 import * as Animatable from 'react-native-animatable';
@@ -65,7 +67,7 @@ export default class SignInScreen extends Component  {
           .signInWithEmailAndPassword(this.state.email, this.state.password)
           .then((res) => {
 
-              firestore().collection('users').where('userId', '==', userId).onSnapshot(querySnapshot => {
+              firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
 
                     querySnapshot.forEach(doc => {
                       if(doc.data().userId == auth().currentUser.uid){
@@ -208,7 +210,7 @@ export default class SignInScreen extends Component  {
     <Text style={styles.text_header}>Welcome!</Text>
         </View>
 
-        <Card style={{backgroundColor: '#ffffff'}}>
+        <Card style={{backgroundColor: '#ffffff', marginTop:SCREEN_HEIGHT < 767? -40:0}}>
             <Text style={styles.text_footer}>Email</Text>
             <View style={styles.action}>
                 <FontAwesome 
@@ -322,7 +324,7 @@ const styles = StyleSheet.create({
         marginBottom: 300
     },
     text_header: {
-        marginTop: 50,
+      marginTop:SCREEN_HEIGHT < 767? -10:50,
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 30

@@ -168,7 +168,7 @@ export default class SearchRentals extends Component {
   }
 
   async addonsdeleteCart(item){
-    const userId= await AsyncStorage.getItem('uid');
+    const userId= auth().currentUser.uid;
     AsyncStorage.setItem('cluster', item.cluster);
      firestore().collection('cart').doc(userId).delete()  
     .catch(function(error) {
@@ -204,7 +204,7 @@ export default class SearchRentals extends Component {
 
     async addonsAddtoCart(item){
       const {cart} = this.state;
-      const userId= await AsyncStorage.getItem('uid');
+      const userId= auth().currentUser.uid;
       if(userId){
         let id = item.id;
        let cluster = item.cluster
@@ -277,7 +277,7 @@ export default class SearchRentals extends Component {
     );
 
   async deleteCart(item) {
-    const userId= await AsyncStorage.getItem('uid');
+    const userId= auth().currentUser.uid;
     AsyncStorage.setItem('cluster', item.cluster);
      firestore().collection('cart').doc(userId).delete()  
     .catch(function(error) {
@@ -306,7 +306,7 @@ export default class SearchRentals extends Component {
  
  	async onAddToCart(item) {
      const {cart} = this.state;
-		const userId= await AsyncStorage.getItem('uid');
+		const userId= auth().currentUser.uid;
 		if(userId){ 
       let id = item.id;
        let cluster = item.cluster
@@ -403,7 +403,7 @@ export default class SearchRentals extends Component {
   
    async componentDidMount() {
     this.setState({loading: true})
-     const userId= await AsyncStorage.getItem('uid');
+     const userId= auth().currentUser.uid;
      //firestore().collection('products').where('city', '==', this.state.City.trim()).where('admin_control', '==', true).where('status', '==', true).onSnapshot(this.onCollectionUpdate);
      this.loadProducts(false, true);
 
@@ -506,7 +506,7 @@ export default class SearchRentals extends Component {
         this.setState({loading: true})
         console.log('CIty: ', this.state.City)
          console.log('searchText: ', this.state.searchText)
-        const userId= await AsyncStorage.getItem('uid');
+        const userId= auth().currentUser.uid;
         firestore().collection('products').where('keywords', 'array-contains-any', [this.state.searchText]).where('admin_control', '==', true).where('city', '==', this.state.City.trim()).onSnapshot((querySnapshot) => {
             const products = [];
             console.log('working here');

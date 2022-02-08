@@ -23,7 +23,7 @@ class SplashScreen extends React.Component {
     if (data !== null) {
       this.props.navigation.reset({
         index: 0,
-        routes: [{ name: 'Home' }],})
+        routes: [{ name: isLoggedIn? 'Home' : 'Home2'}],})
     }
 
   }

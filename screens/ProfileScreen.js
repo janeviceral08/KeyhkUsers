@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet,View, ScrollView, Alert, Share,Dimensions, FlatList, PermissionsAndroid, BackHandler} from 'react-native'
+import {StyleSheet,View, ScrollView, Alert, Share,Dimensions, FlatList, PermissionsAndroid, BackHandler, TouchableOpacity, Image} from 'react-native'
 import { Container, Header, Button, ListItem, Text, Icon, Left, Body, Right, Switch, CardItem, Item,Input  } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -9,7 +9,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card, Title, Paragraph, Avatar } from 'react-native-paper';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+
 import firestore from '@react-native-firebase/firestore';
 import CustomHeader from './Header';
 import auth from '@react-native-firebase/auth';
@@ -132,6 +132,7 @@ export default class ProfileScreen extends Component {
                         photo: data.photo,
                         wallet: data.wallet,
                         selectedCity: data.selectedCity,
+                        selectedCountry: data.selectedCountry,
                       });
                     });
                 
@@ -171,7 +172,7 @@ export default class ProfileScreen extends Component {
               [
                 { text: "OK",   onPress: () =>  this.props.navigation.reset({
                   index: 0,
-                  routes: [{ name: 'Home' }],})}  
+                  routes: [{ name: 'Home2' }],})}  
               ],
               { cancelable: false }
             );
@@ -296,10 +297,10 @@ console.log("UserLocationCountry ", UserLocationCountry)
     }
     _bootstrapAsync =async(selected,item, typeOfRate, city) =>{
    //   const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
-    //  console.log('asyncselectedCity: ',asyncselectedCity)
+    console.log('selectedCity: ',this.state.selectedCity)
         const NewCityItem = item.trim();
         const NewValueofCityUser = city.find( (items) => items.label === NewCityItem);
-      this.setState({selectedCityUser: this.state.selectedCity == 'none'? item:this.state.selectedCity, typeOfRate: NewValueofCityUser.typeOfRate})
+      this.setState({selectedCityUser: this.state.selectedCity == undefined?item: this.state.selectedCity == 'none'? item:this.state.selectedCity, typeOfRate: NewValueofCityUser.typeOfRate})
      const newUserLocationCountry = this.state.UserLocationCountry =='Philippines'?'vehicles':this.state.UserLocationCountry+'.vehicles';
       firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
 
@@ -377,14 +378,16 @@ console.log("UserLocationCountry ", UserLocationCountry)
         }
 
         async getCountryCity(PressedCountrycode){
-      
+          const userId =  auth().currentUser.uid;
+          firestore().collection('users').doc(userId).update({  selectedCountry: PressedCountrycode.trim()})
           console.log('PressedCountrycode: ',PressedCountrycode)
           this.setState({loading: true})
             const city = [];
-            const collect= PressedCountrycode =='Philippines'?'city':this.state.UserLocationCountry+'.city';
+            const collect= PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city';
             await  firestore().collection(collect).where('country', '==', PressedCountrycode)
               .onSnapshot(querySnapshot => {
                 querySnapshot.docs.forEach(doc => {
+                  console.log('getCountryCity: ', doc.data().label)
                 city.push(doc.data());
                
               });
@@ -441,7 +444,7 @@ changeCity (item){
                 </Button> 
           </Left>
           <Right>
-          <TouchableOpacity onPress={()=> this.setState({ViewCountry: !this.state.ViewCountry})}>
+          <TouchableOpacity onPress={()=> this.setState({ViewCountry : !this.state.ViewCountry})}>
           <Text>{this.state.selectedCountry == ''?this.state.UserLocationCountry:this.state.selectedCountry}</Text>
            </TouchableOpacity>
           </Right>
@@ -464,7 +467,7 @@ changeCity (item){
                      <FlatList
                   data={this.state.SelectedAvailableOn.length < 1? this.state.AvailableOn:this.state.SelectedAvailableOn}
                   renderItem={({ item,index }) => (
-                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row'}} key={index} button  onPress={() => {this.getCountryCity(item.label);this.setState({selectedCountry: item.label,SelectedAvailableOn:[], searchCountry:'', ViewCountry: false});  }}>
+                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row'}} key={index} button  onPress={() => {this.getCountryCity(item.label);this.setState({selectedCountry: item.label,SelectedAvailableOn:[], searchCountry:'', ViewCountry: false, keyboardav: false});  }}>
                        <Image style={{  width: 70, height: 50,}} resizeMethod="scale" resizeMode="contain" source={{uri: item.flag}} />
                       <Text style={{fontSize: 17, paddingLeft: 20}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
                     </CardItem>
@@ -794,6 +797,33 @@ changeCity (item){
             </Body>
            
           </ListItem>
+          <ListItem itemDivider style={{backgroundColor: "#FFFFFF"}}/> 
+          <ListItem icon onPress={()=>this.setState({modalSelectedCity: true})}>
+            <Left>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <MaterialIcons name="my-location" size={25} color="gray" />
+              </Button>
+            </Left>
+            <Body>
+              <Text>City: {this.state.selectedCityUser}</Text>
+            </Body>
+            <Right>       
+            <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
+            </Right>
+          </ListItem>
+          <ListItem icon onPress={()=> this.props.navigation.navigate("Vouchers")}>
+            <Left>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <MaterialCommunityIcons name="ticket-percent" size={25} color="gray" />
+              </Button>
+            </Left>
+            <Body>
+              <Text>Vouchers</Text>
+            </Body>
+            <Right>       
+            <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
+            </Right>
+          </ListItem>
             <ListItem icon onPress={this.onShare}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
@@ -816,6 +846,23 @@ changeCity (item){
             </Left>
             <Body>
               <Text>Help</Text>
+            </Body>
+            <Right>
+            <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />
+            </Right>
+          </ListItem>
+
+          <ListItem itemDivider style={{backgroundColor: "#FFFFFF"}}/>
+          <ListItem itemDivider style={{backgroundColor: "#FFFFFF"}}/>
+          <ListItem itemDivider style={{backgroundColor: "#FFFFFF"}}/>
+          <ListItem icon onPress={()=> this.props.navigation.navigate("Gateway")}>
+            <Left>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome name="drivers-license-o" size={20} color="gray" />
+              </Button>
+            </Left>
+            <Body>
+              <Text>Entrepreneur Registration</Text>
             </Body>
             <Right>
             <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />

@@ -136,7 +136,7 @@ export default class CheckoutScreenHotels extends Component {
       customStyleIndex: 0,
       isready:0,
       visibleAddressModalTo: false,
-      passenger: '1',
+      passenger: datas.minGuest.toString(),
       note: '',
       AlwaysOpen: true,
       Customerimage:null,
@@ -686,7 +686,7 @@ const b = moment(out_check_extension.toString());
 const diff = b.diff(a, 'hours');  
 console.log('diff',diff)
 
-const total = this.state.SelectedPricing =='3Hour'?this.state.datas.HourPrice3:this.state.SelectedPricing =='6Hour'?this.state.datas.HourPrice6:this.state.SelectedPricing =='12Hour'?this.state.datas.HourPrice12:this.state.SelectedPricing=='Day'?(diff/24)*parseFloat(this.state.datas.DayPrice):this.state.SelectedPricing=='Hour'?diff*parseFloat(this.state.datas.HourPrice): this.state.SelectedPricing=='Weekly'?parseFloat(this.state.Duration)*parseFloat(this.state.datas.WeeklyPrice):parseFloat(this.state.Duration)*parseFloat(this.state.datas.MonthlyPrice);
+const total = this.state.SelectedPricing =='3Hour'?this.state.datas.HourPrice3:this.state.SelectedPricing =='6Hour'?this.state.datas.HourPrice6:this.state.SelectedPricing =='12Hour'?this.state.datas.HourPrice12:this.state.SelectedPricing=='Day'?(Math.round((diff/24)*10)/10)*(Math.round((this.state.datas.DayPrice)*10)/10):this.state.SelectedPricing=='Hour'?(Math.round((diff)*10)/10)*(Math.round((this.state.datas.HourPrice)*10)/10): this.state.SelectedPricing=='Weekly'?(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.WeeklyPrice)*10)/10):(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.MonthlyPrice)*10)/10);
 
     if(this.state.SelectedPricing == undefined){
 this.setState({warningText: 'Choose Rate', warningModal: true})
@@ -850,7 +850,9 @@ console.log('modesp: ', this.state.datas);
          </Item>  
                         <Text style={{marginTop: 15, fontSize: 10}}>Number of Person</Text>
                         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: this.setState({passenger: text})}} placeholderTextColor="#687373" />
+             <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: parseFloat(text)<this.state.datas.minGuest?
+             Alert.alert('Invalid Input', 'Minimum Guest is '+this.state.datas.minGuest,)
+            :parseFloat(text)>this.state.datas.maxGuest?  Alert.alert('Invalid Input', 'Maximum Guest is '+this.state.datas.maxGuest,): this.setState({passenger: text})}} placeholderTextColor="#687373" />
          </Item>
          <Text style={{marginTop: 15, fontSize: 10}}>Start Date of Rental</Text>
                     <Item regular style={{marginTop: 7, padding: 10}}>
@@ -1124,7 +1126,7 @@ this.state.SelectedPricing == '12Hour'?
                                 <Text style={{fontSize: 13,  color:'green'}}>Total</Text>
                             </Col>
                             <Col>                        
-                                 <Text style={{textAlign: 'right', fontSize: 15 ,color: 'green'}}>{this.props.route.params.currency}{(Math.round(this.state.total*10)/10) - this.state.discount}</Text>             
+                                <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={(Math.round((this.state.total)*10)/10)} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency}/>
                             </Col>
                         </Grid>
                         </View>
@@ -1218,9 +1220,9 @@ const diff = b.diff(a, 'hours');
         OrderId: newDocumentID,
         OrderStatus: 'Pending',
         numberofhours:diff,
-        total:this.state.total,
+        total:Math.round((this.state.total)*10)/10,
         SelectedPricing:this.state.SelectedPricing,
-        pricetoPay:Math.round(this.state.total*10)/10 - this.state.discount,
+        pricetoPay:pricetoPay,
         passenger:this.state.passenger,
         startDate:moment(this.state.startDate).unix(),
         Duration:this.state.Duration,

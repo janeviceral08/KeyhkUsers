@@ -178,6 +178,7 @@ export default class OrderDetailsPabili extends Component {
       flong:this.props.route.params.orders.flong,
        region:{ latitude:this.props.route.params.orders.flat,
       longitude:this.props.route.params.orders.flong,
+      
       // latitudeDelta: 0.0005,
   //longitudeDelta: 0.05
             latitudeDelta: 0.01,
@@ -212,6 +213,7 @@ export default class OrderDetailsPabili extends Component {
         rating: 0,
         ratingModal: false,
         showURL: false,
+        ItemList:[],
   };
 
   }
@@ -341,7 +343,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
         DriverInfo:doc.data().DeliveredBy,
         image:doc.data().image,
         eta: doc.data().DeliveredBy.eta == undefined? 0: doc.data().DeliveredBy.eta/60,
-        ratings: doc.data().DeliveredBy.ratings,
+        ratings: doc.data().DeliveredBy.rating,
         note : doc.data().Note,
         ItemList: doc.data().ItemList,
        });
@@ -458,28 +460,36 @@ this.setState({ItemList: NewListItem})
     height: Dimensions.get('window').height,
     marginLeft: -20,
     backgroundColor:'white'}}>
-  {   this.state.OrderStatus == 'Pending' ?  <Item regular style={{top: this.state.avoildingViewList == true ? 130: 0,display: this.state.OrderStatus == 'Pending'? 'flex': 'none'}}>
-<Input value={this.state.pabiliItem} placeholder="Pabili Item" style={{fontSize: 17,}}  onChangeText={(text) => this.setState({pabiliItem: text})} onFocus={()=>this.setState({avoildingViewList: true})} onBlur={()=>this.setState({avoildingViewList: false})}/>
-<Button  style={{alignSelf:'center', backgroundColor:'#019fe8'}}  onPress={()=>this.pushAItem()}>
-            <Text style={{color: 'white'}}>Add</Text>
-      </Button>
-       </Item>  :null   }
-       <Text style={{marginLeft: 10}}>Item List</Text>       
-       <FlatList
-                                style={{display:this.state.avoildingViewList == true ?'none':'flex'}}   
-                                 data={this.state.ItemList}
-                                 renderItem={ ({ item }) => (
-                                   <View style={{marginLeft: 40, flexDirection: 'row', backgroundColor: 'rgba(232,231,232, 0.5)', width: '80%'}}>
-                                  <TouchableOpacity  style={{flexDirection: 'row'}} onPress={copyToClipboard}>
-                                 <Text style={{padding: 10, width: '95%'}}>{item}</Text>
-        </TouchableOpacity >
-        {this.state.OrderStatus == 'Pending' ? <MaterialCommunityIcons name={'delete-circle-outline'} size={30} color={'white'} onPress={()=>deleteListItem(item)} style={{backgroundColor: '#cf5149',right:0,marginLeft: 'auto', padding: 5, display: this.state.OrderStatus == 'Pending'? 'flex': 'none'}}/>
-         :null}
-       </View>
-       )}
-       keyExtractor={item => item.id}
-     />
-
+ {this.state.ItemList.length == 0?null:<View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginTop: 10}}>
+         <View style={{flex: 3,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey'}}>
+          <Text style={{textAlign:'center'}}>Item</Text>
+          </View>
+          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey'}}>
+          <Text style={{textAlign:'center'}}>Quantity</Text>
+          </View> 
+          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey'}}>
+          <Text style={{textAlign:'center'}}>Unit</Text>
+          </View>
+       </View>}
+       
+      {this.state.ItemList.length == 0?
+       <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addListBulk()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>Add List</Text></Button></View>
+      :<FlatList
+        data={this.state.ItemList}
+        renderItem={
+          ({item}) => 
+          {
+            return(
+              <View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginVertical: 1}}>
+              <Input  value={item.name} style={{flex: 3, borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
+              <Input   value={`${item.qty}`} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
+              <Input  value={item.unit} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
+           </View> 
+            )
+          }
+        }
+        keyExtractor={(item) => item.id}
+        />}
 <Button  style={{alignSelf:'center', backgroundColor:'#019fe8', width: '100%', alignContent: 'center'}}  onPress={()=>this.setState({listModal:false})}>
             <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>Done</Text>
       </Button>
@@ -613,7 +623,7 @@ this.setState({ItemList: NewListItem})
 
               
     {this.state.OrderStatus == 'Cancelled'|| this.state.OrderStatus == 'Delivered'?
-    <Card style={{height: SCREEN_HEIGHT/4}}>
+    <Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/3:SCREEN_HEIGHT/4}}>
 
 <CardItem >
   <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
@@ -664,7 +674,7 @@ Reason of Cancellation:
    
     :
     this.state.OrderStatus == 'Processing'?
-<Card style={{height: SCREEN_HEIGHT/2.5}}>
+<Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/2:SCREEN_HEIGHT/2.5}}>
 <CardItem> 
 <Modal
       isVisible={this.state.showURL}
@@ -816,6 +826,7 @@ Reason of Cancellation:
 
 <CardItem  style={{top: -90, flexDirection: 'column'}}>
 <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.currency} {this.props.route.params.orders.total.toString()}</Text>
+  <Text style={{fontSize: 13, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.PaymentMethod}</Text>
 <View style={{flexDirection: 'row'}}>
 <Body >
  <TouchableOpacity onPress={()=>this.onCall()} style={{flexDirection: 'row', width: '95%', borderRadius: 5, borderWidth: 2, borderColor: '#019fe8', padding: 5, marginRight: 30}}>
@@ -842,7 +853,7 @@ Reason of Cancellation:
  :
 
 
-<Card style={{height: SCREEN_HEIGHT/3.8}}>
+<Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/2.8: SCREEN_HEIGHT/3.8}}>
 <CardItem style={{zIndex: 3}}>
 <ActivityIndicator />
 <Text>Searching for Rider ... </Text>
@@ -891,7 +902,7 @@ Reason of Cancellation:
   </Body>
   <Body>
   <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.currency} {this.props.route.params.orders.total.toString()}</Text>
- 
+    <Text style={{fontSize: 13, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.PaymentMethod}</Text>
   </Body>
   </View>
 </Card>

@@ -429,9 +429,15 @@ if(parseFloat(this.state.rating) == 0){
 <Body style={{flexDirection: 'row'}}>
  <View style={{flexDirection: 'column', marginLeft: 10}}>
  <TouchableOpacity onPress={()=> this.setState({showURL: true, SelectedURL:orders.DeliveredBy.image})}>
-   <Image style={{  width: 100, height: 100, borderRadius: 50, borderWidth: 5, borderColor: 'black', overflow: "hidden", }} source={{uri: orders.DeliveredBy.image}} />
+   <Image style={{  width: 80, height: 80, borderRadius: 50, borderWidth: 5, borderColor: 'black', overflow: "hidden", }} source={{uri: orders.DeliveredBy.image}} />
 </TouchableOpacity>
-{orders.DeliveredBy.rating > 4.5  ?   //5
+
+    </View>
+  <View style={{flexDirection: 'column', marginLeft: 10, top: 0}}>
+   <Text style={{fontSize: 15}}>{orders.DeliveredBy.Name} </Text>
+  <Text style={{fontSize: 12}}>{orders.DeliveredBy.ColorMotor} {orders.DeliveredBy.MBrand} {orders.DeliveredBy.VModel}</Text>
+  <Text style={{fontSize: 12}}>Plate Number :<Text style={{fontSize: 10}}>{orders.DeliveredBy.PlateNo} </Text></Text>
+  {orders.DeliveredBy.rating > 4.5  ?   //5
 <View  style={{flexDirection: 'row', }}>
     <MaterialIcons name="star" size={20} color={'yellow'}/>
     <MaterialIcons name="star" size={20} color={'yellow'} />
@@ -512,12 +518,7 @@ if(parseFloat(this.state.rating) == 0){
          <MaterialIcons name="star-outline" size={20} color={'yellow'} />
         </View>
 }
-       <Text style={{fontSize: 10,  textAlign: 'center'}}>{orders.DeliveredBy.rating} </Text>
-    </View>
-  <View style={{flexDirection: 'column', marginLeft: 10, top: 20}}>
-   <Text style={{fontSize: 15}}>{orders.DeliveredBy.Name} </Text>
-  <Text style={{fontSize: 12}}>{orders.DeliveredBy.ColorMotor} {orders.DeliveredBy.MBrand} {orders.DeliveredBy.VModel}</Text>
-  <Text style={{fontSize: 12}}>Plate Number :<Text style={{fontSize: 10}}>{orders.DeliveredBy.PlateNo} </Text></Text>
+       <Text style={{fontSize: 10,  textAlign: 'center'}}>{Math.round((orders.DeliveredBy.rating)*10)/10} </Text>
   </View>
 </Body>
 
@@ -670,7 +671,7 @@ logoEnabled={false}
             </Body>
             <Right>
               <Text style={{fontSize: 15}}>
-              {this.props.route.params.orders.currency}{Math.round(parseFloat(this.state.delivery)*10)/10+Math.round(parseFloat(this.state.extra)*10)/10}
+              {this.props.route.params.orders.currency}{(Math.round(parseFloat(this.state.delivery)*10)/10+Math.round(parseFloat(this.state.extra)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
               </Text>
             </Right>
           </CardItem>       
@@ -680,7 +681,7 @@ logoEnabled={false}
             </Body>
             <Right>
               <Text style={{fontSize: 15, color:'gray'}}>
-             {this.props.route.params.orders.USERAdd}
+             {parseFloat(this.props.route.params.orders.USERAdd).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
               </Text>
             </Right>
           </CardItem>:null}
@@ -690,7 +691,7 @@ logoEnabled={false}
             </Body>
             <Right>
               <Text style={{fontSize: 15, color:'tomato'}}>
-             - {this.props.route.params.orders.currency}{this.state.discount}
+             - {this.props.route.params.orders.currency}{parseFloat(this.state.discount).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
               </Text>
             </Right>
           </CardItem>
@@ -703,8 +704,13 @@ logoEnabled={false}
               {console.log('extra: ', this.state.extra)}
               {console.log('storeTotal: ', this.storeTotal())}
               {console.log('delivery: ', this.state.delivery)}
-               <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{Math.round((this.state.extra + this.storeTotal() + this.state.delivery - this.state.discount)*10)/10}</Text>
-            </Right>
+              {this.props.route.params.orders.USERAdd> 0?
+              
+               <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() + this.props.route.params.orders.USERAdd +this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+          :
+          <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() + this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+              }
+               </Right>
           </CardItem>
       
      </View>     

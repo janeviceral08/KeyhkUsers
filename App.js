@@ -8,6 +8,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/HomeScreen';
+import HomeScreen2 from './screens/HomeScreen2';
 import Stores from './screens/StoreScreen';
 import ProductScreen from './screens/ProductScreen';
 import Searchbar from './components/Searchbar';
@@ -172,6 +173,99 @@ function TabScreen() {
          <Stack.Screen 
             name="Home" 
             component={HomeStack}
+            options={{headerShown:false}}
+            />  
+             
+             <Stack.Screen 
+            name="Orders" 
+            component={OrderStack} 
+            options={{headerShown:false}}
+            
+            />   
+              <Stack.Screen 
+          name="Vouchers" 
+          component={VoucherScreen}
+          options={{headerShown:false}}
+        
+        />  
+             <Stack.Screen 
+            name="Account" 
+            component={SettingsStack} 
+            options={{headerShown:false}}
+            
+            />   
+             {/* <Tab.Navigator 
+    screenOptions ={{
+      tabBarHideOnKeyboard: true,
+      tabBarActiveTintColor: '#183c57',
+      tabBarInactiveTintColor: 'gray',
+    tabBarStyle: {   backgroundColor: 'white', }
+    }}
+    initialRouteName="Home"
+    >
+       
+       
+        
+        <Tab.Screen 
+            name="Home" 
+            component={HomeStack}
+            options={{headerShown:false,
+              tabBarLabel: 'Home',
+              tabBarIcon: ({focused, color, size, tintColor}) => (
+                <AntDesign name={'isv'} size={25} color={color}  style={{ paddingTop: 2}} active={focused}/>
+              ),
+            }} 
+            />  
+             <Tab.Screen 
+            name="Orders" 
+            component={OrderStack} 
+            options={{headerShown:false,
+              tabBarLabel: 'Transactions',
+              tabBarIcon: ({focused, color, size, tintColor}) => (
+                <AntDesign name={'profile'} size={25} color={color}  style={{ paddingTop: 2}} active={focused}/>
+              ),
+           
+            }}
+            
+            />   
+              <Tab.Screen 
+          name="Vouchers" 
+          component={VoucherScreen}
+          options={{headerShown:false,
+            tabBarLabel: 'Vouchers',
+            tabBarIcon: ({focused, color, size, tintColor}) => (
+              <AntDesign name={'wallet'} size={25} color={color}  style={{ paddingTop: 2}} active={focused}/>
+            ),
+            
+          }}
+        
+        />  
+             <Tab.Screen 
+            name="Account" 
+            component={SettingsStack} 
+            options={{headerShown:false,
+              tabBarLabel: 'Account',
+              tabBarIcon: ({focused, color, size, tintColor}) => (
+                <AntDesign name={'user'} size={25} color={color}  style={{ paddingTop: 2}} active={focused}/>
+              ),
+           
+            }}
+            
+            />   
+          </Tab.Navigator>*/}
+    </Stack.Navigator>
+  
+  );
+}
+
+
+function TabScreen2() {
+  return (
+    <Stack.Navigator>
+         
+              <Stack.Screen 
+            name="Home2" 
+            component={HomeStack2}
             options={{headerShown:false}}
             />  
              <Stack.Screen 
@@ -408,6 +502,125 @@ function HomeStack() {
   );
 }
 
+
+function HomeStack2() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Categories"
+        component={HomeScreen2}
+        options={{headerShown:false}}
+      />
+       <Stack.Screen
+        name="Stores"
+        component={Stores}
+        options={{
+          headerShown:false,
+          tabBarVisible:false,
+        }}
+        tabBarOptions={{
+          tabStyle: {height: 0},
+          style: {backgroundColor: 'transparent'}
+        }}
+      />
+      <Stack.Screen
+        name="Products"
+        component={ProductScreen}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+      <Stack.Screen
+        name="Fastfood"
+        component={FastFoods}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+      <Stack.Screen
+        name="Search"
+        component={Searchbar}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+      <Stack.Screen
+        name="SearchAll"
+        component={SearchAll}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+       <Stack.Screen
+        name="SearchRentals"
+        component={SearchRentals}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+       <Stack.Screen
+        name="SearchServices"
+        component={SearchServices}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+      <Stack.Screen
+        name="SearchProperty"
+        component={SearchProperty}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+      <Stack.Screen
+        name="Cart"
+        component={Cart}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+       <Stack.Screen 
+        name="Address" 
+        component={Address} 
+        options={{headerShown:false}}
+        /> 
+          <Stack.Screen 
+        name="MyVoucher" 
+        component={MyVoucherScreen} 
+        options={{headerShown:false}}
+        /> 
+              <Stack.Screen 
+        name="Checkout" 
+        component={Checkout} 
+        options={{headerShown:false}}/>  
+                  <Stack.Screen 
+        name="CheckoutTransport" 
+        component={CheckoutTransport} 
+        options={{headerShown:false}}/>
+           <Stack.Screen 
+        name="CheckoutScreenRentals" 
+        component={CheckoutScreenRentals} 
+        options={{headerShown:false}}/>  
+         <Stack.Screen 
+        name="HotelsMap" 
+        component={HotelsMap} 
+        options={{headerShown:false}}/> 
+        <Stack.Screen 
+        name="CheckoutScreenHotels" 
+        component={CheckoutScreenHotels} 
+        options={{headerShown:false}}/> 
+              <Stack.Screen 
+        name="CheckoutScreenService" 
+        component={CheckoutScreenService} 
+        options={{headerShown:false}}/>  
+               <Stack.Screen 
+        name="PropertyRent" 
+        component={PropertyRent} 
+        options={{headerShown:false}}/>
+            <Stack.Screen 
+        name="PropertyHotel" 
+        component={PropertyHotel} 
+        options={{headerShown:false}}/>  
+        <Stack.Screen 
+        name="Pabili" 
+        component={Pabili} 
+        options={{headerShown:false}}/> 
+         <Stack.Screen 
+        name="pabiliOrderDetails" 
+        component={pabiliOrderDetails} 
+        options={{headerShown:false}}/> 
+         <Stack.Screen 
+        name="CheckoutScreenEquipment" 
+        component={CheckoutScreenEquipment} 
+        options={{headerShown:false}}/>  
+    </Stack.Navigator>
+  );
+}
+
 const App = () => {
 
     useEffect(() => {
@@ -493,7 +706,11 @@ const App = () => {
           options={{ headerShown: false }}
         />
          
-          
+         <Stack.Screen
+          name="Home2"
+          component={TabScreen2}
+          options={{ headerShown: false }}
+        />
         </Stack.Navigator>
       </NavigationContainer>
   );

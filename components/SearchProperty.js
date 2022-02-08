@@ -121,7 +121,7 @@ export default class SearchProperty extends Component {
   
    async componentDidMount() {
     this.setState({loading: true})
-     const userId= await AsyncStorage.getItem('uid');
+     const userId= auth().currentUser.uid;
      firestore().collection('products').where('storeId', '==', this.props.route.params.storeId).where('rentalType', '==', 'Property').onSnapshot(this.onCollectionUpdate);
      
 
@@ -144,8 +144,8 @@ export default class SearchProperty extends Component {
     searchFilterFunction = async() => {    
         this.setState({loading: true})
         console.log('CIty: ', this.state.City)
-        const userId= await AsyncStorage.getItem('uid');
-        firestore().collection('products').where('keywords', 'array-contains-any', [this.state.searchText]).where('city', '==', this.state.City).onSnapshot((querySnapshot) => {
+        const userId= auth().currentUser.uid;
+        firestore().collection('products').where('keywords', 'array-contains-any', [this.state.searchText]).where('storeId', '==', this.props.route.params.storeId).where('rentalType', '==','Property').onSnapshot((querySnapshot) => {
             const products = [];
             querySnapshot.forEach((doc) => {
               //console.log('search: ', doc.data())

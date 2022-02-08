@@ -124,7 +124,7 @@ export default class HotelCard extends Component {
       }
 
   rowRenderer = (type, data) => {
-    const {StatHourPrice3,StatHourPrice6,StatHourPrice12,HourPrice3,HourPrice6,HourPrice12, name, price, quantity, imageArray, unit, status, id,admin_control, storeId, DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice, brand ,cluster, addons} = data;
+    const {StatHourPrice3,StatHourPrice6,maxGuest,StatHourPrice12,HourPrice3,HourPrice6,HourPrice12, name, price, quantity, imageArray, unit, status, id,admin_control, storeId, DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice, brand ,cluster, addons} = data;
     const newData = imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
@@ -141,52 +141,53 @@ export default class HotelCard extends Component {
       >
       <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
   bottom:0, width: '100%', height:50}}>
-      <View style={{height:50,flexShrink: 1, flexDirection: 'row' }}>
-        <Text  numberOfLines={1} style={{ fontSize: 15,
+  <Text  numberOfLines={1} style={{ fontSize: 15,
     color: 'black',
     padding : 1,paddingLeft: 10}}>{name}</Text>
+      <View style={{height:50,flexShrink: 1, flexDirection: 'row' }}>
+        
     {!StatHourPrice3?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice3).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+    padding : 1,}}> ₱{parseFloat(HourPrice3).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       {!StatHourPrice6?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice6).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+    padding : 1,}}> ₱{parseFloat(HourPrice6).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       {!StatHourPrice12?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice12).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+    padding : 1,}}> ₱{parseFloat(HourPrice12).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
          {!StatHourPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+    padding : 1,}}> ₱{parseFloat(HourPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
         
         {!StatDayPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1}}> ₱{parseFloat(DayPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+    padding : 1}}> ₱{parseFloat(DayPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
      {!StatWeeklyPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(WeeklyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+    padding : 1,}}> ₱{parseFloat(WeeklyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
      {!StatMonthlyPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(MonthlyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+    padding : 1,}}> ₱{parseFloat(MonthlyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       </View>  
             {!admin_control || !status ? 

@@ -117,6 +117,7 @@ export default class Checkout extends Component {
        ImageTobeUploaded: null,
        ApprovalRequest: false,
        storeAddress: '',
+       paymentMethods:[]
   };
 
   }
@@ -230,6 +231,7 @@ export default class Checkout extends Component {
     this.storeID();
     this.storeIDS();
     this.component();
+
     firestore().collection('stores').where("cluster", '==', this.state.cartItems[0].cluster).onSnapshot(
                 querySnapshot => {
                     const AvailableOn = []
@@ -488,9 +490,11 @@ const databasecharge = item.Country.trim() == 'Philippines'?'AppShare':item.Coun
           USERAdd : doc.data().USERAdd,
           StoreDeduction: doc.data().StoreDeduction,
           minimumToID: doc.data().minimumToID,
+          paymentMethods: doc.data().modeOfPayment
        });
       })
     })
+      
    firestore().collection(databasecharge).where('label', '==', 'deliveryCharge' ).onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
        this.setState({
@@ -578,8 +582,8 @@ changeAddress(item){
       this.setState({sameCountry: item.Country.trim() == this.state.cartItems[0].Country.trim()? '':'Store and Delivery Address Country is not the same'})
       
     
-        console.log('changeAddress item.Country: ', item.Country);
-const databasecharge = item.Country == 'Philippines'? 'AppShare':item.Country+'.AppShare';
+        console.log('changeAddress item.Country: ', item.Country.trim());
+const databasecharge = item.Country == 'Philippines'? 'AppShare':item.Country.trim()+'.AppShare';
 console.log('changeAddress databasecharge: ', databasecharge);
         firestore().collection(databasecharge).where('label', '==', 'foodStore' ).onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
@@ -588,9 +592,11 @@ console.log('changeAddress databasecharge: ', databasecharge);
           USERAdd : doc.data().USERAdd,
           StoreDeduction: doc.data().StoreDeduction,
           minimumToID: doc.data().minimumToID,
+          paymentMethods: doc.data().modeOfPayment,
        });
       })
     })
+  
     firestore().collection(databasecharge).where('label', '==', 'deliveryCharge').onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
        this.setState({
@@ -655,8 +661,9 @@ console.log('changeAddress databasecharge: ', databasecharge);
 }
 
 changePaymentMethod(item){
+
   this.setState({
-    paymentMethod: item.datas.label,
+    paymentMethod:item=='COD'?'(COD)': item.Label,
     visiblePaymentModal: false
   })
 }
@@ -719,7 +726,7 @@ openGallerylaunchCamera = () => {
   render() {
     const { paymentMethod, minimum, selectedIndex, selectedIndices, customStyleIndex, slatitude, slongitude, lat, ULat,summary } = this.state;
 
-console.log('sameCountry: ', this.state.sameCountry);
+console.log('paymentMethods: ', this.state.paymentMethods);
 console.log('fromPlace: ', this.props.route.params.fromPlace);
 console.log('minimumToID: ', this.state.minimumToID);
 console.log('extraKMCharges: ', this.extraKMCharges());
@@ -875,6 +882,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                          />
                          
                          <Text style={{padding: 5}}>{this.state.paymentMethod}</Text>
+                     
                      </View>
                     <Modal 
                       useNativeDriver={true}
@@ -888,13 +896,20 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                       <View style={styles.content}> 
                     <View>
                       <Text style={{textAlign:'center', paddingVertical: 15}}> Select Payment Method </Text>
+                       <Card transparent>
+                          <CardItem style={{borderRadius: 10, borderWidth: 0.1, marginHorizontal: 10, borderColor:'tomato'}} button onPress={()=> this.changePaymentMethod('COD')}>                     
+                            <View style={{flex: 1, flexDirection: 'column'}}>
+                              <Text style={{fontSize: 14}}> Cash on Delivery (COD)</Text>
+                            </View>                    
+                          </CardItem>
+                        </Card>  
                       <FlatList
-                          data={this.state.payments}
+                          data={this.state.paymentMethods}
                           renderItem={({ item }) => 
                           <Card transparent>
                           <CardItem style={{borderRadius: 10, borderWidth: 0.1, marginHorizontal: 10, borderColor:'tomato'}} button onPress={()=> this.changePaymentMethod(item)}>                     
                             <View style={{flex: 1, flexDirection: 'column'}}>
-                              <Text style={{fontSize: 14}}> {item.datas.label}</Text>
+                              <Text style={{fontSize: 14}}> {item.Label}</Text>
                             </View>                    
                           </CardItem>
                         </Card>  
@@ -904,15 +919,15 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                     </View>
                 </View>
                     </Modal>
-                    {paymentMethod === 'GCash' && 
+                    {/*paymentMethod === 'GCash' && 
                     <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                         <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
                             <Text style={{color:'gray', fontSize: 14}}>Send to:</Text>
                             <Input  placeholderTextColor="#687373"  value={this.state.gcash_number}  disabled/>
                         </Item>
                         <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                    </Form>}
-                    {paymentMethod === 'Bank Transfer' && 
+                        </Form>*/}
+                    {/*paymentMethod === 'Bank Transfer' && 
                     <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                         <Text>Bank Option 1</Text>
                         <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
@@ -933,8 +948,8 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                             <Input style={{fontSize: 16}}    placeholderTextColor="#687373"  value={this.state.bank_number2} numberOfLines={2}  disabled/>
                         </Item>
                        <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                    </Form>}
-                    {paymentMethod === 'Palawan Remittance' && 
+                      </Form>*/}
+                    {/*paymentMethod === 'Palawan Remittance' && 
                     <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                         <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
                             <Text style={{color:'gray', fontSize: 14}}>Receiver Name:</Text>
@@ -945,8 +960,8 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                             <Input value={this.state.palawan_number}  disabled numberOfLines={2}/>
                         </Item>
                        <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                    </Form>}
-                    {paymentMethod === 'Paypal' && 
+                    </Form>*/}
+                    {/*paymentMethod === 'Paypal' && 
                     <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                         <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
                             <Text style={{color:'gray', fontSize: 14}}>Paypal Email:</Text>
@@ -957,7 +972,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                             <Input value={this.state.paypal_uname}  disabled numberOfLines={2}/>
                         </Item>
                        <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                    </Form>}
+                  </Form>*/}
                 </Card> 
                 <View> 
         <TearLines  ref="top"/>
@@ -1217,15 +1232,15 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                       </View>
                   </View>
                       </Modal>
-                      {paymentMethod === 'GCash' && 
+                      {/*paymentMethod === 'GCash' && 
                       <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                           <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
                               <Text style={{color:'gray', fontSize: 14}}>Send to:</Text>
                               <Input  placeholderTextColor="#687373"  value={this.state.gcash_number}  disabled/>
                           </Item>
                           <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                      </Form>}
-                      {paymentMethod === 'Bank Transfer' && 
+                      </Form>*/}
+                      {/*paymentMethod === 'Bank Transfer' && 
                       <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                           <Text>Bank Option 1</Text>
                           <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
@@ -1246,8 +1261,8 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                               <Input style={{fontSize: 16}}    placeholderTextColor="#687373"  value={this.state.bank_number2} numberOfLines={2}  disabled/>
                           </Item>
                          <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                      </Form>}
-                      {paymentMethod === 'Palawan Remittance' && 
+                      </Form>*/}
+                      {/*paymentMethod === 'Palawan Remittance' && 
                       <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                           <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
                               <Text style={{color:'gray', fontSize: 14}}>Receiver Name:</Text>
@@ -1258,8 +1273,8 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                               <Input value={this.state.palawan_number}  disabled numberOfLines={2}/>
                           </Item>
                          <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                      </Form>}
-                      {paymentMethod === 'Paypal' && 
+                      </Form>*/}
+                      {/*paymentMethod === 'Paypal' && 
                       <Form style={{paddingLeft: 20, paddingRight: 20, paddingVertical: 10}}>
                           <Item regular style={{marginTop: 5, paddingLeft:10,height:30}}>
                               <Text style={{color:'gray', fontSize: 14}}>Paypal Email:</Text>
@@ -1270,7 +1285,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                               <Input value={this.state.paypal_uname}  disabled numberOfLines={2}/>
                           </Item>
                          <Text style={{color: 'tomato', fontSize: 14}}>***Please email the photo/screenshot of your payment receipt/transaction to KeyS@gmail.com.</Text>
-                      </Form>}
+                      </Form>*/}
                   </Card> 
                   <View> 
           <TearLines  ref="top"/>

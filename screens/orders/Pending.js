@@ -253,6 +253,21 @@ export default class Pending extends Component {
                                           {items.qty > 1 ? items.qty+" x " : null}
                                           {items.name}
                                         </Text>
+                                        {items.choice == null || items.choice== undefined?null:
+                 <View>
+                 {items.choice.map((choice,index)=>
+                   <View key={index} style={{flexDirection: 'row'}}>
+                     {console.log('10')}
+                        <Text style={{fontSize: 10}}>{choice.label}</Text>
+                        <Text style={{fontSize: 10}}> {choice.price.toFixed(2)}</Text>
+                             
+                   </View>
+                 )}
+                 {  console.log('Choice: ', items.choice)}
+                 </View>
+               
+                 
+                 }
                                         <Text note style={{fontSize: 14}}>Brand: {items.brand}</Text>
                                         <Text note style={{fontSize: 14}}>by {items.store_name}</Text>
                                         <Text note style={{fontSize: 14}}>Note: {items.note}</Text>
@@ -278,6 +293,7 @@ export default class Pending extends Component {
                                     </CardItem>
                                       
                                       }
+                                      
                                   </Card>
                                   )}</TouchableOpacity>
                     :

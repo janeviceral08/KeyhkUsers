@@ -737,7 +737,7 @@ console.log('out: ', out);
     right: 0,
     bottom: 0,
  width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height/1.5,}}>
+    height: Dimensions.get('window').height/1.4,}}>
       
   <MapboxGL.MapView
       zoomEnabled={true}
@@ -888,7 +888,7 @@ console.log('out: ', out);
                  <CardItem button  onPress={()=> this.setState({visibleAddressModalTo: true})}>
                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Rate:  </Text>
                     <Left>
-                       <Text style={{fontSize: 12}}>{this.state.datas.currency}{this.state.datas.SelectedPricing=='3Hour'?Math.round(parseFloat(this.state.datas.HourPrice3)*10)/10:this.state.datas.SelectedPricing=='6Hour'?Math.round(parseFloat(this.state.datas.HourPrice6)*10)/10:this.state.datas.SelectedPricing=='12Hour'?Math.round(parseFloat(this.state.datas.HourPrice12)*10)/10:this.state.datas.SelectedPricing=='Weekly'?Math.round(parseFloat(this.state.datas.WeeklyPrice)*10)/10:this.state.datas.SelectedPricing=='Monthly'?Math.round(parseFloat(this.state.datas.MonthlyPrice)*10)/10:this.state.datas.SelectedPricing=='Hour'?Math.round(parseFloat(this.state.datas.HourPrice)*10)/10:Math.round(parseFloat(this.state.datas.DayPrice)*10)/10}</Text>
+                       <Text style={{fontSize: 12}}>{this.state.datas.currency}{this.state.datas.SelectedPricing=='3Hour'?parseFloat(this.state.datas.HourPrice3).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='6Hour'?parseFloat(this.state.datas.HourPrice6).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='12Hour'?parseFloat(this.state.datas.HourPrice12).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Weekly'?parseFloat(this.state.datas.WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Monthly'?parseFloat(this.state.datas.MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Hour'?parseFloat(this.state.datas.HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):parseFloat(this.state.datas.DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
                     </Left>
                  <Body>
                         <Text style={{fontWeight: 'bold',fontSize: 12}}>Mode:</Text>
@@ -897,7 +897,7 @@ console.log('out: ', out);
                    <Right>
                   
                    <Text style={{fontWeight: 'bold',fontSize: 12}}>Amount To Pay:</Text>
-                   <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.currency}{Math.round(parseFloat(this.state.datas.total)*10)/10}</Text>
+                   <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.currency}{parseFloat(this.state.datas.total).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
                     </Right>
                 </CardItem>
             </Card> 
