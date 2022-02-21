@@ -442,7 +442,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
           <Container style={{backgroundColor: '#CCCCCC'}}>   
           <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#396ba0'}}>
           <Left style={{flex:3, width: '70%'}}>
-      <Title style={{color:'white', marginLeft: 20}}>KeyS</Title>
+      <Title style={{color:'white', marginLeft: 20}}>Booking Shares</Title>
           </Left>
           <Body style={{flex: 3}}>
             

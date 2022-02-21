@@ -998,10 +998,12 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                                           {this.props.route.params.currency}{item.price}
                                         </Text>
                                          {item.choice == null || item.choice== undefined?null:
+                                         
                                               <View>
                                               {item.choice.map((choice,index)=>
+                                              choice.isChecked == 'unchecked'?null:
                                                 <View key={index} style={{flexDirection: 'row'}}>
-                                                  {console.log('10')}
+                                                  {console.log('10 ', choice)}
                                                       <Text>{choice.label}</Text>
                                                       <Text> {choice.price.toFixed(2)}</Text>
                                                           
@@ -1035,8 +1037,10 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                                           {this.props.route.params.currency}{item.sale_price}
                                         </Text>
                                           {item.choice == null || item.choice== undefined?null:
+                                          
                                               <View style={{marginLeft: 10}}>
                                               {item.choice.map((choice,index)=>
+                                              choice.isChecked == 'unchecked'?null:
                                                 <View key={index} style={{flexDirection: 'row'}}>
                                                   {console.log('10')}
                                                       <Text note style={{fontSize: 13}}>{choice.label}</Text>
@@ -1495,7 +1499,7 @@ console.log('extraKMCharges: ', this.extraKMCharges());
               onBackdropPress={() => this.OrderSuccess()} transparent={true}>
             <View style={styles.content}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyS!</Text>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using Booking Shares!</Text>
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
               <Image

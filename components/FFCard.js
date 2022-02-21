@@ -463,8 +463,8 @@ async addonsdeleteCart(item){
     fontWeight: 'bold',
     color: 'black',
     padding : 1,
-    paddingHorizontal: 20,width:SCREEN_WIDTH/3.5}}>{name}</Text>
-         <Text style={{fontStyle: "italic",  fontSize: 13,  Top: 10,width:100}}>Stock :{quantity}</Text>
+    paddingHorizontal: 20,width:SCREEN_WIDTH/3}}>{name}</Text>
+         <Text style={{fontStyle: "italic",  fontSize: 13,width:100, marginLeft: -25, marginTop: 2}}>Stock :{quantity}</Text>
       </View>  
             {!admin_control || !status ? 
          <View style={styles.text}>
@@ -484,11 +484,11 @@ async addonsdeleteCart(item){
 
         {sale_price ? 
         <View style={{flexDirection: "row"}}>
-        <Text style={styles.categoriesPrice}>{this.props.currency}{sale_price}</Text>
-        <Text style={styles.categoriesPriceSale}>{this.props.currency}{price}</Text>
+        <Text style={styles.categoriesPrice}>{this.props.currency}{sale_price}<Text style={[styles.categoriesPrice,{fontSize: 10}]}>/ {unit}</Text></Text>
+        <Text style={styles.categoriesPriceSale}>{this.props.currency}{price}<Text style={[styles.categoriesPriceSale,{fontSize: 10}]}>/ {unit}</Text></Text>
         </View> :
         <View>
-        <Text style={styles.categoriesPrice}>{this.props.currency}{price}</Text>
+        <Text style={styles.categoriesPrice}>{this.props.currency}{price}<Text style={[styles.categoriesPrice,{fontSize: 10}]}>/ {unit}</Text></Text>
         </View>
         }
         </View>

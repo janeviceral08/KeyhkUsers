@@ -502,15 +502,15 @@ console.log('backPress')
       </FastImage>
                
       <View style={{height:20,flexShrink: 1}}>
-        <Text  numberOfLines={1} style={styles.categoriesStoreName}>{name}</Text>
+        <Text  numberOfLines={1} style={styles.categoriesStoreName}>{MBrand} {VModel} </Text>
       </View>  
      <View style={{flexDirection: 'row'}}>
-     <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand :{MBrand}</Text>
+     <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Color : {ColorMotor}</Text>
+    
      
      
   </View>
-  <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Model : {VModel}</Text>
-  <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Color : {ColorMotor}</Text>
+  <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Type :{name}</Text>
    
   
     </TouchableOpacity>
@@ -601,20 +601,48 @@ console.log('backPress')
           activeTabStyle={{backgroundColor: 'gray'}}
   />*/}
                 <View style={{flexDirection: 'row', }}>
-<TouchableOpacity style={{width: SCREEN_WIDTH/4,backgroundColor: this.state.selectedIndexRentals ==0 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 0})}>
+<TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: SCREEN_WIDTH/4,backgroundColor: this.state.selectedIndexRentals ==0 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 0})}>
          <FontAwesome5 name={'hotel'} size={15} color={this.state.selectedIndexRentals ==0 ?'white':'#525252'} />
     <Text style={{color: this.state.selectedIndexRentals ==0 ?'white':'#525252', fontSize: 13}}> Hotels etc.</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={{width: SCREEN_WIDTH/4, backgroundColor:this.state.selectedIndexRentals ==1 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 5, marginRight: 5}} onPress={()=>this.setState({selectedIndexRentals: 1})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: SCREEN_WIDTH/4, backgroundColor:this.state.selectedIndexRentals ==1 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 5, marginRight: 5}} onPress={()=>this.setState({selectedIndexRentals: 1})}>
        <MaterialIcons name={'house'} size={15} color={this.state.selectedIndexRentals ==1 ?'white':'#525252'}/>
        <Text style={{color: this.state.selectedIndexRentals ==1 ?'white':'#525252', fontSize: 13}}>  Property</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={{width:SCREEN_WIDTH/5, backgroundColor:this.state.selectedIndexRentals ==2 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginRight: 5}} onPress={()=>this.setState({selectedIndexRentals: 2})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width:SCREEN_WIDTH/5, backgroundColor:this.state.selectedIndexRentals ==2 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginRight: 5}} onPress={()=>this.setState({selectedIndexRentals: 2})}>
 <MaterialIcons name={'car-rental'}  size={15} color={this.state.selectedIndexRentals ==2 ?'white':'#525252'} />
 <Text style={{color: this.state.selectedIndexRentals ==2 ?'white':'#525252', fontSize: 13}}>  Vehicle</Text>
 
     </TouchableOpacity>
-    <TouchableOpacity style={{width:SCREEN_WIDTH/4, backgroundColor:this.state.selectedIndexRentals ==3 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 3})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width:SCREEN_WIDTH/4, backgroundColor:this.state.selectedIndexRentals ==3 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 3})}>
 <FontAwesome5 name={'tools'}  size={15} color={this.state.selectedIndexRentals ==3 ?'white':'#525252'} />
 <Text style={{color: this.state.selectedIndexRentals ==3 ?'white':'#525252', fontSize: 13}}> Equipment</Text>
 
@@ -708,7 +736,7 @@ console.log('backPress')
   ItemSeparatorComponent={this.ListViewItemSeparator}
   renderItem={({ item }) => this.rowRendererVrentals(item)}
   enableEmptySections={true}
-  style={{ marginTop: 10 }}
+  style={{ marginTop: 10 , marginBottom: 35}}
   numColumns={2}
   columnWrapperStyle={{justifyContent:'space-between'}}
   keyExtractor={(item, index) => index.toString()}
@@ -721,7 +749,7 @@ console.log('backPress')
   ItemSeparatorComponent={this.ListViewItemSeparator}
   renderItem={({ item }) => this.rowRendererErentals(item)}
   enableEmptySections={true}
-  style={{ marginTop: 10 }}
+  style={{ marginTop: 10, marginBottom: 35 }}
   numColumns={2}
   columnWrapperStyle={{justifyContent:'space-between'}}
   keyExtractor={(item, index) => index.toString()}
@@ -808,17 +836,17 @@ console.log('backPress')
       )}
     />
            
-         <Text style={{marginTop: 15, fontSize: 14}}>Label : {this.state.vInfos.name}</Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.rentalType == 'Equipment'?this.state.vInfos.name: this.state.vInfos.MBrand+' '+this.state.vInfos.VModel} </Text></Text>
          
-         <Text style={{marginTop: 15, fontSize: 14}}>Location : {this.state.vInfos.address}</Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Location: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.address}</Text></Text>
         
-        <Text style={{marginTop: 15, fontSize: 14}}>Detailed Address : {this.state.vInfos.DetailedAddress}</Text>
+        <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Detailed Address: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.DetailedAddress}</Text></Text>
          
-         <Text style={{marginTop: 15, fontSize: 14}}>Description : {this.state.vInfos.description} </Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.description}</Text> </Text>
      
         
                       
-         <Text style={{marginTop: 15, fontSize: 14}}>Ameneties : {this.state.vInfos.ameneties}</Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.ameneties}</Text></Text>
         
 
            </ScrollView>   
@@ -851,9 +879,9 @@ console.log('backPress')
               <Text style={{color:'tomato', fontWeight:'bold'}}>Detailed Information</Text>
               </View>
  
-        <Text style={{marginTop: 15, fontSize: 14}}>Label : {this.state.vInfo.name} </Text>
+        <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.name} </Text></Text>
          
-         <Text style={{marginTop: 15, fontSize: 14}}>Location : {this.state.vInfo.address}</Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Location: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.address}</Text></Text>
        
         
              <FlatList

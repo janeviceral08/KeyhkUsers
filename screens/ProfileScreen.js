@@ -8,7 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card, Title, Paragraph, Avatar } from 'react-native-paper';
+import { Card, Title, Paragraph, Avatar,Caption } from 'react-native-paper';
 
 import firestore from '@react-native-firebase/firestore';
 import CustomHeader from './Header';
@@ -105,6 +105,8 @@ export default class ProfileScreen extends Component {
       CountryNow:[{labelRider: '', currency: '', currencyPabili:''}],
       ViewCountry:false,
       photo:'',
+      processing: 0,
+      delivered:0,
       };
       this.FetchProfile();
   }
@@ -142,6 +144,31 @@ export default class ProfileScreen extends Component {
                  //   console.log(error)
                 }
             );
+
+            firestore().collection('orders').where('userId', '==', userId ).onSnapshot(     
+              querySnapshot => {
+                 let  processing = 0;
+                 let  delivered = 0;
+              querySnapshot.forEach(doc => {
+               const data = doc.data();
+               if(data.OrderStatus == 'Pending'){
+                processing = processing+1
+               }
+               if(data.OrderStatus == 'Processing'){
+                processing = processing+1
+               }
+               if(data.OrderStatus == 'Delivered'){
+                delivered = delivered+1
+               }
+              });
+              this.setState({
+                processing,delivered
+              });
+             
+          },
+          error => {
+           //   console.log(error)
+          })
 
 
   }
@@ -568,7 +595,31 @@ changeCity (item){
             <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
             </Right>
           </ListItem>
-          <ListItem icon onPress={()=> this.props.navigation.navigate("Orders")}>
+          <View style={{
+    borderBottomColor: '#dddddd',
+    borderBottomWidth: 1,
+    borderTopColor: '#dddddd',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    height: 100,
+  }}>
+          <TouchableOpacity onPress={()=> this.props.navigation.navigate("Orders")} style={ { width: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+            borderRightColor: '#dddddd',
+            borderRightWidth: 1
+          }}>
+            <Title>{this.state.processing}</Title>
+            <Caption>Pending & Processing</Caption>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={()=> this.props.navigation.navigate("Orders")} style={{ width: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',}}>
+            <Title>{this.state.delivered}</Title>
+            <Caption>Delivered</Caption>
+          </TouchableOpacity>
+      </View>
+          {/*<ListItem icon onPress={()=> this.props.navigation.navigate("Orders")}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name="profile" size={25} color="gray" />
@@ -580,7 +631,7 @@ changeCity (item){
             <Right>       
             <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
             </Right>
-          </ListItem>
+        </ListItem>*/}
           <ListItem icon onPress={()=> this.props.navigation.navigate("Vouchers")}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>

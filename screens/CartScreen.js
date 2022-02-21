@@ -118,8 +118,7 @@ export default class Cart extends Component {
         { cancelable: false }
       );
     }else {
-      console.log('cart: ', cart)
-      this.props.navigation.navigate('Checkout',{"cartItems": cart, "subtotal" : this.calculateTotalPrice(),'currency' :this.props.route.params.currency,'fromPlace' :this.props.route.params.fromPlace});
+     this.props.navigation.navigate('Checkout',{"cartItems": this.state.cart, "subtotal" : this.calculateTotalPrice(),'currency' :this.props.route.params.currency,'fromPlace' :this.props.route.params.fromPlace});
     }
   }
 
@@ -344,6 +343,7 @@ async onRemoveFromCart (id) {
                  {item.choice == null || item.choice== undefined?null:
                  <View>
                  {item.choice.map((choice,index)=>
+                 choice.isChecked == 'unchecked'?null:
                    <View key={index} style={{flexDirection: 'row'}}>
                      {console.log('10')}
                         <Text style={{fontSize: 10}}>{choice.label}</Text>

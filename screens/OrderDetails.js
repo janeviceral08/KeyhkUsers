@@ -6,8 +6,6 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 import CustomHeader from './Header';
 import MapView, {  Polyline,  PROVIDER_GOOGLE,  } from 'react-native-maps';
-import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
-MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
 import axios  from 'axios';
 import Rider_img from '../assets/rider.png';
@@ -18,6 +16,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Modal from 'react-native-modal';
 import { Rating, AirbnbRating } from 'react-native-ratings';
 import moment from "moment";
+import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
+MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
 const secondIndicatorStyles = {
   stepIndicatorSize: 30,
@@ -164,9 +164,10 @@ else if (doc.data().OrderStatus == 'Delivered'){
         }else{
           total += item.price * item.qty
         }
-
+        
         if(item.choice){
           item.choice.forEach(addon => {
+            addon.isChecked === 'unchecked' ? addonTotal += 0:
               addonTotal += addon.price * item.qty
           });
       }
@@ -241,19 +242,21 @@ if(parseFloat(this.state.rating) == 0){
 
 
 
+
+
   render() {
     const {orders}=this.state;
     return (
       <Container>
-      <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#183c57'}}>
+        <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#183c57'}}>
           <Left style={{flex:1}}>
           <Button transparent onPress={()=> this.props.navigation.goBack()}>
                  <MaterialIcons name="arrow-back" size={25} color="white" />
                 </Button> 
           </Left>
-          <Body style={{flex: 3}}>
+          <Left style={{flex: 3}}>
             <Title style={{color:'white'}}></Title>
-          </Body>
+          </Left>
          <Right style={{flex:1}}>
           <Button transparent onPress={()=> this.setState({ModalHelp: true})}>
                  <MaterialIcons name="help-outline" size={25} color="white" />
@@ -536,7 +539,7 @@ if(parseFloat(this.state.rating) == 0){
  }}>
 
    
- <MapboxGL.MapView style={{ flex: 1, position: 'absolute',
+<MapboxGL.MapView style={{ flex: 1, position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
@@ -606,7 +609,7 @@ logoEnabled={false}
   
       
        
-                    <Card>
+         <Card>
         <FlatList
                data={this.state.dataSource}
                renderItem={({ item }) => (            
@@ -642,6 +645,7 @@ logoEnabled={false}
                 }
                  {item.choice  ? 
               [item.choice.map((drink, i) =>
+                drink.isChecked === 'unchecked' ? null :
                 <View key={i}>
                    <List style={{marginLeft: 20}}>
                    <ListItem>

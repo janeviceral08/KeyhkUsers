@@ -399,7 +399,7 @@ export default class HomeScreenService extends Component {
   ItemSeparatorComponent={this.ListViewItemSeparator}
   renderItem={({ item }) => this.rowRendererPrentals(item)}
   enableEmptySections={true}
-  style={{ marginTop: -5 }}
+  style={{ marginTop: -5,marginBottom: 285 }}
   numColumns={2}
   columnWrapperStyle={{justifyContent:'space-between'}}
   keyExtractor={(item, index) => index.toString()}
@@ -483,19 +483,15 @@ export default class HomeScreenService extends Component {
       )}
     />
              
-         <Text style={{marginTop: 15, fontSize: 10}}>Label</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.vInfo.name}  value={this.state.vInfo.name} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Description</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.description} placeholderTextColor="#687373" />
-         </Item>
+         <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'normal'}}>{this.state.vInfo.name}</Text></Text>
+        
+     
+         <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'normal'}}>{this.state.vInfo.description}</Text></Text>
+         
        
-         <Text style={{marginTop: 15, fontSize: 10}}>Ameneties</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.ameneties} placeholderTextColor="#687373" />
-         </Item>
+         <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'normal'}}>{this.state.vInfo.ameneties}</Text></Text>
+         
+       
 
 
            </ScrollView>   

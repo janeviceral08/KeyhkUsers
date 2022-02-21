@@ -66,42 +66,45 @@ export default class SignInScreen extends Component  {
           auth()
           .signInWithEmailAndPassword(this.state.email, this.state.password)
           .then((res) => {
+messaging().getToken().then(token => {
+  firestore().collection('users').doc(auth().currentUser.uid).update({token: firestore.FieldValue.arrayUnion(token)})
+  firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
 
-              firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
+    querySnapshot.forEach(doc => {
+      if(doc.data().userId == auth().currentUser.uid){
+        
+                      const usersRef = firestore().collection('users').doc(auth().currentUser.uid)
+                      const updateRef = firestore().collection('users').doc(auth().currentUser.uid);
+                      updateRef.update({
+                        token: firestore.FieldValue.arrayUnion(token),
+                      });
+                  usersRef.get()
+                      .then((docSnapshot) => {
+                        if (docSnapshot.exists) {
+                          usersRef.onSnapshot((doc) => {
+                          
+                  console.log('working here 2')
+                  console.log('current: ', auth().currentUser.uid)
+                        AsyncStorage.setItem('uid',  auth().currentUser.uid);
+                this.setState({
+                    loading: false,
+                    email: '', 
+                    password: ''
+                  })
+                  this.props.navigation.reset({
+                      index: 0,
+                      routes: [{ name: 'Home' }],})
+                          });
+                        } else {
+                          this.setState({ errorMessage: 'Invalid Email or Password', loading: false })
+                        }
+                    });
 
-                    querySnapshot.forEach(doc => {
-                      if(doc.data().userId == auth().currentUser.uid){
-                        
-                                      const usersRef = firestore().collection('users').doc(auth().currentUser.uid)
-                                      const updateRef = firestore().collection('users').doc(auth().currentUser.uid);
-                                      updateRef.update({
-                                        token: firestore.FieldValue.arrayUnion(token),
-                                      });
-                                  usersRef.get()
-                                      .then((docSnapshot) => {
-                                        if (docSnapshot.exists) {
-                                          usersRef.onSnapshot((doc) => {
-                                          
-                                  console.log('working here 2')
-                                  console.log('current: ', auth().currentUser.uid)
-                                        AsyncStorage.setItem('uid',  auth().currentUser.uid);
-                                this.setState({
-                                    loading: false,
-                                    email: '', 
-                                    password: ''
-                                  })
-                                  this.props.navigation.reset({
-                                      index: 0,
-                                      routes: [{ name: 'Home' }],})
-                                          });
-                                        } else {
-                                          this.setState({ errorMessage: 'Invalid Email or Password', loading: false })
-                                        }
-                                    });
-
-                      }
-                    })
-              })
+      }
+    })
+})
+})
+              
 
             
     

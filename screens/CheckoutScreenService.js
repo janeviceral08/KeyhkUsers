@@ -704,15 +704,13 @@ console.log('out: ', out);
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
-          <Header androidStatusBarColor="#2c3e50" style={{display:'none'}} style={{backgroundColor: '#183c57'}}>
-          <Left style={{flex:1}}>
+          <Header androidStatusBarColor="#fd7823" style={{display:'none'}} style={{backgroundColor: '#fd7823'}}>
+          <Left style={{flex:3, flexDirection: 'row'}}>
           <Button transparent onPress={()=> this.props.navigation.goBack()}>
                  <MaterialIcons name="arrow-back" size={25} color="white" />
                 </Button> 
+                <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares</Title>
           </Left>
-          <Body style={{flex: 3}}>
-            <Title style={{color:'white'}}>KeyS</Title>
-          </Body>
         
         </Header>
           <Loader loading={this.state.loading}/>     
@@ -825,7 +823,7 @@ console.log('out: ', out);
            
            
           <View style={{ height: 40, alignItems: 'center', marginBottom: 10}}>
-							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: '#019fe8', width: SCREEN_WIDTH - 10, height: 40, borderRadius: 5, padding: 10}]} onPress={() => this.setState({VisibleAddInfo: true})}>
+							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: '#FD934F', width: SCREEN_WIDTH - 10, height: 40, borderRadius: 5, padding: 10}]} onPress={() => this.setState({VisibleAddInfo: true})}>
 								<Text style={{color: '#ffffff'}}>Book Now</Text>
 							</TouchableOpacity>
             </View>
@@ -868,6 +866,7 @@ console.log('out: ', out);
       animationIn='slideInUp'
       animationOut='slideOutDown'
       animationOutTiming={700}
+      style={{ margin: 0 }}
       useNativeDriver={true}
       onBackButtonPress={() => this.setState({ VisibleAddInfo: false })}
       onBackdropPress={() => this.setState({VisibleAddInfo: false})} transparent={true}>
@@ -875,7 +874,9 @@ console.log('out: ', out);
       padding: 22,
       borderRadius: 4,
       borderColor: 'rgba(0, 0, 0, 0.1)',}}>
-       
+        <View  style={{ alignSelf: 'flex-end', position: 'absolute', top: 10, right:10, flex: 5}}>
+                        <AntDesign name="closecircle" color="gray" size={25} onPress={() => this.setState({VisibleAddInfo: false})}/>
+                        </View>
         <ScrollView>
        
      
@@ -1038,7 +1039,7 @@ console.log('out: ', out);
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
               <Text style={{color:'black', fontWeight:'bold'}}>{this.state.warningText}</Text>
               </View>
-            <Button block style={{ height: 30, backgroundColor: "#019fe8"}}
+            <Button block style={{ height: 30, backgroundColor: "#FD934F"}}
              onPress={()=> this.setState({warningModal: false})} >
               <Text style={{color: 'white'}}>Ok</Text>
               </Button>
@@ -1056,7 +1057,7 @@ console.log('out: ', out);
               onBackdropPress={() => this.OrderSuccess()} transparent={true}>
             <View style={styles.content}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyS!</Text>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using Booking Shares!</Text>
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
               <Image
@@ -1068,7 +1069,7 @@ console.log('out: ', out);
               <Text style={{color:'black', fontWeight:'bold'}}>Your Transaction is Queued!</Text>
               <Text style={{color:'black', fontWeight:'600', textAlign: "center"}}>Please wait patiently.</Text>
               </View>
-            <Button block style={{ height: 30, backgroundColor: "#019fe8"}}
+            <Button block style={{ height: 30, backgroundColor: "#FD934F"}}
              onPress={()=> this.OrderSuccess()} >
               <Text style={{color: 'white'}}>Ok</Text>
               </Button>
@@ -1107,7 +1108,7 @@ console.log('out: ', out);
                                       </Body>
                                       <Right style={{textAlign: 'right'}}>
                                       
-                                          <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.props.route.params.currency}{Math.round(parseFloat(pricetoPay*this.state.Duration)*10)/10}</Text>
+                                          <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.props.route.params.currency}{Math.round(pricetoPay*10)/10}</Text>
                                         
                                       </Right>
                                       </View> 
@@ -1116,15 +1117,7 @@ console.log('out: ', out);
 
                     <View>
                      
-                        <Grid style={{padding: 8}}>
-                            <Col>
-                                <Text style={{fontSize: 13,  color:'green'}}>Sub Total</Text>
-                            </Col>
-                            <Col>
-                            <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={Math.round(parseFloat(pricetoPay)*10)/10} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} />
-              
-                            </Col>
-                        </Grid>
+                       
                         <Grid  style={{padding: 8}}>
                             <Col>
                                 <Text style={{fontSize: 13,  color:'green'}}>Duration ({this.state.Duration}{this.state.SelectedPricing})</Text>

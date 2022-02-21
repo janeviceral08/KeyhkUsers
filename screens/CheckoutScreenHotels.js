@@ -746,14 +746,13 @@ console.log('modesp: ', this.state.datas);
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
           <Header androidStatusBarColor="#2c3e50" style={{display:'none'}} style={{backgroundColor: '#183c57'}}>
-          <Left style={{flex:1}}>
+          <Left style={{flex:3, flexDirection: 'row'}}>
           <Button transparent onPress={()=> this.props.navigation.goBack()}>
                  <MaterialIcons name="arrow-back" size={25} color="white" />
                 </Button> 
+                <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares</Title>
           </Left>
-          <Body style={{flex: 3}}>
-            <Title style={{color:'white'}}>KeyS</Title>
-          </Body>
+          
         
         </Header>
           <Loader loading={this.state.loading}/>     
@@ -840,7 +839,9 @@ console.log('modesp: ', this.state.datas);
       padding: 22,
       borderRadius: 4,
       borderColor: 'rgba(0, 0, 0, 0.1)',}}>
-       
+       <View  style={{ alignSelf: 'flex-end', position: 'absolute', top: 10, right:10, flex: 5}}>
+                        <AntDesign name="closecircle" color="gray" size={25} onPress={() => this.setState({VisibleAddInfo: false})}/>
+                        </View>
         <ScrollView>
        
      
@@ -992,6 +993,7 @@ this.state.SelectedPricing == '12Hour'?
       isVisible={this.state.showURL}
       onBackButtonPress={() => this.setState({ showURL: false })}
       animationInTiming={700}
+      style={{marginLeft: 5}}
       animationIn='slideInUp'
       animationOut='slideOutDown'
       animationOutTiming={700}
@@ -1037,7 +1039,7 @@ this.state.SelectedPricing == '12Hour'?
               onBackdropPress={() => this.OrderSuccess()} transparent={true}>
             <View style={styles.content}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyS!</Text>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using Booking Shares!</Text>
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
               <Image

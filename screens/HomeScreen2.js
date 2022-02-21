@@ -506,7 +506,7 @@ async getCountryCity(PressedCountrycode){
      //  console.log('collect: ', collect)
       //     console.log('UserLocationCountry: ', this.state.UserLocationCountry)
       //           console.log('selectedCountry: ', this.state.selectedCountry)
-      await  firestore().collection(collect).where('country', '==', this.state.UserLocationCountry.trim())
+        firestore().collection(collect).where('country', '==', this.state.UserLocationCountry.trim())
         .onSnapshot(querySnapshot => {
           querySnapshot.docs.forEach(doc => {
           city.push(doc.data());
@@ -718,7 +718,7 @@ let Address ='';
             <View style={{flex:1, alignSelf: 'flex-end', position: 'absolute', right: 0,}}>
                       <CartBadge navigation={this.props.navigation} fromPlace={this.state.fromPlace} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow.length == 0? '':this.state.CountryNow[0].currency}/>
           </View>
-         {/* <Text style={{color: 'white', fontSize: 22}}>KeyS</Text>
+         {/* <Text style={{color: 'white', fontSize: 22}}>Booking Shares</Text>
           <Text style={{color: '#4bccac', fontSize: 15,width: '100%'}}>Shared Booking Portal</Text>*/}
            <View style={{width: SCREEN_WIDTH/2.5,marginTop: 10 }}>
              {/*console.log('Dropdown cities: ', this.state.cities)*/}

@@ -39,7 +39,7 @@ export default class SignupNumber extends Component  {
         super();
         this.state = {
           user: null,
-          email: "9760676587",
+          email: "",
           password: "",
           formValid: true,
           errorMessage: "",

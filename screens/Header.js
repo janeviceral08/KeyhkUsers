@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {View, Image, Dimensions, SafeAreaView, ScrollView } from 'react-native';
 import {Container, Header , Left, Right,Body, Button, Title, Text, List, ListItem} from 'native-base';
 import CartBadge from '../components/CartBadge';
-import Feather from 'react-native-vector-icons/Feather'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 class CustomHeader extends Component {
   render(){
@@ -12,12 +12,12 @@ class CustomHeader extends Component {
 
         
       <Header androidStatusBarColor="#ee4e4e" style={{backgroundColor: '#ee4e4e'}}>
-          <Left style={{flex:3, width: '70%'}}>
-      <Title style={{color:'white', marginLeft: 20}}>KeyS</Title>
+          <Left style={{flex:3, flexDirection: 'row'}}>
+          <Button transparent onPress={()=> this.props.navigation.goBack()}>
+                 <MaterialIcons name="arrow-back" size={25} color="white" />
+                </Button> 
+                <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares</Title>
           </Left>
-          <Body style={{flex: 3}}>
-            
-          </Body>
           <Right style={{flex:1}}>
             {
                 !Cartoff ? 

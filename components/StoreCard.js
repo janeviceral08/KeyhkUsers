@@ -66,13 +66,18 @@ console.log('fromPlace: ', this.props.fromPlace  )
                           }}
                           resizeMode={FastImage.resizeMode.cover}
                       >
+               {status && !this.props.product.AlwaysOpen && Closing == true ? null: this.props.product.AlwaysOpen? null:
+                <View style={styles.subtitleclose}>
+                <Text style={{color:'#FFFFFF', fontStyle:'italic', fontWeight: 'bold'}}>Unavailable</Text>
+              </View> }
+               
                
                   <View style={{position: 'absolute', right: 0,backgroundColor: 'rgba(49,49,49, 0.8)',height: 100, padding:10, width: SCREEN_WIDTH/2.5 }}>
                   
-                  <Text style={[styles.categoriesName,{color: 'white',fontSize: 15,paddingLeft:2,
+                  <Text numberOfLines={2} style={[styles.categoriesName,{color: 'white',fontSize: 15,paddingLeft:2,
     fontWeight: 'normal',
     textAlign: 'center',}]}>{this.props.product.name}  </Text>          
-                        <Text note style={[styles.categoriesName,{color: 'white',fontSize: 10.5,
+                        <Text note numberOfLines={2} style={[styles.categoriesName,{color: 'white',fontSize: 10.5,
     fontWeight: 'normal',
     textAlign: 'center',}]}>{this.props.product.address}</Text>  
 

@@ -67,17 +67,16 @@ export default class Pending extends Component {
     return (
       <Container style={{flex: 1}}> 
         <Loader loading={this.state.loading}/>
-        <ScrollView>
+        
         {this.props.uid ? 
   
         <FlatList
         key={'#'}
                data={newOrders}
                renderItem={({ item,index }) => (
-                <View>
+                <View key={index}>
                  
                    <Card>
-                     {console.log('key ', index )}
                        <Collapse isExpanded={index == 0? true:false} handleLongPress={() => {item.datas.SubProductType == 'Pabili'?this.props.navigation.navigate('OrderDetailsPabili',{ 'orders' : item.datas }):item.datas.ProductType == 'Services'?this.props.navigation.navigate('OrderDetailsService',{ 'orders' : item.datas }):item.datas.ProductType == 'Rentals'?this.props.navigation.navigate('OrderDetailsRentals',{ 'orders' : item.datas }):item.datas.ProductType == 'Hotels'?this.props.navigation.navigate('OrderDetailsHotels',{ 'orders' : item.datas }):item.datas.ProductType == 'Transport'?this.props.navigation.navigate('OrderDetailsTranspo',{ 'orders' : item.datas }): this.props.navigation.navigate('OrderDetails',{ 'orders' : item.datas })}}>
       <CollapseHeader>
       <CardItem>            
@@ -253,26 +252,13 @@ export default class Pending extends Component {
                                           {items.qty > 1 ? items.qty+" x " : null}
                                           {items.name}
                                         </Text>
-                                        {items.choice == null || items.choice== undefined?null:
-                 <View>
-                 {items.choice.map((choice,index)=>
-                   <View key={index} style={{flexDirection: 'row'}}>
-                     {console.log('10')}
-                        <Text style={{fontSize: 10}}>{choice.label}</Text>
-                        <Text style={{fontSize: 10}}> {choice.price.toFixed(2)}</Text>
-                             
-                   </View>
-                 )}
-                 {  console.log('Choice: ', items.choice)}
-                 </View>
-               
-                 
-                 }
+                                      
                                         <Text note style={{fontSize: 14}}>Brand: {items.brand}</Text>
                                         <Text note style={{fontSize: 14}}>by {items.store_name}</Text>
                                         <Text note style={{fontSize: 14}}>Note: {items.note}</Text>
                                         {items.choice &&items.choice.length > 1?<Text note style={{fontSize: 14, fontWeight: 'bold'}}>Add ons</Text>:null}
                                         {items.choice &&items.choice.length> 1?items.choice.map((drink, i) =>
+                                        drink.isChecked == 'unchecked'? null:
                                     <View style={{marginLeft: 20, flexDirection: 'row', width: SCREEN_WIDTH/1.5}}>
                                     <View  style={{justifyContent: "flex-start"}}>
                                         <Text style={{fontWeight:'bold', fontSize: 20}}>{'\u2022' + " "}</Text>
@@ -310,7 +296,6 @@ export default class Pending extends Component {
                   <Text style={{paddingVertical: 10}}>No orders yet</Text>
                 </View>
            }
-        </ScrollView>
       </Container>
     );
   }

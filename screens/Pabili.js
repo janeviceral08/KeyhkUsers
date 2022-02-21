@@ -1349,12 +1349,13 @@ const copyToClipboard = () => {
           <Container style={{backgroundColor: '#CCCCCC'}}>   
              
       <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#396ba0'}}>
-          <Left style={{flex:3, width: '70%'}}>
-      <Title style={{color:'white', marginLeft: 20}}>KeyS</Title>
+      <Left style={{flex:3, flexDirection: 'row'}}>
+          <Button transparent onPress={()=> this.props.navigation.goBack()}>
+                 <MaterialIcons name="arrow-back" size={25} color="white" />
+                </Button> 
+                <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares</Title>
           </Left>
-          <Body style={{flex: 3}}>
-            
-          </Body>
+          
           <Right style={{flex:1}}>
             <FontAwesome5 name="clipboard-list" size={25} color="white" onPress={()=> this.setState({listModal:true})}/>
           </Right>

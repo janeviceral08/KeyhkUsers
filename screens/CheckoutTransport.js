@@ -8,6 +8,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 // Our custom files and classes import
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 import AccountInfo from './checkout/AccountInfo';
 import DeliveryDetails from './checkout/DeliveryDetails';
 import { RadioButton, Chip, Divider } from 'react-native-paper';
@@ -205,7 +206,7 @@ export default class CheckoutTransport extends Component {
         PassengerDescription:'',
       ExtraBaggage:false,
       willingtopay:false,
-      tip:5,
+      tip:0,
       paymentMethods:[],
   };
   this.getLocation();
@@ -1157,15 +1158,13 @@ console.log('region: ', this.state.region);
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
   
-          <Header androidStatusBarColor="#2c3e50" style={{display:'none'}} style={{backgroundColor: '#183c57'}}>
-          <Left style={{flex:1}}>
+          <Header androidStatusBarColor="#28ae07" style={{display:'none'}} style={{backgroundColor: '#28ae07'}}>
+          <Left style={{flex:3, flexDirection: 'row'}}>
           <Button transparent onPress={()=> this.props.navigation.goBack()}>
                  <MaterialIcons name="arrow-back" size={25} color="white" />
                 </Button> 
+                <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares</Title>
           </Left>
-          <Body style={{flex: 3}}>
-            <Title style={{color:'white'}}>KeyS</Title>
-          </Body>
         <Right>
         <MaterialIcons name="my-location" size={30} color={'white'} onPress={()=> this.getLocationNow()} />       
          
@@ -1274,6 +1273,7 @@ zoomTapEnabled={false}
           </MapView>*/}
         { /* <MaterialIcons name="my-location" size={40} style={{backgroundColor: 'white', width: 40,  right: 10, top: 150, position: 'absolute'}} onPress={()=> this.getLocationNow()} />       
         */ }  
+        
        <Card style={{ left: 0, top: 0, position: 'absolute'}}>
         <CardItem>
                     <Text style={{fontWeight: 'bold'}}>From: </Text>
@@ -1441,8 +1441,37 @@ console.log("province", province)
        { /* <Card >
               
             </Card>*/} 
-             
-            <Card>
+              <Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/3:SCREEN_HEIGHT/5, borderTopRightRadius: 20, borderTopLeftRadius: 20,}}>
+
+              <View style={{flexDirection: 'row'}}>
+<View style={{flexDirection: 'column', width: SCREEN_WIDTH/2}}>
+<Text style={{fontSize: SCREEN_HEIGHT < 767?18:28, marginLeft: 20, paddingTop: 10, fontWeight: 'bold'}}>
+{this.state.datas.vehicle}
+</Text>
+<Text style={{fontSize: SCREEN_HEIGHT < 767?10:13, marginLeft: 20,  fontWeight: 'bold'}}>
+Base fare: 
+<NumberFormat  renderText={text => <Text style={{fontSize: SCREEN_HEIGHT < 767?10:13, marginLeft: 20,}}> {text}</Text>} value={this.props.route.params.typeOfRate =='Municipal Rate'?this.state.datas.base_fare:this.props.route.params.typeOfRate =='City Rate'?this.state.datas.City:this.state.datas.Metro} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} />
+</Text>
+{this.state.summary === undefined? null: 
+            <Text style={{fontSize: SCREEN_HEIGHT < 767?15:20, marginLeft: 20,  fontWeight: 'bold'}}>
+            Fare: <NumberFormat  renderText={text => <Text style={{fontSize: SCREEN_HEIGHT < 767?15:20, marginLeft: 20,}}> {text}</Text>} value={this.state.summary === undefined? null: distanceAmount < 1?this.state.amount_base: Math.round((actualAmountPay*10)/10)} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} /> </Text>     
+               }
+  {this.state.summary === undefined? null:<View style={{ height: 40, alignItems: 'center', marginBottom: 10}}>
+							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: '#53BE38', borderRadius: 5, padding: 10, width: '100%',}]} onPress={() => {this.state.uid == null?  this.props.navigation.navigate('Login') :this.setState({VisibleAddInfo: true})}}>
+								<Text style={{color: '#ffffff'}}>{this.state.uid == null?'Log in to Continue':'Book Now'}</Text>
+							</TouchableOpacity>
+            </View>}
+</View>
+<View style={{flexDirection: 'column', width: SCREEN_WIDTH/2}}>
+<Image style={{  width: SCREEN_WIDTH/2.2, height:SCREEN_WIDTH/2, resizeMode: 'contain', marginTop: -30}} source={{uri: this.state.datas.image[0]}} />
+</View>
+</View>
+
+
+</Card>
+    
+    
+         {/*   <Card>
                 <CardItem>
                     <Text style={{fontWeight: 'bold', fontSize: 15}}>Vehicle:  </Text>
                     <Left>
@@ -1462,7 +1491,7 @@ console.log("province", province)
             </View>}
                     </Body>
                 </CardItem>
-            </Card> 
+            </Card> */}
 
             
                
@@ -1482,7 +1511,9 @@ console.log("province", province)
       padding: 22,
       borderRadius: 4,
       borderColor: 'rgba(0, 0, 0, 0.1)',}}>
-       
+        <View  style={{ alignSelf: 'flex-end', position: 'absolute', top: 10, right:10, flex: 5}}>
+                        <AntDesign name="closecircle" color="gray" size={25} onPress={() => this.setState({VisibleAddInfo: false})}/>
+                        </View>
         <View>
                         <Text style={{marginTop: 15, fontSize: 10}}>Number of Passengers</Text>
                          <Item regular style={{marginTop: 7, padding: 10}}> 
@@ -1611,7 +1642,7 @@ console.log("province", province)
               onBackdropPress={() => this.OrderSuccess()} transparent={true}>
             <View style={styles.content}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using KeyS!</Text>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using Booking Shares!</Text>
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
               <Image
