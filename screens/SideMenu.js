@@ -43,7 +43,7 @@ class SideMenu extends Component {
     return(
       <SafeAreaView style={{flex: 1}}>
         <View style={{justifyContent: 'center', alignItems:'center'}}>
-          <Image source={require('../assets/k.png')} 
+          <Image source={require('../assets/k.jpg')} 
             style={{height: 170, width: Dimensions.get('window').width * 3/4}}
           />
         </View>

@@ -235,8 +235,8 @@ export default class HomeScreenService extends Component {
     this.setState({selectedCityUser: item})
     this.ref.where('city','==',item ==null? this.state.City: item).onSnapshot(this.onCollectionUpdate);
     console.log('city: ', this.props.selectedCityUser ==null? this.state.City:  this.props.selectedCityUser)
-    firestore().collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
-    firestore().collection('products').where('rentalType','==', 'Services').where('city','==',this.props.selectedCityUser ==null? this.state.City.trim(): this.props.selectedCityUser.trim()).onSnapshot(this.onPrentals)
+   // firestore().collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
+    firestore().collection('products').where('rentalType','==', 'Services').where('arrayofCity','array-contains-any',this.props.selectedCityUser ==null? [this.state.City.trim()]: [this.props.selectedCityUser.trim()]).onSnapshot(this.onPrentals)
      
   }
    async getUserCity(){
@@ -339,7 +339,7 @@ export default class HomeScreenService extends Component {
 
     rowRendererPrentals = (data) => {
       console.log('data: ', data)
-      const { name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,address, ameneties, ColorMotor,imageArray, brand, store_name} = data;
+      const { ratemode,newratemode,name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,address, ameneties, ColorMotor,imageArray, brand, store_name} = data;
       const newData = imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
@@ -380,7 +380,10 @@ export default class HomeScreenService extends Component {
      {!StatMonthlyPrice?null:
 <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
      }
-        
+              {ratemode =='Others'?
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20, paddingBottom: 5}}>{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}/{newratemode}</Text>
+     :null
+    }
   </TouchableOpacity>
   </CardItem>
   </Card>

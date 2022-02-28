@@ -890,7 +890,7 @@ export default class SearchServices extends Component {
     return (
       <Container style={{flex: 1}}>
        <CustomHeader title={'Search from '+this.state.store_name} fromPlace={this.props.route.params.fromPlace} navigation={this.props.navigation} currency={this.props.route.params.currency}/>
-        <Header searchBar rounded androidStatusBarColor={'#696969'} style={{backgroundColor: '#019fe8', elevation: 0}}>
+        <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
                 <Fontisto name="search" size={20} color={"#000000"}/>
                 <Input placeholder="Search..."

@@ -21,7 +21,7 @@ export default class GatewayDetails extends Component {
     render() {
       return (
         <Container style={{flex: 1,backgroundColor: '#fdfdfd'}}>
-          <Header androidStatusBarColor="#2c3e50" style={{display:'none'}} style={{backgroundColor: '#396ba0'}}>
+          <Header androidStatusBarColor="#ee4e4e" style={{display:'none'}} style={{backgroundColor: '#ee4e4e'}}>
                <Left> 
                  <Button transparent onPress={()=> this.props.navigation.goBack()}>
                  <MaterialIcons name="arrow-back" size={25} color="white" />

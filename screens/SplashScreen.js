@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, ImageBackground, Image } from 'react-native';
+import { View, Text, ImageBackground, Image,Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 //import {fcmService} from './FCM/FCMService'
-
-
+import {Container, Header} from 'native-base';
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 class SplashScreen extends React.Component {
   performTimeConsumingTask = async() => {
     return new Promise((resolve) =>
@@ -33,10 +34,12 @@ class SplashScreen extends React.Component {
   render() {
     return (
       <View style={styles.viewStyles}>
-
+   <Header androidStatusBarColor="#a70b0c"  style={{display: 'none'}}>
+         
+        </Header>
           <Image
-            source={require('../assets/k.png')}
-            style={{ width: 300, height: 300 }}
+            source={require('../assets/k.jpg')}
+            style={{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2 }}
           />
       </View>
     );
@@ -48,7 +51,7 @@ const styles = {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white'
+    backgroundColor: '#a70b0c'
    
   },
   textStyles: {

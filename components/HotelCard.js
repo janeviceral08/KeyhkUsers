@@ -150,44 +150,44 @@ export default class HotelCard extends Component {
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice3).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
+    padding : 1,}}> {this.props.currency}{parseFloat(HourPrice3).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       {!StatHourPrice6?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice6).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
+    padding : 1,}}> {this.props.currency}{parseFloat(HourPrice6).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       {!StatHourPrice12?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice12).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
+    padding : 1,}}> {this.props.currency}{parseFloat(HourPrice12).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
          {!StatHourPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(HourPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
+    padding : 1,}}> {this.props.currency}{parseFloat(HourPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
         
         {!StatDayPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1}}> ₱{parseFloat(DayPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
+    padding : 1}}> {this.props.currency}{parseFloat(DayPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
      {!StatWeeklyPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(WeeklyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
+    padding : 1,}}> {this.props.currency}{parseFloat(WeeklyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
      {!StatMonthlyPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
     color: 'black',
-    padding : 1,}}> ₱{parseFloat(MonthlyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
+    padding : 1,}}> {this.props.currency}{parseFloat(MonthlyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       </View>  
             {!admin_control || !status ? 
@@ -448,7 +448,7 @@ export default class HotelCard extends Component {
         </View>
         <View>
             <Text style={styles.infoRecipeName}>{this.state.name}</Text>
-            <Text style={{fontSize: 17, textAlign: 'center'}}>₱{this.state.price}</Text>
+            <Text style={{fontSize: 17, textAlign: 'center'}}>{this.props.currency}{this.state.price}</Text>
           <View style={{ flex: 1, padding: 10, backgroundColor: "white" }}>
         {productss.map((object, d) =>       
           <View key={d}>
@@ -464,7 +464,7 @@ export default class HotelCard extends Component {
                         <Text style={{ fontSize: 12}}>{drink.label}</Text>
                     </View>
                     <View style={{justifyContent: "flex-end", flex:1}}>
-                        <Text style={{ fontSize: 13 }}>₱{drink.price}</Text>
+                        <Text style={{ fontSize: 13 }}>{this.props.currency}{drink.price}</Text>
                     </View>                  
                 </CardItem>
               </View>

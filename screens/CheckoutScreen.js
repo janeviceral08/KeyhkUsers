@@ -239,6 +239,7 @@ export default class Checkout extends Component {
                         
                         AvailableOn.push(doc.data())
                          this.setState({
+                          arrayofCity: doc.data().arrayofCity,
       storeAddress : doc.data().address+' '+doc.data().city+' '+doc.data().province})
                     });
                    
@@ -1636,18 +1637,20 @@ Alert.alert('Submission Complete!', 'We will process your verification')
        email: this.state.account_email,
        barangay: this.state.billing_barangay==undefined?'': this.state.billing_barangay,
        city: this.state.account_city.trim(),
-       province: this.state.account_province,
+       province: this.state.account_province.toLowerCase(),
        status: this.state.account_status,
+       arrayofCity: this.state.arrayofCity,
      },
      Billing: {
        name: this.state.billing_name,
        address: this.state.billing_street,
        phone: this.state.billing_phone,
        barangay: this.state.billing_barangay==undefined?'': this.state.billing_barangay,
-       province: this.state.billing_province,
+       province: this.state.billing_province.toLowerCase(),
        city: this.state.billing_city,
-
+       arrayofCity: this.state.arrayofCity,
      },
+     arrayofCity: this.state.arrayofCity,
      Products: this.state.cartItems,
      OrderDetails: {
       Date_Ordered: date_ordered,

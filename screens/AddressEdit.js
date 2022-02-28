@@ -256,7 +256,7 @@ updateTextInput = (text, field) => {
     updatedCart[itemIndex]['postal'] = this.state.postal;
     updatedCart[itemIndex]['address'] = this.state.address; 
     updatedCart[itemIndex]['city'] = this.state.selectedCity; 
-    updatedCart[itemIndex]['province'] = this.state.province; 
+    updatedCart[itemIndex]['province'] = this.state.province.toLowerCase(); 
     updatedCart[itemIndex]['phone'] = this.state.mobile; 
     updatedCart[itemIndex]['name'] = this.state.name;  
     updatedCart[itemIndex]['lat'] = this.state.region[1]  
@@ -299,7 +299,7 @@ else{
       updatedCart[itemIndex]['postal'] = this.state.postal;
       updatedCart[itemIndex]['address'] = this.state.address; 
       updatedCart[itemIndex]['city'] = this.state.selectedCity; 
-      updatedCart[itemIndex]['province'] = this.state.province; 
+      updatedCart[itemIndex]['province'] = this.state.province.toLowerCase(); 
       updatedCart[itemIndex]['phone'] = this.state.mobile; 
       updatedCart[itemIndex]['name'] = this.state.name;  
       updatedCart[itemIndex]['lat'] = this.state.region[1]  
@@ -495,7 +495,7 @@ console.log("arr", arr)
     return (
       <Root>
       <Container style={styles.Container}>
-                <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#183c57'}}>
+                <Header androidStatusBarColor="#ee4e4e" style={{backgroundColor: '#ee4e4e'}}>
                 <Left> 
                   <Button transparent onPress={()=> this.props.navigation.goBack()}>
                   <MaterialIcons name="arrow-back" size={25} color="white" />
@@ -631,8 +631,13 @@ zoomLevel={15}
 
 let arr = str.split(',');
 let arrcountry = arr.length-1;
+let arrProvince = arr.length-2;
 console.log("str", str)
 console.log("arr", arr)
+console.log("arrcountry", arr[arrcountry])
+console.log("arrProvince", arr[arrProvince])
+console.log("province", item.context[0].text)
+if(arr[arrcountry].trim() == 'Philippines'){
 const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
             
 const region=  {latitude: item.center[1], latitudeDelta: 0.0999998484542477, longitude: item.center[0], longitudeDelta: 0.11949475854635239}
@@ -648,7 +653,34 @@ console.log('region on press',item.geometry.coordinates);
                postal:arr[3],
                address: arr[0]+', '+ arr[1],
                
-               location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })}}>
+               location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })
+              
+    }
+    else{
+      //const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
+            
+const region=  {latitude: item.center[1], latitudeDelta: 0.0999998484542477, longitude: item.center[0], longitudeDelta: 0.11949475854635239}
+console.log('region: ', region)
+//this.onRegionChange(region)
+console.log('region on press',item.geometry.coordinates);
+             this.setState({
+               region: item.geometry.coordinates,
+               province: arr[arrProvince].trim(),
+               selectedCity:arr[arr.length-3].trim(),
+               selectedBarangay:item.context[1].text,
+               Country: arr[arrcountry].trim(),
+               postal:arr[3],
+               address: arr[0]+', '+ arr[1],
+               
+               location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })}
+    
+}
+}
+               
+               
+               
+               
+               >
            <Text>{item.place_name}</Text>
            {console.log('coordinates:', item.geometry.coordinates)}</TouchableOpacity>
          </View>
@@ -661,7 +693,7 @@ console.log('region on press',item.geometry.coordinates);
                   </Item>
                   <Text style={{marginTop: 15, fontSize: 10}}>Phone Number</Text>
                   <Item regular style={{marginTop: 7}}>
-                      <Input placeholder={this.state.mobile} value={this.state.mobile} keyboardType='numeric'  onChangeText={(text) => this.updateTextInput(text, 'mobile')} placeholderTextColor="#687373" />
+                      <Input placeholder={this.state.mobile} value={this.state.mobile} keyboardType='phone-pad'  onChangeText={(text) => this.updateTextInput(text, 'mobile')} placeholderTextColor="#687373" />
                   </Item>
                    <Text style={{marginTop: 15, fontSize: 10}}>Country</Text>
            
@@ -813,8 +845,14 @@ zoomLevel={15}
 
 let arr = str.split(',');
 let arrcountry = arr.length-1;
+let arrProvince = arr.length-2;
 console.log("str", str)
 console.log("arr", arr)
+console.log("arrcountry", arr[arrcountry])
+console.log("arrProvince", arr[arrProvince])
+console.log("province", item.context[0].text)
+if(arr[arrcountry].trim() == 'Philippines'){
+
 const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
              console.log('region on press',item.geometry.coordinates);
              
@@ -826,7 +864,26 @@ const province = Province.ZipsCollection.find( (items) => items.zip === item.con
                selectedBarangay:item.context[1].text,
                postal:arr[3],
                address: arr[0]+', '+ arr[1],
-               location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })}}>
+               location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })
+             }
+             else{
+               
+const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
+console.log('region on press',item.geometry.coordinates);
+
+this.setState({
+  region:item.geometry.coordinates,
+   Country: arr[arrcountry].trim(),
+  province: arr[arrProvince].trim(),
+  selectedCity:arr[arr.length-3].trim(),
+  selectedBarangay:item.context[1].text,
+  postal:arr[3],
+  address: arr[0]+', '+ arr[1],
+  location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })
+             }
+              }
+            
+            }>
             <Text>{item.place_name}</Text>
            {console.log('coordinates:', item.geometry.coordinates)}</TouchableOpacity>
          </View>
@@ -840,7 +897,7 @@ const province = Province.ZipsCollection.find( (items) => items.zip === item.con
                   </Item>
                   <Text style={{marginTop: 15, fontSize: 10}}>Phone Number</Text>
                   <Item regular style={{marginTop: 7}}>
-                      <Input placeholder={this.state.mobile} value={this.state.mobile} keyboardType='numeric'  onChangeText={(text) => this.updateTextInput(text, 'mobile')} placeholderTextColor="#687373" />
+                      <Input placeholder={this.state.mobile} value={this.state.mobile} keyboardType='phone-pad'  onChangeText={(text) => this.updateTextInput(text, 'mobile')} placeholderTextColor="#687373" />
                   </Item>
                    <Text style={{marginTop: 15, fontSize: 10}}>Country</Text>
            

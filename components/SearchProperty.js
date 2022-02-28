@@ -292,7 +292,7 @@ export default class SearchProperty extends Component {
     console.log('search typeOfRate', this.props.route.params.typeOfRate)
     return (
       <Container style={{flex: 1}}>
-        <Header searchBar rounded androidStatusBarColor={'#696969'} style={{backgroundColor: '#019fe8', elevation: 0}}>
+        <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
                 <Fontisto name="search" size={20} color={"#000000"}/>
                 <Input placeholder="Search..."

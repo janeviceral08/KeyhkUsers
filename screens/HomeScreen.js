@@ -345,7 +345,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
 
 
              this.setState({
-               UserLocationCountry: this.state.customerInfo.selectedCountry == undefined? UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
+               UserLocationCountry: this.state.customerInfo.selectedCountry == undefined? UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
            })
            this.getAllCity()
        }).catch(err => {
@@ -473,10 +473,10 @@ console.log("UserLocationCountry ", UserLocationCountry)
    const newUserLocationCountry = this.state.UserLocationCountry.trim() =='Philippines'?'vehicles':this.state.UserLocationCountry.trim()+'.vehicles';
    console.log('newUserLocationCountry: ',newUserLocationCountry)
    firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
-    this.cityRef.collection('products').where('rentalType','==', 'Property').where('city','==',NewCityItem).onSnapshot(this.onPrentals)
-    this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('city','==',NewCityItem).onSnapshot(this.onVrentals)
+    this.cityRef.collection('products').where('rentalType','==', 'Property').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onPrentals)
+    this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onVrentals)
      
-      firestore().collection('stores').where('city','==',NewCityItem).where('Account', '==', 'Food Delivery').where('wallet', '>', 0).onSnapshot(querySnapshot=>{
+      firestore().collection('stores').where('arrayofCity','array-contains-any',[NewCityItem]).where('Account', '==', 'Food Delivery').where('wallet', '>', 0).onSnapshot(querySnapshot=>{
         const city = [];
             querySnapshot.docs.forEach(doc => {
             city.push(doc.data());

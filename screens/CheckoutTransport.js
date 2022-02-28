@@ -1800,7 +1800,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
        email: this.state.account_email,
        barangay: this.state.account_barangay==undefined?'': this.state.account_barangay,
        city: this.state.account_city.trim(),
-       province: this.state.account_province,
+       province: this.state.account_province.toLowerCase(),
        status: this.state.account_status,
      },
      Billing: {
@@ -1808,7 +1808,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
        address: this.state.billing_street,
        phone: this.state.phone,
        barangay:this.state.billing_barangay==undefined?'':  this.state.billing_barangay,
-       province: this.state.billing_province,
+       province: this.state.billing_province.toLowerCase(),
        billing_city: this.state.billing_city.trim(),
 
      },
@@ -1825,7 +1825,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
      },
      billing_nameTo: this.state.account_name,
      billing_phoneTo:this.state.phone,
-     billing_provinceTo: this.state.billing_provinceTo,
+     billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),
      billing_cityTo: this.state.billing_cityTo,
      billing_streetTo: this.state.billing_streetTo,
      billing_postalTo: this.state.billing_postalTo,

@@ -1725,7 +1725,7 @@ console.log('UserLocation: ', UserLocation)
       
          summary: res.data.response.route[0].summary,
         
-   billing_provinceTo:Newprovince,
+   billing_provinceTo:Newprovince.toLowerCase(),
    billing_cityTo: UserLocation,
    billing_streetTo:arr[0]+', '+ arr[1],
    billing_postalTo: arr[3],
@@ -2102,7 +2102,7 @@ const DatasValue = {
        email: this.state.account_email,
        barangay: this.state.account_barangay==undefined?'': this.state.account_barangay,
        city: this.state.account_city.trim(),
-       province: this.state.account_province,
+       province: this.state.account_province.toLowerCase(),
        status: this.state.account_status,
      },
     DeliveredBy:{
@@ -2121,7 +2121,7 @@ const DatasValue = {
        address: this.state.billing_street,
        phone: this.state.account_number,
        barangay:this.state.billing_barangay==undefined?'': this.state.billing_barangay,
-       province: this.state.billing_province,
+       province: this.state.billing_province.toLowerCase(),
        billing_city: this.state.billing_city.trim(),
 
      },
@@ -2138,7 +2138,7 @@ const DatasValue = {
      },
      billing_nameTo: this.state.account_name,
      billing_phoneTo:this.state.account_number,
-     billing_provinceTo: this.state.billing_provinceTo,
+     billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),
      billing_cityTo: this.state.billing_cityTo,
      billing_streetTo: this.state.billing_streetTo,
      billing_postalTo: this.state.billing_postalTo,

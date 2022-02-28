@@ -207,7 +207,7 @@ console.log('city.length: ',city.length)
               address: this.state.address,
               barangay: this.state.selectedBarangay,
               city: this.state.selectedCity.trim(),
-              province: this.state.province,
+              province: this.state.province.toLowerCase(),
               postal:'8600',
               lat:this.state.userPoint.latitude,
               long:this.state.userPoint.longitude,

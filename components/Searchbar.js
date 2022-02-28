@@ -601,7 +601,7 @@ async addonsdeleteCart(item){
     return (
       <Container style={{flex: 1}}>
        <CustomHeader title={'Search from '+this.state.store_name}  navigation={this.props.navigation} currency={this.props.route.params.currency}/>
-        <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#f06767', elevation: 0}}>
+        <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
                 <Fontisto name="search" size={20} color={"#000000"}/>
                 <Input placeholder="Search..."

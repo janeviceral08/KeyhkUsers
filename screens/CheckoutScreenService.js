@@ -130,7 +130,7 @@ export default class CheckoutScreenService extends Component {
       loading: false,
       address_list:[],
       visibleAddressModal: false,
-      SelectedPricing:datas.StatDayPrice == true?'Day':datas.StatHourPrice == true?'Hour':datas.StatWeeklyPrice == true?'Weekly':'Monthly',
+      SelectedPricing:datas.ratemode == 'Others'?datas.newratemode:datas.StatDayPrice == true?'Day':datas.StatHourPrice == true?'Hour':datas.StatWeeklyPrice == true?'Weekly':'Monthly',
       minimum: 0,
       selectedIndex: 0,
       selectedIndices: [0],  
@@ -899,7 +899,7 @@ console.log('out: ', out);
       />
                     </Item>
 
-<Text style={{marginTop: 15, fontSize: 10}}>No of {this.state.datas.StatHourPrice == true?'Hours':this.state.datas.StatDayPrice == true?'Days':this.state.datas.StatWeeklyPrice == true?'Weeks':'Months'}</Text>
+<Text style={{marginTop: 15, fontSize: 10}}>No of {this.state.datas.ratemode == 'Others'?this.state.datas.newratemode:this.state.datas.StatHourPrice == true?'Hours':this.state.datas.StatDayPrice == true?'Days':this.state.datas.StatWeeklyPrice == true?'Weeks':'Months'}</Text>
        <Item regular style={{marginTop: 7}}>
              <Input placeholder={this.state.Duration}  value={this.state.Duration} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: this.setState({Duration: text})}} placeholderTextColor="#687373" />
          </Item>
@@ -1120,7 +1120,7 @@ console.log('out: ', out);
                        
                         <Grid  style={{padding: 8}}>
                             <Col>
-                                <Text style={{fontSize: 13,  color:'green'}}>Duration ({this.state.Duration}{this.state.SelectedPricing})</Text>
+                                <Text style={{fontSize: 13,  color:'green'}}>{this.state.Duration} {this.state.SelectedPricing}</Text>
                             </Col>
                          
                         </Grid>
@@ -1167,7 +1167,7 @@ let StatHourPrice = this.state.datas.StatHourPrice == true?'Hour':null;
 let StatWeeklyPrice = this.state.datas.StatWeeklyPrice == true?'Weekly':null;
 let StatMonthlyPrice = this.state.datas.StatMonthlyPrice == true?'Monthly':null;
     let DropdownSelect =[StatHourPrice,StatDayPrice,StatWeeklyPrice,StatMonthlyPrice ];
-    let pricetoPay = this.state.datas.StatHourPrice == true?this.state.datas.HourPrice:this.state.datas.StatDayPrice == true?this.state.datas.DayPrice:this.state.datas.StatWeeklyPrice == true?this.state.datas.WeeklyPrice:this.state.datas.MonthlyPrice;
+    let pricetoPay = this.state.datas.ratemode == 'Others'?this.state.datas.DayPrice: this.state.datas.StatHourPrice == true?this.state.datas.HourPrice:this.state.datas.StatDayPrice == true?this.state.datas.DayPrice:this.state.datas.StatWeeklyPrice == true?this.state.datas.WeeklyPrice:this.state.datas.MonthlyPrice;
 console.log('pricetoPay: ', pricetoPay);
 if(this.state.phone == ''|| this.state.phone == undefined ||this.state.phone == 'Select Phone Number' ){
   Alert.alert(
@@ -1225,6 +1225,7 @@ const b = moment(out_check_extension.toString());
 const diff = b.diff(a, 'hours'); 
 
     const dataNow={
+      newratemode: this.state.datas.newratemode,
       accname:newData.length>0? newData[0].accname:'',
       accno:newData.length>0? newData[0].accno:'',
       bankNote:newData.length>0? newData[0].bankNote:'',
@@ -1268,7 +1269,7 @@ const diff = b.diff(a, 'hours');
           email: this.state.account_email,
           barangay:this.state.account_barangay==undefined?'': this.state.account_barangay,
           city: this.state.account_city.trim(),
-          province: this.state.account_province,
+          province: this.state.account_province.toLowerCase(),
           status: this.state.account_status,
         },
         Billing: {
@@ -1276,7 +1277,7 @@ const diff = b.diff(a, 'hours');
           address: this.state.billing_street,
           phone: this.state.phone,
           barangay:this.state.billing_barangay==undefined?'': this.state.billing_barangay,
-          province: this.state.billing_province,
+          province: this.state.billing_province.toLowerCase(),
           billing_city: this.state.billing_city.trim(),
     
         },
@@ -1294,7 +1295,7 @@ const diff = b.diff(a, 'hours');
     
         billing_nameTo: this.state.billing_nameTo,
         billing_phoneTo:this.state.phone,
-        billing_provinceTo: this.state.billing_provinceTo,
+        billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),
         billing_cityTo: this.state.billing_cityTo,
         billing_streetTo: this.state.billing_streetTo,
         billing_postalTo: this.state.billing_postalTo,

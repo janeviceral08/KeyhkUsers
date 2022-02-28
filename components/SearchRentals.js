@@ -657,26 +657,52 @@ export default class SearchRentals extends Component {
 
 
 :rentalType =='Property'?
- <CardItem style={{paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:1 ,width:SCREEN_WIDTH/2-10}}>
-  <TouchableOpacity style={{width:SCREEN_WIDTH/2-10, flex: 1}} onPress={()=>this.setState({vInfo: data, VisibleAddInfoP: true,MonthlyPrice: data.MonthlyPrice.toString(),
+<CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:0.5,width:SCREEN_WIDTH/2-10 }}>
+      <TouchableOpacity style={{width:SCREEN_WIDTH/2-10, flex: 1}} onPress={()=>this.setState({vInfo: data, VisibleAddInfoP: true,MonthlyPrice: data.MonthlyPrice.toString(),
         DayPrice: data.DayPrice.toString(),
         HourPrice: data.HourPrice.toString(),
         WeeklyPrice: data.WeeklyPrice.toString(),})}>
-
-
-           <Image style={styles.productPhoto} resizeMode="cover" source={{uri:newData[0]}} />
+      <FastImage style={styles.productPhoto} source={{ uri: newData[0], headers: { Authorization: 'someAuthToken' },
+                  priority: FastImage.priority.normal, }} 
+                  resizeMode={FastImage.resizeMode.cover}
+      >
+      <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
+  bottom:0, width: '100%'}}>
+      <View style={{height:20,flexShrink: 1, }}>
+        <Text  numberOfLines={1} style={styles.categoriesStoreName}>{name}</Text>
+      </View>  
+            {!admin_control || !status ? 
+         <View style={styles.text}>
+         <Text style={styles.title}>Unavailable</Text>
+       </View>
+        :   quantity  <= 0  ?
+        <View style={styles.text}>
+        <Text style={styles.title}>Out of Stock</Text>
+      </View>
+        : 
+         null
+      }
      
-    <View style={{height:20,flexShrink: 1}}>
-      <Text  numberOfLines={1} style={styles.categoriesStoreName}>{name}</Text>
-    </View>  
-   <View style={{flexDirection: 'row'}}>
+     
+    <View style={{flexDirection: 'row'}}>
    <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Location :{address}</Text>
    
    
 </View>
-
-     
-{!StatHourPrice?null:
+        <View>
+        {!data.StatHourPrice3?null:
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.route.params.currency}{parseFloat(data.HourPrice3).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+     }
+        
+        {!data.StatHourPrice6?null:
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.route.params.currency}{parseFloat(data.HourPrice6).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+     }
+        
+        {!data.StatHourPrice12?null:
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.route.params.currency}{parseFloat(data.HourPrice12).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+     }
+        
+  {!StatHourPrice?null:
 <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.route.params.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
      }
         
@@ -689,9 +715,16 @@ export default class SearchRentals extends Component {
      {!StatMonthlyPrice?null:
 <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.route.params.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
      }
+        </View>
         
-  </TouchableOpacity>
-  </CardItem>
+        </View>
+        </FastImage>
+    </TouchableOpacity>
+    </CardItem>
+
+
+
+
 
 :rentalType =='Hotels'?
 
@@ -772,7 +805,7 @@ export default class SearchRentals extends Component {
       <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, }}>
-        <Text  numberOfLines={1} style={styles.categoriesStoreName}>{name}</Text>
+        <Text  numberOfLines={1} style={styles.categoriesStoreName}>{rentalType == 'Equipment'?name: MBrand+' '+VModel}{name}</Text>
       </View>  
             {!admin_control || !status ? 
          <View style={styles.text}>
@@ -787,8 +820,9 @@ export default class SearchRentals extends Component {
       }
      
      
-        <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>
-          <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Model : {VModel}</Text>
+        {rentalType == 'Equipment'?<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>:null}
+         {rentalType == 'Equipment'? <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Model : {VModel}</Text>:null}
+         {rentalType == 'Vehicle'? <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Type : {name}</Text>:null}
   <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Color : {ColorMotor}</Text>
 
         
@@ -815,7 +849,8 @@ export default class SearchRentals extends Component {
     </CardItem>
 
 
-: <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:0.5,width:SCREEN_WIDTH/2-10 }}>
+: 
+<CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:0.5,width:SCREEN_WIDTH/2-10 }}>
       <TouchableOpacity style={{width:SCREEN_WIDTH/2-10, flex: 1}} onPress={()=> this.router(data) }>
       <FastImage style={styles.productPhoto} source={{ uri: featured_image, headers: { Authorization: 'someAuthToken' },
                   priority: FastImage.priority.normal, }} 
@@ -891,7 +926,7 @@ export default class SearchRentals extends Component {
     return (
       <Container style={{flex: 1}}>
        <CustomHeader title={'Search from '+this.state.store_name}  navigation={this.props.navigation} fromPlace={this.props.route.params.fromPlace} currency={this.props.route.params.currency}/>
-        <Header searchBar rounded androidStatusBarColor={'#696969'} style={{backgroundColor: '#019fe8', elevation: 0}}>
+        <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
                 <Fontisto name="search" size={20} color={"#000000"}/>
                 <Input placeholder="Search..."
@@ -1044,20 +1079,18 @@ export default class SearchRentals extends Component {
        
       )}
     />
+
+<Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.rentalType == 'Vehicle'? this.state.vInfo.MBrand+' '+this.state.vInfo.VModel:this.state.vInfo.name} </Text></Text>
+         
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.description}</Text> </Text>
+     
+        
+                      
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.ameneties}</Text></Text>
+        
+
              
-         <Text style={{marginTop: 15, fontSize: 10}}>Label</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.vInfo.name}  value={this.state.vInfo.name} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Description</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.description} placeholderTextColor="#687373" />
-         </Item>
-       
-         <Text style={{marginTop: 15, fontSize: 10}}>Ameneties</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.ameneties} placeholderTextColor="#687373" />
-         </Item>
+  
 
 
            </ScrollView>   
@@ -1105,29 +1138,15 @@ export default class SearchRentals extends Component {
       )}
     />
              
-         <Text style={{marginTop: 15, fontSize: 10}}>Label</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.vInfo.name}  value={this.state.vInfo.name} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Location</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.vInfo.address}  value={this.state.vInfo.address}placeholderTextColor="#687373" />
-         </Item>
-        
-        <Text style={{marginTop: 15, fontSize: 10}}>Detailed Address</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.DetailedAddress} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Description</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.description} placeholderTextColor="#687373" />
-         </Item>
+             <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.rentalType == 'Vehicle'? this.state.vInfo.MBrand+' '+this.state.vInfo.VModel:this.state.vInfo.name} </Text></Text>
+         
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.description}</Text> </Text>
+     
         
                       
-         <Text style={{marginTop: 15, fontSize: 10}}>Ameneties</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.ameneties} placeholderTextColor="#687373" />
-         </Item>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.ameneties}</Text></Text>
+        
+
 
 
            </ScrollView>   
@@ -1177,28 +1196,14 @@ export default class SearchRentals extends Component {
       )}
     />
              
-         <Text style={{marginTop: 15, fontSize: 10}}>Label</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.vInfo.name}  value={this.state.vInfo.name} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Location</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.vInfo.address}  value={this.state.vInfo.address}placeholderTextColor="#687373" />
-         </Item>
-        
-        <Text style={{marginTop: 15, fontSize: 10}}>Detailed Address</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.DetailedAddress} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Description</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.description} placeholderTextColor="#687373" />
-         </Item>
+             <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.rentalType == 'Vehicle'? this.state.vInfo.MBrand+' '+this.state.vInfo.VModel:this.state.vInfo.name} </Text></Text>
+         
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.description}</Text> </Text>
      
-         <Text style={{marginTop: 15, fontSize: 10}}>Ameneties</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.vInfo.ameneties} placeholderTextColor="#687373" />
-         </Item>
+        
+                      
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfo.ameneties}</Text></Text>
+        
 
 
            </ScrollView>   

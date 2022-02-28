@@ -263,11 +263,11 @@ console.log('backPress')
     this.setState({selectedCityUser: item})
     this.ref.where('city','==',this.props.selectedCityUser).onSnapshot(this.onCollectionUpdate);
     console.log('citys: ', this.props.selectedCityUser)
-     firestore().collection('stores').where('selectedAccount', '==','Hotels').where('city','==',this.props.selectedCityUser.trim()).onSnapshot(this.onCollectionStoreHotels);
-    firestore().collection('stores').where('selectedAccount', '==','Rental').where('city','==',this.props.selectedCityUser.trim()).onSnapshot(this.onCollectionStoreRental);
-     firestore().collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
-    this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('city','==',this.props.selectedCityUser.trim()).onSnapshot(this.onVrentals)
-      this.cityRef.collection('products').where('rentalType','==', 'Equipment').where('city','==',this.props.selectedCityUser.trim()).onSnapshot(this.onErentals)
+     firestore().collection('stores').where('selectedAccount', '==','Hotels').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onCollectionStoreHotels);
+    firestore().collection('stores').where('selectedAccount', '==','Rental').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onCollectionStoreRental);
+    // firestore().collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
+    this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onVrentals)
+      this.cityRef.collection('products').where('rentalType','==', 'Equipment').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onErentals)
   }
    async getUserCity(){
      

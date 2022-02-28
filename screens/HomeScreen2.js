@@ -434,10 +434,10 @@ console.log("UserLocationCountry ", UserLocationCountry)
    const newUserLocationCountry = this.state.UserLocationCountry.trim() =='Philippines'?'vehicles':this.state.UserLocationCountry.trim()+'.vehicles';
    console.log('newUserLocationCountry: ',newUserLocationCountry)
    firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
-    this.cityRef.collection('products').where('rentalType','==', 'Property').where('city','==',NewCityItem).onSnapshot(this.onPrentals)
-    this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('city','==',NewCityItem).onSnapshot(this.onVrentals)
+    this.cityRef.collection('products').where('rentalType','==', 'Property').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onPrentals)
+    this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onVrentals)
      
-      firestore().collection('stores').where('city','==',NewCityItem).where('Account', '==', 'Food Delivery').where('wallet', '>', 0).onSnapshot(querySnapshot=>{
+      firestore().collection('stores').where('arrayofCity','array-contains-any',[NewCityItem]).where('Account', '==', 'Food Delivery').where('wallet', '>', 0).onSnapshot(querySnapshot=>{
         const city = [];
             querySnapshot.docs.forEach(doc => {
             city.push(doc.data());
@@ -942,28 +942,70 @@ renderItem={({ item }) =>
 enableEmptySections={true}
 />*/}
 <View style={{flexDirection: 'row'}}>
-<TouchableOpacity style={{width: SCREEN_WIDTH/6,}} onPress={()=>this.setState({selectedIndex: 0})}>
+<TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: SCREEN_WIDTH/6,}} onPress={()=>this.setState({selectedIndex: 0})}>
          <MaterialIcons name={'storefront'} size={this.state.selectedIndex == 0? 30:30} color={this.state.selectedIndex == 0?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 0?'#ee4e4e':'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
-    <TouchableOpacity style={{width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 1})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 1})}>
        <Ionicons name={'md-key-outline'} size={this.state.selectedIndex == 1? 30:30} color={this.state.selectedIndex == 1?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 1?'#396ba0':'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
-    <TouchableOpacity style={{width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 2})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 2})}>
 <MaterialCommunityIcons name={'car-multiple'}  size={this.state.selectedIndex == 2? 30:30} color={this.state.selectedIndex == 2?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 2?'#28ae07':'white',borderRadius: 15, padding: 5}}/>
     
 
     </TouchableOpacity>
-    <TouchableOpacity style={{width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 3})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 3})}>
 <MaterialCommunityIcons name={'account-hard-hat'}  size={this.state.selectedIndex == 3? 30:30} color={this.state.selectedIndex == 3?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 3?'#fd7823':'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
-    <TouchableOpacity style={{width: SCREEN_WIDTH/6}} onPress={()=> this.props.navigation.navigate('Account')}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=> this.props.navigation.navigate('Account')}>
 <MaterialCommunityIcons name={'menu'}  size={this.state.selectedIndex == 4? 35:30} color={this.state.selectedIndex == 4?'#396ba0':'#525252'} style={{alignSelf: 'center', backgroundColor: 'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
-    <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedIndex == 1?this.props.navigation.navigate('SearchRentals',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace }):this.state.selectedIndex == 3?this.props.navigation.navigate('SearchServices',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace':  this.state.fromPlace}):this.props.navigation.navigate('SearchAll',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24, width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedIndex == 1?this.props.navigation.navigate('SearchRentals',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace }):this.state.selectedIndex == 3?this.props.navigation.navigate('SearchServices',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace':  this.state.fromPlace}):this.props.navigation.navigate('SearchAll',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
         
         <Fontisto name="search" size={20} color={"#525252"} style={{alignSelf: 'flex-start', backgroundColor: 'white',borderRadius: 15, padding: 9}}/>
         </TouchableOpacity>
@@ -993,15 +1035,36 @@ tabsContainerStyle={{width: SCREEN_WIDTH-30,alignSelf: 'center',}}
           activeTabStyle={{backgroundColor: '#666666',}}
   />*/}
         <View style={{flexDirection: 'row',marginLeft: 15 }}>
-<TouchableOpacity style={{width: (SCREEN_WIDTH-50)/3,backgroundColor: this.state.selectedcategories ==0 ?'#f06767':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 0})}>
+<TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: (SCREEN_WIDTH-50)/3,backgroundColor: this.state.selectedcategories ==0 ?'#f06767':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 0})}>
          <FontAwesome5 name={'hamburger'} size={15} color={this.state.selectedcategories ==0 ?'white':'#525252'} />
     <Text style={{color: this.state.selectedcategories ==0 ?'white':'#525252',}}> Fastfood</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={{width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==1 ?'#f28080':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({selectedcategories: 1})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==1 ?'#f28080':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({selectedcategories: 1})}>
        <MaterialCommunityIcons name={'fruit-watermelon'} size={15} color={this.state.selectedcategories ==1 ?'white':'#525252'}/>
        <Text style={{color: this.state.selectedcategories ==1 ?'white':'#525252',}}> Produce etc.</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={{width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==2 ?'#f06767':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 2})}>
+    <TouchableOpacity style={{shadowColor: "#000",
+shadowOffset: {
+	width: 0,
+	height: 12,
+},
+shadowOpacity: 0.58,
+shadowRadius: 16.00,
+elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==2 ?'#f06767':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 2})}>
 <Fontisto name={'shopping-bag-1'}  size={15} color={this.state.selectedcategories ==2 ?'white':'#525252'} />
 <Text style={{color: this.state.selectedcategories ==2 ?'white':'#525252',}}>Gen. Merch.</Text>
 
