@@ -309,7 +309,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
 
 
              this.setState({
-               UserLocationCountry: UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(),
+               UserLocationCountry: UserLocationCountry.trim(),
            })
            this.getAllCity()
        }).catch(err => {
@@ -1066,7 +1066,7 @@ shadowOpacity: 0.58,
 shadowRadius: 16.00,
 elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==2 ?'#f06767':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 2})}>
 <Fontisto name={'shopping-bag-1'}  size={15} color={this.state.selectedcategories ==2 ?'white':'#525252'} />
-<Text style={{color: this.state.selectedcategories ==2 ?'white':'#525252',}}>Gen. Merch.</Text>
+<Text style={{color: this.state.selectedcategories ==2 ?'white':'#525252',}}>  Gen. Merch.</Text>
 
     </TouchableOpacity>
     </View>

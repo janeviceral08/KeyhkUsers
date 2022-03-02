@@ -208,6 +208,8 @@ export default class CheckoutTransport extends Component {
       willingtopay:false,
       tip:0,
       paymentMethods:[],
+      present: -1,
+      carsAvailable:[],
   };
   this.getLocation();
 
@@ -426,7 +428,7 @@ console.log("arr", arr)
   getLocation (){
 
  const newUserLocationCountry = this.props.route.params.UserLocationCountry =='Philippines'?'vehicles':this.props.route.params.UserLocationCountry+'.vehicles';
- firestore().collection(newUserLocationCountry).where('vehicle', '==', this.state.datas.vehicle).onSnapshot((querySnapshot) => {
+ firestore().collection(newUserLocationCountry).where('vehicle', '==', this.props.route.params.datas.vehicle).onSnapshot((querySnapshot) => {
     querySnapshot.forEach((doc) => {
 console.log('doc.data(): ', doc.data())
       this.setState({
@@ -538,6 +540,22 @@ console.log('doc.data(): ', doc.data())
     ]);
     return true;
   };
+  onCollectionVehicles = (querySnapshot) => {
+    const products = [];
+    querySnapshot.forEach((doc) => {
+      //console.log('products: ', doc.data())
+      if(doc.data().vehicle != this.state.datas.vehicle)
+   {  products.push ({
+       
+            datas : doc.data(),
+            key : doc.id
+            });
+          }
+    });
+   // console.log('products: ', products)
+      this.setState({loading: false,  carsAvailable: products})
+   // this.arrayholder = products;
+  }
 
   componentDidMount() {
       this.backHandler = BackHandler.addEventListener(
@@ -545,7 +563,9 @@ console.log('doc.data(): ', doc.data())
       this.backAction
     );
      const newUserLocationCountry = this.props.route.params.UserLocationCountry.trim() =='Philippines'?'AppShare':this.props.route.params.UserLocationCountry.trim()+'.AppShare';
-
+     const newUserLocationCountryVehicles = this.props.route.params.UserLocationCountry.trim() =='Philippines'?'vehicles':this.props.route.params.UserLocationCountry.trim()+'.vehicles';
+     console.log('newUserLocationCountry: ',newUserLocationCountry)
+     firestore().collection(newUserLocationCountryVehicles).where('succeed', '>',0).onSnapshot(this.onCollectionVehicles);
     firestore().collection(newUserLocationCountry).where('label', '==', 'rides').onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
   console.log('modeOfPayment', doc.data().modeOfPayment)
@@ -1131,6 +1151,50 @@ if(this.state.visibleAddressModal == true)
 
 
 
+  changeVehicleAdd (){
+ /*   this.setState({
+              present: this.state.present+1,
+      })*/
+    console.log('Pressed', this.state.present)
+    this.setState({
+      datas:this.state.carsAvailable[this.state.present+1].datas,
+      succeding: this.state.carsAvailable[this.state.present+1].datas.succeed,
+      amount_base: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.carsAvailable[this.state.present+1].datas.base_fare:this.props.route.params.typeOfRate =='City Rate'?this.state.carsAvailable[this.state.present+1].datas.City:this.state.carsAvailable[this.state.present+1].datas.Metro,
+      base_dist: this.state.carsAvailable[this.state.present+1].datas.base,
+        Metro: this.state.carsAvailable[this.state.present+1].datas.Metro,
+          City: this.state.carsAvailable[this.state.present+1].datas.City,
+            SCity: this.state.carsAvailable[this.state.present+1].datas.SCity,
+              SMetro: this.state.carsAvailable[this.state.present+1].datas.SMetro,
+              RiderToken: this.state.carsAvailable[this.state.present+1].datas.tokens,
+              present: this.state.present+1,
+      })
+  }
+
+
+  changeVehicleMinus (){
+    console.log('Pressed', this.state.present-1)
+  if(this.state.present-1 >= 0){  this.setState({
+      datas:this.state.carsAvailable[this.state.present-1].datas,
+      succeding: this.state.carsAvailable[this.state.present-1].datas.succeed,
+      amount_base: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.carsAvailable[this.state.present-1].datas.base_fare:this.props.route.params.typeOfRate =='City Rate'?this.state.carsAvailable[this.state.present-1].datas.City:this.state.carsAvailable[this.state.present-1].datas.Metro,
+      base_dist: this.state.carsAvailable[this.state.present-1].datas.base,
+        Metro: this.state.carsAvailable[this.state.present-1].datas.Metro,
+          City: this.state.carsAvailable[this.state.present-1].datas.City,
+            SCity: this.state.carsAvailable[this.state.present-1].datas.SCity,
+              SMetro: this.state.carsAvailable[this.state.present-1].datas.SMetro,
+              RiderToken: this.state.carsAvailable[this.state.present-1].datas.tokens,
+              present: this.state.present-1,
+      })}
+      else{
+      this.getLocation();
+      this.setState({
+        datas: this.props.route.params.datas,
+                present: this.state.present-1,
+        })
+
+      }
+      
+  }
 
   render() {
     const { paymentMethod, minimum, selectedIndex, selectedIndices, customStyleIndex, slatitude, slongitude, lat, ULat,summary } = this.state;
@@ -1442,19 +1506,23 @@ console.log("province", province)
               
             </Card>*/} 
               <Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/3:SCREEN_HEIGHT/5, borderTopRightRadius: 20, borderTopLeftRadius: 20,}}>
-
+              { this.state.present < 0? null: <TouchableOpacity style={{position: 'absolute',  top: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/9:SCREEN_HEIGHT/13, flex: 100}} onPress={()=> this.changeVehicleMinus()}>
+<MaterialIcons name="keyboard-arrow-left" size={30} color={'black'} onPress={()=> this.changeVehicleMinus()} />       
+         
+</TouchableOpacity>
+}
               <View style={{flexDirection: 'row'}}>
 <View style={{flexDirection: 'column', width: SCREEN_WIDTH/2}}>
-<Text style={{fontSize: SCREEN_HEIGHT < 767?18:28, marginLeft: 20, paddingTop: 10, fontWeight: 'bold'}}>
+<Text style={{fontSize: SCREEN_HEIGHT < 767?18:28, marginLeft: 25, paddingTop: 10, fontWeight: 'bold'}}>
 {this.state.datas.vehicle}
 </Text>
-<Text style={{fontSize: SCREEN_HEIGHT < 767?10:13, marginLeft: 20,  fontWeight: 'bold'}}>
+<Text style={{fontSize: SCREEN_HEIGHT < 767?10:13, marginLeft: 25,  fontWeight: 'bold'}}>
 Base fare: 
-<NumberFormat  renderText={text => <Text style={{fontSize: SCREEN_HEIGHT < 767?10:13, marginLeft: 20,}}> {text}</Text>} value={this.props.route.params.typeOfRate =='Municipal Rate'?this.state.datas.base_fare:this.props.route.params.typeOfRate =='City Rate'?this.state.datas.City:this.state.datas.Metro} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} />
+<NumberFormat  renderText={text => <Text style={{fontSize: SCREEN_HEIGHT < 767?10:13, marginLeft: 25,}}> {text}</Text>} value={this.props.route.params.typeOfRate =='Municipal Rate'?this.state.datas.base_fare:this.props.route.params.typeOfRate =='City Rate'?this.state.datas.City:this.state.datas.Metro} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} />
 </Text>
 {this.state.summary === undefined? null: 
-            <Text style={{fontSize: SCREEN_HEIGHT < 767?15:20, marginLeft: 20,  fontWeight: 'bold'}}>
-            Fare: <NumberFormat  renderText={text => <Text style={{fontSize: SCREEN_HEIGHT < 767?15:20, marginLeft: 20,}}> {text}</Text>} value={this.state.summary === undefined? null: distanceAmount < 1?this.state.amount_base: Math.round((actualAmountPay*10)/10)} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} /> </Text>     
+            <Text style={{fontSize: SCREEN_HEIGHT < 767?15:20, marginLeft: 25,  fontWeight: 'bold'}}>
+            Fare: <NumberFormat  renderText={text => <Text style={{fontSize: SCREEN_HEIGHT < 767?15:20, marginLeft: 25,}}> {text}</Text>} value={this.state.summary === undefined? null: distanceAmount < 1?this.state.amount_base: Math.round((actualAmountPay*10)/10)} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} /> </Text>     
                }
   {this.state.summary === undefined? null:<View style={{ height: 40, alignItems: 'center', marginBottom: 10}}>
 							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: '#53BE38', borderRadius: 5, padding: 10, width: '100%',}]} onPress={() => {this.state.uid == null?  this.props.navigation.navigate('Login') :this.setState({VisibleAddInfo: true})}}>
@@ -1466,8 +1534,11 @@ Base fare:
 <Image style={{  width: SCREEN_WIDTH/2.2, height:SCREEN_WIDTH/2, resizeMode: 'contain', marginTop: -30}} source={{uri: this.state.datas.image[0]}} />
 </View>
 </View>
-
-
+{ this.state.present >= this.state.carsAvailable.length? null: <TouchableOpacity style={{position: 'absolute', right: 0, top: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/9:SCREEN_HEIGHT/13, flex: 100}} onPress={()=> this.changeVehicleAdd()}>
+<MaterialIcons name="keyboard-arrow-right" size={30} color={'black'} onPress={()=> this.changeVehicleAdd()} />       
+         
+</TouchableOpacity>
+}
 </Card>
     
     

@@ -1033,12 +1033,12 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
          </View>
    {this.state.selectedIndex ==0 ?
    <View style={{flexDirection: 'row', marginLeft: 30,}}>
-       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2, marginBottom: 2,}}>Delivery</Text></View>
+       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2, marginBottom: 2,color: 'black'}}>Delivery</Text></View>
    :this.state.selectedIndex ==1 ?<View style={{flexDirection: 'row', marginLeft: 30, marginBottom: 2}}>
        <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Rentals</Text></View>
    :this.state.selectedIndex ==2 ?<View style={{flexDirection: 'row', marginLeft: 30}}>
        <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Ride</Text></View>
-   :<View style={{flexDirection: 'row', marginLeft: 30}}>
+   :<View style={{flexDirection: 'row', marginLeft: 30, marginBottom:5}}>
       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Services</Text></View>
   }
         <Loader loading={this.state.loading}/>
@@ -1085,7 +1085,7 @@ shadowOpacity: 0.58,
 shadowRadius: 16.00,
 elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==2 ?'#f06767':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 2})}>
 <Fontisto name={'shopping-bag-1'}  size={15} color={this.state.selectedcategories ==2 ?'white':'#525252'} />
-<Text style={{color: this.state.selectedcategories ==2 ?'white':'#525252',}}>Gen. Merch.</Text>
+<Text style={{color: this.state.selectedcategories ==2 ?'white':'#525252',}}>  Gen. Merch.</Text>
 
     </TouchableOpacity>
     </View>
