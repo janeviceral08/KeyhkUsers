@@ -10,7 +10,7 @@ import {
     StatusBar,
     BackHandler,
     Alert,
-    FlatList,Image
+    FlatList,Image,Animated
 } from 'react-native';
 import {  Overlay  } from 'react-native-elements';
 import {Card, Container, Button, CardItem, Item, Input} from 'native-base'
@@ -37,6 +37,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 export default class SignupNumber extends Component  {
     constructor() {
         super();
+        this.Rotatevalue = new Animated.Value(0);
         this.state = {
           user: null,
           email: "",
@@ -126,6 +127,7 @@ export default class SignupNumber extends Component  {
       };
 
       componentDidMount(){
+        this.StartImageRotationFunction()
 
         firestore().collection('AvailableOn').where('status', '==', true).orderBy('label', 'asc').onSnapshot(
             querySnapshot => {
@@ -144,13 +146,33 @@ export default class SignupNumber extends Component  {
         );
       }
    
-    render(){
+      StartImageRotationFunction(){
+        this.Rotatevalue.setValue(0);
+        Animated.timing(this.Rotatevalue,{
+          toValue:1,
+          duration:3000,
+        }).start(()=>this.StartImageRotationFunction());
+      }
+      render() {
+    //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+       //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+       //  console.log('CountryNow: ', this.state.CountryNow)
+       const RotateData = this.Rotatevalue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '368deg']
+      })
+    
+      const trans={
+        transform:[
+          {rotate: RotateData}
+        ]
+      }
       //  console.log('current: ', auth().currentUser.uid)
       //  console.log('current currentUser: ', auth().currentUser)
 
     return (
       <Container style={styles.container}>
-          <Loader loading={this.state.loading}/>
+          <Loader loading={this.state.loading} trans={trans}/>
         <View>
         <View style={styles.header}>
             <Text style={[styles.error,{textAlign: 'center'}]}>{this.state.errorMessage}</Text>

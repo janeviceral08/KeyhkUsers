@@ -10,7 +10,7 @@ import {
     StyleSheet ,
     StatusBar,
     BackHandler,
-    Alert
+    Alert,Animated
 } from 'react-native';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -39,6 +39,7 @@ GoogleSignin.configure({
 export default class SignInScreen extends Component  {
     constructor() {
         super();
+        this.Rotatevalue = new Animated.Value(0);
         this.state = {
           user: null,
           email: "",
@@ -49,6 +50,7 @@ export default class SignInScreen extends Component  {
         };
       }
       componentDidMount() {
+        this.StartImageRotationFunction()
         messaging().getToken().then(token=>{
           console.log('token: ', token)
           AsyncStorage.setItem('token', token)
@@ -201,10 +203,30 @@ messaging().getToken().then(token => {
            
         }
         
-    render(){
+        StartImageRotationFunction(){
+          this.Rotatevalue.setValue(0);
+          Animated.timing(this.Rotatevalue,{
+            toValue:1,
+            duration:3000,
+          }).start(()=>this.StartImageRotationFunction());
+        }
+        render() {
+      //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+         //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+         //  console.log('CountryNow: ', this.state.CountryNow)
+         const RotateData = this.Rotatevalue.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '368deg']
+        })
+      
+        const trans={
+          transform:[
+            {rotate: RotateData}
+          ]
+        }
     return (
       <Container style={styles.container}>
-          <Loader loading={this.state.loading}/>
+          <Loader loading={this.state.loading} trans={trans}/>
         <View>
         <View style={styles.header}>
             <Text style={styles.error}>{this.state.errorMessage}</Text>

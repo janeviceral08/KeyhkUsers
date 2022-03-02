@@ -4,7 +4,7 @@
 
 // React native and others libraries imports
 import React, { Component } from 'react';
-import { TouchableHighlight, BackHandler, TouchableOpacity,Linking } from 'react-native';
+import { TouchableHighlight, BackHandler, TouchableOpacity,Linking,Animated } from 'react-native';
 import { Container, Content, View, Grid, Col, Left, Right, Button, Icon, List,Thumbnail, ListItem, Body, Radio, Input, Item,Text,Toast, Root, Row } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
@@ -17,6 +17,7 @@ import Zocial from 'react-native-vector-icons/Zocial';
 export default class SupportScreen extends Component {
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.ref =  firestore();
       this.state = {
         contact: '',
@@ -72,13 +73,37 @@ updateTextInput = (text, field) => {
   this.setState(state);
 }
 
-  render() {
+componentDidMount() {
+  this.StartImageRotationFunction()
+}
+
+StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+  }).start(()=>this.StartImageRotationFunction());
+}
+render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+ //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+ //  console.log('CountryNow: ', this.state.CountryNow)
+ const RotateData = this.Rotatevalue.interpolate({
+  inputRange: [0, 1],
+  outputRange: ['0deg', '368deg']
+})
+
+const trans={
+  transform:[
+    {rotate: RotateData}
+  ]
+}
    const {fbpage1, fbpage2, fbpage3, fbpage4, fbpage5, fblink1, fblink2, fblink3,fblink4, fblink5} = this.state;
     return(
       <Root>
       <Container style={{backgroundColor: '#fdfdfd'}}>
       <CustomHeader title="Contact Us"  Cartoff={true} navigation={this.props.navigation}/>
-            <Loader loading={this.state.isLoading}/>
+            <Loader loading={this.state.isLoading}  trans={trans}/>
         <Content padder>
           <View>
             <Text style={{marginTop: 15, fontSize: 16}}>To Follow up your orders contact:</Text>

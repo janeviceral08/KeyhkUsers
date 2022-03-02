@@ -1,11 +1,19 @@
 import React from 'react';
-import { View, Text, ImageBackground, Image,Dimensions } from 'react-native';
+import { View, Text, ImageBackground, Image,Dimensions,Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 //import {fcmService} from './FCM/FCMService'
 import {Container, Header} from 'native-base';
+import { Easing } from 'react-native-reanimated';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
+
+
 class SplashScreen extends React.Component {
+  constructor(props){
+    super(props)
+    this.Rotatevalue = new Animated.Value(0);
+  }
+  
   performTimeConsumingTask = async() => {
     return new Promise((resolve) =>
       setTimeout(
@@ -18,42 +26,64 @@ class SplashScreen extends React.Component {
   async componentDidMount() {
     // Preload data from an external API
     // Preload data using AsyncStorage
+    this.StartImageRotationFunction()
+
+   
     const data = await this.performTimeConsumingTask();
     const isLoggedIn= await AsyncStorage.getItem('uid');
     
-    if (data !== null) {
+   if (data !== null) {
       this.props.navigation.reset({
         index: 0,
         routes: [{ name: isLoggedIn? 'Home' : 'Home2'}],})
     }
 
   }
-
+  StartImageRotationFunction(){
+    this.Rotatevalue.setValue(0);
+    Animated.timing(this.Rotatevalue,{
+      toValue:1,
+      duration:3000,
+    }).start(()=>this.StartImageRotationFunction());
+  }
 
 
   render() {
+
+    const RotateData = this.Rotatevalue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '368deg']
+    })
+
+    const trans={
+      transform:[
+        {rotate: RotateData}
+      ]
+    }
     return (
       <View style={styles.viewStyles}>
-   <Header androidStatusBarColor="#a70b0c"  style={{display: 'none'}}>
+   <Header androidStatusBarColor="#ee4e4e"  style={{display: 'none'}}/>
          
-        </Header>
-          <Image
-            source={require('../assets/k.jpg')}
-            style={{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2 }}
-          />
+   <Animated.Image 
+   style={[{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2 }, trans]}  
+   source={require('../assets/k.png')}/>
+
+       
       </View>
     );
   }
 }
 
 const styles = {
+
   viewStyles: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#a70b0c'
+    backgroundColor: '#ee4e4e'
    
   },
+ 
   textStyles: {
     color: 'white',
     fontSize: 40,

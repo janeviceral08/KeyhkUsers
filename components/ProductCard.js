@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { StyleSheet, View, Dimensions,  Image, TouchableOpacity, Alert ,TextInput, TouchableHighlight} from 'react-native';
+import { StyleSheet, View, Dimensions,  Image, TouchableOpacity, Alert ,TextInput, TouchableHighlight,Animated} from 'react-native';
 import { Col, Card, CardItem, Body, Button, Left, ListItem, List, Content, Thumbnail, Right, Text,Grid, Icon,  Container, Header,Toast, Root } from 'native-base';
 
 import { RecyclerListView, DataProvider, LayoutProvider } from 'recyclerlistview';
@@ -22,6 +22,7 @@ export default class Products extends Component {
 
   constructor(props) {
     super(props);
+    this.Rotatevalue = new Animated.Value(0);
     this.cartRef =  firestore().collection('cart');
     this.state = {
       dataProvider: new DataProvider((r1, r2) => {
@@ -207,6 +208,7 @@ export default class Products extends Component {
   }
 
   async componentDidMount(){  
+    this.StartImageRotationFunction()
     const userId= await AsyncStorage.getItem('uid');
     this.setState({ loading: true });   
   
@@ -330,7 +332,27 @@ export default class Products extends Component {
     }
   };
 
+  StartImageRotationFunction(){
+    this.Rotatevalue.setValue(0);
+    Animated.timing(this.Rotatevalue,{
+      toValue:1,
+      duration:3000,
+    }).start(()=>this.StartImageRotationFunction());
+  }
   render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+   //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+   //  console.log('CountryNow: ', this.state.CountryNow)
+   const RotateData = this.Rotatevalue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '368deg']
+  })
+
+  const trans={
+    transform:[
+      {rotate: RotateData}
+    ]
+  }
        const {selectedFilter} = this.state;
     return (
       <Root>
@@ -358,7 +380,7 @@ export default class Products extends Component {
               </TouchableOpacity>
             </Left>
         </Header>
-        <Loader loading={this.state.loading}/>
+        <Loader loading={this.state.loading} trans={trans}/>
         <RecyclerListView
           style={{flex: 1, marginHorizontal: 5}}
           rowRenderer={this.rowRenderer}

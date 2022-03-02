@@ -4,7 +4,7 @@
 
 // React native and others libraries imports
 import React, { Component } from 'react';
-import { TouchableHighlight, BackHandler,ScrollView, TouchableOpacity, Image } from 'react-native';
+import { TouchableHighlight, BackHandler,ScrollView, TouchableOpacity, Image,Animated } from 'react-native';
 import { Container, View, Grid, Col, Left, Right, Button, Icon, List,Thumbnail, ListItem, Body, Radio, Input, Item,Text,Toast, Root } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
@@ -20,6 +20,7 @@ import * as ImagePicker from "react-native-image-picker"
 export default class Profile extends Component {
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.ref =  firestore();
       this.state = {
         name: '',
@@ -90,14 +91,37 @@ updateTextInput = (text, field) => {
   state[field] = text;
   this.setState(state);
 }
+componentDidMount() {
+  this.StartImageRotationFunction()
+}
+ 
+StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+  }).start(()=>this.StartImageRotationFunction());
+}
+render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+ //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+ //  console.log('CountryNow: ', this.state.CountryNow)
+ const RotateData = this.Rotatevalue.interpolate({
+  inputRange: [0, 1],
+  outputRange: ['0deg', '368deg']
+})
 
-  render() {
+const trans={
+  transform:[
+    {rotate: RotateData}
+  ]
+}
    
     return(
       <Root>
       <Container style={{backgroundColor: '#fdfdfd'}}>
       <CustomHeader title="Account Information"  Cartoff={true} navigation={this.props.navigation}/>
-            <Loader loading={this.state.isLoading}/>
+            <Loader loading={this.state.isLoading} trans={trans}/>
         <ScrollView style={{paddingHorizontal: 10}}>
           <View>
             <Text style={{marginTop: 15, fontSize: 18}}>Personal Information</Text>

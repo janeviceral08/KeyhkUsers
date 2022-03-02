@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dimensions, StyleSheet, FlatList, Image, TouchableOpacity,Text,View,ScrollView,PermissionsAndroid, Alert, Platform, ImageBackground} from 'react-native';
+import {Animated, Dimensions, StyleSheet, FlatList, Image, TouchableOpacity,Text,View,ScrollView,PermissionsAndroid, Alert, Platform, ImageBackground} from 'react-native';
 import { Container, Content, Button, Left, Right,  Card, CardItem, Header,Toast, Root,Item,Input } from 'native-base';
 var {height, width } = Dimensions.get('window');
 import Swiper from 'react-native-swiper'
@@ -111,7 +111,7 @@ export async function request_device_location_runtime_permissions() {
 export default class HomeScreen2 extends Component {
   constructor(props){
     super(props)
-  
+    this.Rotatevalue = new Animated.Value(0);
     this.cityRef =  firestore();
     this.ref =  firestore().collection('carousel');
     this.catref =  firestore().collection('categories');
@@ -695,7 +695,28 @@ let Address ='';
   }
   
  
+  StartImageRotationFunction(){
+    this.Rotatevalue.setValue(0);
+    Animated.timing(this.Rotatevalue,{
+      toValue:1,
+      duration:3000,
+    }).start(()=>this.StartImageRotationFunction());
+  }
   render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+   //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+   //  console.log('CountryNow: ', this.state.CountryNow)
+   const RotateData = this.Rotatevalue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '368deg']
+  })
+
+  const trans={
+    transform:[
+      {rotate: RotateData}
+    ]
+  }
+
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
    //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
    //  console.log('CountryNow: ', this.state.CountryNow)
@@ -1022,7 +1043,7 @@ elevation: 24, width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedInde
    :<View style={{flexDirection: 'row', marginLeft: 30}}>
       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Services</Text></View>
   }
-        <Loader loading={this.state.loading}/>
+        <Loader loading={this.state.loading} trans={trans} />
     {this.state.selectedIndex ==0 ? <View style={{flex: 1,}}>
   {/*    <SegmentedControlTab
           values={this.state.categoriesStores}

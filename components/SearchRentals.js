@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {FlatList, TouchableOpacity, Dimensions, View, Alert, StatusBar, StyleSheet, ScrollView, TouchableHighlight, Image, Pressable} from 'react-native';
+import {FlatList, TouchableOpacity, Dimensions, View, Alert, StatusBar, StyleSheet, ScrollView, TouchableHighlight, Image, Pressable,Animated} from 'react-native';
 import { Col, Card, CardItem, Body, Button, Left, ListItem, List, Content, Thumbnail, Right, Text,Grid, Icon,  Container, Header,Item, Input, Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -24,6 +24,7 @@ import {LayoutUtil} from './LayoutUtil';
 export default class SearchRentals extends Component {
     constructor(props) {
         super(props);
+        this.Rotatevalue = new Animated.Value(0);
     console.log('params: ', this.props.route.params.selectedCityUser)
         this.ref =  firestore().collection('products');
         this.state = {
@@ -402,6 +403,7 @@ export default class SearchRentals extends Component {
 
   
    async componentDidMount() {
+    this.StartImageRotationFunction()
     this.setState({loading: true})
      const userId= auth().currentUser.uid;
      //firestore().collection('products').where('city', '==', this.state.City.trim()).where('admin_control', '==', true).where('status', '==', true).onSnapshot(this.onCollectionUpdate);
@@ -920,7 +922,27 @@ export default class SearchRentals extends Component {
     }
   }
 
+  StartImageRotationFunction(){
+    this.Rotatevalue.setValue(0);
+    Animated.timing(this.Rotatevalue,{
+      toValue:1,
+      duration:3000,
+    }).start(()=>this.StartImageRotationFunction());
+  }
   render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+   //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+   //  console.log('CountryNow: ', this.state.CountryNow)
+   const RotateData = this.Rotatevalue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '368deg']
+  })
+
+  const trans={
+    transform:[
+      {rotate: RotateData}
+    ]
+  }
        console.log('SearchRental');
     const {selectedFilter, activeSlide, productss} = this.state;
     return (
@@ -1023,7 +1045,7 @@ export default class SearchRentals extends Component {
                 </Button>
           </View>
           </Modal>
-        <Loader loading={this.state.loading}/>
+        <Loader loading={this.state.loading}  trans={trans}/>
         {this.searchFilterFunction &&
         
         <RecyclerListView

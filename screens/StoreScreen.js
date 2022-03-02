@@ -5,7 +5,7 @@
 // React native and others libraries imports
 import React, { Component } from 'react';
 import { Container, Content, View, Left, Right, Button, Grid, Col, Badge, Card,Header, Body,Text } from 'native-base';
-import {FlatList,TouchableOpacity, StyleSheet} from 'react-native';
+import {FlatList,TouchableOpacity, StyleSheet,Animated} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
@@ -22,6 +22,7 @@ export default class Stores extends Component {
  
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.cityRef =  firestore();
       this.subscribe=null;
        console.log('params: ',this.props.route.params)
@@ -124,13 +125,34 @@ _bootstrapAsync =async(selected,item) =>{
   }
 
   componentDidMount() {
+    this.StartImageRotationFunction()
     this.getAllCity()
     this.getUserCity();
   
   }
 
 
+  StartImageRotationFunction(){
+    this.Rotatevalue.setValue(0);
+    Animated.timing(this.Rotatevalue,{
+      toValue:1,
+      duration:3000,
+    }).start(()=>this.StartImageRotationFunction());
+  }
   render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+   //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+   //  console.log('CountryNow: ', this.state.CountryNow)
+   const RotateData = this.Rotatevalue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '368deg']
+  })
+
+  const trans={
+    transform:[
+      {rotate: RotateData}
+    ]
+  }
     const { selectedCity } = this.state;
     console.log('this.state.cities: ', this.state.cities)
     return(
@@ -155,7 +177,7 @@ _bootstrapAsync =async(selected,item) =>{
                 dropDownStyle={{backgroundColor: '#ffffff'}}
                 onChangeItem={item => this._bootstrapAsync(true, item.label)}
             />
-            <Loader loading={this.state.loading}/>
+            <Loader loading={this.state.loading}  trans={trans}/>
               <FlatList
                   data={this.state.dataSource}
                   renderItem={({ item }) => (

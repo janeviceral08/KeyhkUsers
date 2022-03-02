@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, ActivityIndicator,Dimensions, Alert, Image, FlatList,TouchableWithoutFeedback, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid} from 'react-native'
+import {StyleSheet, TextInput, TouchableOpacity, ActivityIndicator,Dimensions, Alert, Image, FlatList,TouchableWithoutFeedback, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List,Header,Title, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -81,6 +81,7 @@ export async function request_device_location_runtime_permission() {
 export default class pabiliOrderDetails extends Component {
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.updateref =  firestore();
       this.updatecounts =  firestore();
       this.updateUserOrders =  firestore();
@@ -281,6 +282,7 @@ if(parseFloat(this.state.rating) == 0){
   };
 
   async componentDidMount() {
+    this.StartImageRotationFunction()
      /* this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       this.backAction
@@ -414,7 +416,27 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
 
 
 
+  StartImageRotationFunction(){
+    this.Rotatevalue.setValue(0);
+    Animated.timing(this.Rotatevalue,{
+      toValue:1,
+      duration:3000,
+    }).start(()=>this.StartImageRotationFunction());
+  }
   render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+   //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+   //  console.log('CountryNow: ', this.state.CountryNow)
+   const RotateData = this.Rotatevalue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '368deg']
+  })
+
+  const trans={
+    transform:[
+      {rotate: RotateData}
+    ]
+  }
     const { paymentMethod, minimum, selectedIndex, selectedIndices, customStyleIndex, slatitude, slongitude, lat, ULat,summary } = this.state;
     const copyToClipboard = () => {
       const keys = this.state.ItemList;
@@ -497,8 +519,8 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
       </Button>
     </View>
 </Modal>
-          <Loader loading={this.state.loading}/>     
-     <Loader loading={this.state.isLoading}/>  
+          <Loader loading={this.state.loading} trans={trans}/>     
+     <Loader loading={this.state.isLoading} trans={trans}/>  
      
 <Modal
                   useNativeDriver={true}

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet,TouchableWithoutFeedback, TextInput, ToastAndroid,TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid} from 'react-native'
+import {StyleSheet,TouchableWithoutFeedback, TextInput, ToastAndroid,TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List,Picker, ListItem,Header, Title, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -76,6 +76,7 @@ export async function request_device_location_runtime_permission() {
 export default class Pabili extends Component {
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.updateref =  firestore();
       this.updatecounts =  firestore();
       this.updateUserOrders =  firestore();
@@ -544,6 +545,7 @@ console.log('doc.data(): ', doc.data())
   };
 
   async componentDidMount() {
+    this.StartImageRotationFunction()
      /* this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       this.backAction
@@ -1304,7 +1306,27 @@ addListBulk(){
     }
 }
 
-  render() {
+StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+  }).start(()=>this.StartImageRotationFunction());
+}
+render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+ //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+ //  console.log('CountryNow: ', this.state.CountryNow)
+ const RotateData = this.Rotatevalue.interpolate({
+  inputRange: [0, 1],
+  outputRange: ['0deg', '368deg']
+})
+
+const trans={
+  transform:[
+    {rotate: RotateData}
+  ]
+}
     const { paymentMethod, minimum, selectedIndex, selectedIndices, customStyleIndex, slatitude, slongitude, lat, ULat,summary } = this.state;
  
     let distance = this.state.summary === undefined? null: this.state.summary.distance/1000;
@@ -1360,7 +1382,7 @@ const copyToClipboard = () => {
             <FontAwesome5 name="clipboard-list" size={25} color="white" onPress={()=> this.setState({listModal:true})}/>
           </Right>
         </Header>
-          <Loader loading={this.state.loading}/>     
+          <Loader loading={this.state.loading} trans={trans}/>     
             <Modal
               isVisible={this.state.listModal}
               useNativeDriver={true}>
@@ -1762,7 +1784,7 @@ console.log('UserLocation: ', UserLocation)
  </View>
             </Modal>
 
-     <Loader loading={this.state.isLoading}/>  
+     <Loader loading={this.state.isLoading} trans={trans}/>  
                       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <View style={{position: 'absolute',
     top: 0,

@@ -4,7 +4,7 @@
 
 // React native and others libraries imports
 import React, { Component } from 'react';
-import { TouchableHighlight, BackHandler,ScrollView, FlatList } from 'react-native';
+import { TouchableHighlight, BackHandler,ScrollView, FlatList,Animated } from 'react-native';
 import { Container, View, Grid, Col, Left, Right, Button, Icon, List,Thumbnail, ListItem, Body, Radio, Input, Item,Text,Toast, Root,Title, Card, CardItem, Header} from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
@@ -19,6 +19,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 export default class wallet extends Component {
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.ref =  firestore();
       this.state = {
         name: '',
@@ -94,7 +95,31 @@ updateTextInput = (text, field) => {
   this.setState(state);
 }
 
-  render() {
+componentDidMount() {
+  this.StartImageRotationFunction()
+}
+
+StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+  }).start(()=>this.StartImageRotationFunction());
+}
+render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+ //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+ //  console.log('CountryNow: ', this.state.CountryNow)
+ const RotateData = this.Rotatevalue.interpolate({
+  inputRange: [0, 1],
+  outputRange: ['0deg', '368deg']
+})
+
+const trans={
+  transform:[
+    {rotate: RotateData}
+  ]
+}
    console.log('DataSource: ', this.state.DataSource)
     return(
       <Root>
@@ -110,7 +135,7 @@ updateTextInput = (text, field) => {
           </Body>
         
         </Header>
-            <Loader loading={this.state.isLoading}/>
+            <Loader loading={this.state.isLoading}  trans={trans}/>
      
           <Card>
             <FlatList

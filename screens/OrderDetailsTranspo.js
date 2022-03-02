@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, TouchableWithoutFeedback} from 'react-native'
+import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, TouchableWithoutFeedback,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Title, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -44,6 +44,7 @@ Logger.setLogCallback(log => {
 export default class OrderDetailsTranspo extends Component {
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.updateref =  firestore();
       this.updatecounts =  firestore();
       this.updateUserOrders =  firestore();
@@ -144,6 +145,7 @@ export default class OrderDetailsTranspo extends Component {
 
 
 async componentDidMount() {
+  this.StartImageRotationFunction()
      const getData= firestore().collection('charges').doc(this.props.route.params.orders.adminID);
     const doc = await getData.get();
     if (!doc.exists) {
@@ -184,7 +186,27 @@ ReasonOfCancel(){
     this.props.navigation.goBack();
 }
 
-  render() {
+StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+  }).start(()=>this.StartImageRotationFunction());
+}
+render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+ //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+ //  console.log('CountryNow: ', this.state.CountryNow)
+ const RotateData = this.Rotatevalue.interpolate({
+  inputRange: [0, 1],
+  outputRange: ['0deg', '368deg']
+})
+
+const trans={
+  transform:[
+    {rotate: RotateData}
+  ]
+}
    
     let distance =  this.state.cart.distance/1000;
     let newDistance = distance - this.state.base_dist;
@@ -230,7 +252,7 @@ console.log('cLat: ', this.state.cLat);
                    
           </Right>
         </Header>
-          <Loader loading={this.state.loading}/>     
+          <Loader loading={this.state.loading} trans={trans}/>     
      
                       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <View style={{position: 'absolute',

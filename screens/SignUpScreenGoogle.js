@@ -9,7 +9,7 @@ import {
     FlatList,
     StatusBar,
     Image,
-    ScrollView
+    ScrollView,Animated
 } from 'react-native';
 import { Container, View, Left, Right, Button, Icon, Item, Input, DatePicker, Picker } from 'native-base';
 import LinearGradient from 'react-native-linear-gradient';
@@ -27,6 +27,7 @@ import messaging from '@react-native-firebase/messaging';
 export default class SignUpScreenGoogle extends Component {
         constructor(props) {
             super(props);
+            this.Rotatevalue = new Animated.Value(0);
             this.cityRef =  firestore().collection('city');
             this.barangayRef =  firestore();
             this.ref =  firestore();
@@ -110,6 +111,7 @@ export default class SignUpScreenGoogle extends Component {
   }
       
         async componentDidMount(){
+          this.StartImageRotationFunction()
           const token= await AsyncStorage.getItem('token');
             console.log('current: ', auth().currentUser.uid)
             console.log('current: ', auth().currentUser)
@@ -270,11 +272,31 @@ console.log("arr", arr)
 
 
  }
-    render() {
+ StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+  }).start(()=>this.StartImageRotationFunction());
+}
+render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+ //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+ //  console.log('CountryNow: ', this.state.CountryNow)
+ const RotateData = this.Rotatevalue.interpolate({
+  inputRange: [0, 1],
+  outputRange: ['0deg', '368deg']
+})
+
+const trans={
+  transform:[
+    {rotate: RotateData}
+  ]
+}
       return (
         <Container style={{flex: 1,backgroundColor: '#fdfdfd'}}>
         <ScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps="always">
-          <Loader loading={this.state.loading} />
+          <Loader loading={this.state.loading} trans={trans} />
           <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', paddingLeft: 50, paddingRight: 50, marginTop: 20}}>
             <View style={{marginBottom: 10, width: '100%'}}>
               <Text style={{fontSize: 24, fontWeight: 'bold', textAlign: 'left', width: '100%', color: '#183c57'}}>Set up your account, </Text>

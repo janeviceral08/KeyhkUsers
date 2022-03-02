@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 //import react in our code.
 import { Container, Header, Content, Icon, Accordion, Text, View, Card, CardItem, Thumbnail, Body, Left, Right, Button, Item,ListItem, Form,Textarea } from "native-base";
-import {   TouchableOpacity, StyleSheet, Alert} from 'react-native';
+import {   TouchableOpacity, StyleSheet, Alert,Animated} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 //import all the basic component we have used
@@ -17,6 +17,7 @@ export default class CartItems extends Component {
   
     constructor(props) {
         super(props);    
+        this.Rotatevalue = new Animated.Value(0);
         this.productsRef  =   firestore().collection('products').where('id', '==', this.props.items.datas.id);
         this.state = {
           user: null,
@@ -53,6 +54,7 @@ export default class CartItems extends Component {
     }
       
       componentDidMount() {
+        this.StartImageRotationFunction()
         this.setState({loading: true})
           this.unsubscribe = this.productsRef.onSnapshot(this.onCollectionUpdate);   
         }
@@ -187,11 +189,31 @@ export default class CartItems extends Component {
       return itemss;
     }
   //Profile Screen to show from Open profile button
+  StartImageRotationFunction(){
+    this.Rotatevalue.setValue(0);
+    Animated.timing(this.Rotatevalue,{
+      toValue:1,
+      duration:3000,
+    }).start(()=>this.StartImageRotationFunction());
+  }
   render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+   //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+   //  console.log('CountryNow: ', this.state.CountryNow)
+   const RotateData = this.Rotatevalue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '368deg']
+  })
+
+  const trans={
+    transform:[
+      {rotate: RotateData}
+    ]
+  }
   
      return(
       <Content>
-        <Loader loading={this.state.loading}/>
+        <Loader loading={this.state.loading}  trans={trans}/>
         {this.renderProducts()}
         <Modal
             isVisible={this.state.visibleModal}

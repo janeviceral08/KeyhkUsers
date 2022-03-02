@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {StyleSheet, FlatList, TouchableOpacity,BackHandler, Alert, ScrollView,Dimensions} from 'react-native';
+import {StyleSheet, FlatList, TouchableOpacity,BackHandler, Alert, ScrollView,Dimensions,Animated} from 'react-native';
 import { Container, Header, Icon, Accordion, Text, View, Card, CardItem, Thumbnail, Body, Left, Right, Button,List,ListItem } from "native-base";
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -43,6 +43,7 @@ const secondIndicatorStyles = {
 export default class Pending extends Component {
   constructor(props) {
     super(props);
+    this.Rotatevalue = new Animated.Value(0);
     this.unsubscribe = null;
     this.state = {
       user: null,
@@ -54,9 +55,30 @@ export default class Pending extends Component {
       
     };
      }
-    
+     componentDidMount(){
+     this.StartImageRotationFunction()}
      
-  render() {
+     StartImageRotationFunction(){
+      this.Rotatevalue.setValue(0);
+      Animated.timing(this.Rotatevalue,{
+        toValue:1,
+        duration:3000,
+      }).start(()=>this.StartImageRotationFunction());
+    }
+    render() {
+  //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+     //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+     //  console.log('CountryNow: ', this.state.CountryNow)
+     const RotateData = this.Rotatevalue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '368deg']
+    })
+  
+    const trans={
+      transform:[
+        {rotate: RotateData}
+      ]
+    }
     const newOrders = this.props.orders.filter(item => {
       const itemData = item.datas.OrderStatus;
       const textData = 'Pending';
@@ -66,7 +88,7 @@ export default class Pending extends Component {
     })
     return (
       <Container style={{flex: 1}}> 
-        <Loader loading={this.state.loading}/>
+        <Loader loading={this.state.loading}  trans={trans}/>
         
         {this.props.uid ? 
   

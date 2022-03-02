@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView} from 'react-native'
+import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Card, CardItem, Body,Item, Input,List,Picker, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -46,6 +46,7 @@ Logger.setLogCallback(log => {
 export default class OrderDetailsRentals extends Component {
   constructor(props) {
       super(props);
+      this.Rotatevalue = new Animated.Value(0);
       this.updateref =  firestore();
       this.updatecounts =  firestore();
       this.updateUserOrders =  firestore();
@@ -276,6 +277,7 @@ export default class OrderDetailsRentals extends Component {
   }
 
  async componentDidMount() {
+  this.StartImageRotationFunction()
     //this.setState({loading: true})
   const getData= firestore().collection('charges').doc(this.props.route.params.orders.adminID);
     const doc = await getData.get();
@@ -683,7 +685,27 @@ ReasonOfCancel(){
     })
     this.props.navigation.goBack();
 }
-  render() {
+StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+  }).start(()=>this.StartImageRotationFunction());
+}
+render() {
+//console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+ //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+ //  console.log('CountryNow: ', this.state.CountryNow)
+ const RotateData = this.Rotatevalue.interpolate({
+  inputRange: [0, 1],
+  outputRange: ['0deg', '368deg']
+})
+
+const trans={
+  transform:[
+    {rotate: RotateData}
+  ]
+}
     const { paymentMethod, minimum, selectedIndex, selectedIndices, customStyleIndex, slatitude, slongitude, lat, ULat,summary } = this.state;
    
 
@@ -729,7 +751,7 @@ console.log('out: ', out);
                 }
           </Right>
         </Header>
-          <Loader loading={this.state.loading}/>     
+          <Loader loading={this.state.loading} trans={trans}/>     
      
                       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <View style={{position: 'absolute',

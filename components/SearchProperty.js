@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {FlatList, TouchableOpacity, Dimensions, View, Alert, StatusBar, StyleSheet, ScrollView, TouchableHighlight, Image, Pressable} from 'react-native';
+import {FlatList, TouchableOpacity, Dimensions, View, Alert, StatusBar, StyleSheet, ScrollView, TouchableHighlight, Image, Pressable,Animated} from 'react-native';
 import { Col, Card, CardItem, Body, Button, Left, ListItem, List, Content, Thumbnail, Right, Text,Grid, Icon,  Container, Header,Item, Input, Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -23,6 +23,7 @@ import { FlatGrid } from 'react-native-super-grid';
 export default class SearchProperty extends Component {
     constructor(props) {
         super(props);
+        this.Rotatevalue = new Animated.Value(0);
     console.log('params: ', this.props.route.params.selectedCityUser)
         this.ref =  firestore().collection('products');
         this.state = {
@@ -120,6 +121,7 @@ export default class SearchProperty extends Component {
 
   
    async componentDidMount() {
+    this.StartImageRotationFunction()
     this.setState({loading: true})
      const userId= auth().currentUser.uid;
      firestore().collection('products').where('storeId', '==', this.props.route.params.storeId).where('rentalType', '==', 'Property').onSnapshot(this.onCollectionUpdate);
@@ -287,7 +289,27 @@ export default class SearchProperty extends Component {
       }
     
 
-  render() {
+      StartImageRotationFunction(){
+        this.Rotatevalue.setValue(0);
+        Animated.timing(this.Rotatevalue,{
+          toValue:1,
+          duration:3000,
+        }).start(()=>this.StartImageRotationFunction());
+      }
+      render() {
+    //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
+       //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
+       //  console.log('CountryNow: ', this.state.CountryNow)
+       const RotateData = this.Rotatevalue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '368deg']
+      })
+    
+      const trans={
+        transform:[
+          {rotate: RotateData}
+        ]
+      }
     const {selectedFilter, activeSlide, productss} = this.state;
     console.log('search typeOfRate', this.props.route.params.typeOfRate)
     return (
@@ -304,7 +326,7 @@ export default class SearchProperty extends Component {
             <Text>Search</Text>
           </Button>
         </Header>
-        <Loader loading={this.state.loading}/>
+        <Loader loading={this.state.loading} trans={trans}/>
         {this.searchFilterFunction &&
         <FlatList
           data={this.state.data}

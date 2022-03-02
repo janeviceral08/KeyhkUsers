@@ -3,12 +3,13 @@ import {
   StyleSheet,
   View,
   Modal,
-  ActivityIndicator
+  ActivityIndicator,
+  Animated
 } from 'react-native';
 
 const Loader = props => {
   const {
-    loading,
+    loading,trans,
     ...attributes
   } = props;
 
@@ -20,8 +21,11 @@ const Loader = props => {
       onRequestClose={() => {console.log('close modal')}}>
       <View style={styles.modalBackground}>
         <View style={styles.activityIndicatorWrapper}>
-          <ActivityIndicator
-            animating={loading} color="#00ff00" size="large"/>
+        <Animated.Image 
+   style={[{ width: 80, height: 80, backgroundColor:'#ee4e4e', borderRadius: 20 }, trans]}  
+   source={require('../assets/k.png')}/>
+       {  /* <ActivityIndicator
+            animating={loading} color="#00ff00" size="large"/>*/}
         </View>
       </View>
     </Modal>
@@ -37,7 +41,7 @@ const styles = StyleSheet.create({
 
   },
   activityIndicatorWrapper: {
-        backgroundColor: 'lightgray',
+      
     height: 100,
     width: 100,
     borderRadius: 10,
