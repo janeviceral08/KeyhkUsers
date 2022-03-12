@@ -44,6 +44,7 @@ class SplashScreen extends React.Component {
     Animated.timing(this.Rotatevalue,{
       toValue:1,
       duration:3000,
+      useNativeDriver: true // Add This line
     }).start(()=>this.StartImageRotationFunction());
   }
 
@@ -56,17 +57,15 @@ class SplashScreen extends React.Component {
     })
 
     const trans={
-      transform:[
-        {rotate: RotateData}
-      ]
+      opacity:this.Rotatevalue
     }
     return (
       <View style={styles.viewStyles}>
    <Header androidStatusBarColor="#ee4e4e"  style={{display: 'none'}}/>
          
    <Animated.Image 
-   style={[{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2 }, trans]}  
-   source={require('../assets/k.png')}/>
+   style={[{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2, resizeMode:'contain',  opacity:this.Rotatevalue }]}  
+   source={require('../assets/k5.png')}/>
 
        
       </View>

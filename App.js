@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, } from 'react';
 
-import { Button, Text, View, TouchableOpacity, StyleSheet,Dimensions } from 'react-native';
+import { Button, Text, View, TouchableOpacity, StyleSheet,Dimensions,LogBox } from 'react-native';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
@@ -61,7 +61,7 @@ import OrderDetailsPabili from './screens/OrderDetailsPabili';
 import pabiliOrderDetails from './screens/pabiliOrderDetails';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
-
+LogBox.ignoreLogs(["Require cycle:"])
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 

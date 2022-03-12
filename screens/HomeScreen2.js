@@ -226,7 +226,7 @@ let arr = str.split(',');
 const newarrLenghtCountry= arr.length-1
 const UserLocationCountry = arr[newarrLenghtCountry]
              this.setState({
-               UserLocationCountry: UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(),
+               UserLocationCity: UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim()+'.city',
            })
            this.getAllCity()
        }).catch(err => {
@@ -502,7 +502,7 @@ async getCountryCity(PressedCountrycode){
   this.setState({loading: true})
       const city = [];
      // const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
-      const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.toString()+'.city';
+      const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.trim()+'.city';
      //  console.log('collect: ', collect)
       //     console.log('UserLocationCountry: ', this.state.UserLocationCountry)
       //           console.log('selectedCountry: ', this.state.selectedCountry)
@@ -700,6 +700,7 @@ let Address ='';
     Animated.timing(this.Rotatevalue,{
       toValue:1,
       duration:3000,
+      useNativeDriver: true // Add This line
     }).start(()=>this.StartImageRotationFunction());
   }
   render() {

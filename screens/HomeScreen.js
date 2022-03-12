@@ -225,8 +225,8 @@ console.log('Displaying')
 let arr = str.split(',');
 const newarrLenghtCountry= arr.length-1
 const UserLocationCountry = arr[newarrLenghtCountry]
-             this.setState({
-               UserLocationCountry: UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(),
+            this.setState({
+              UserLocationCountry: this.state.customerInfo.selectedCountry == undefined? UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
            })
            this.getAllCity()
        }).catch(err => {
@@ -272,7 +272,7 @@ const UserLocationCountry = arr[newarrLenghtCountry]
                 }
             );
      // this.getUserCity();
-     
+     console.log('city print: ', this.state.customerInfo.selectedCity == 'none' || this.state.customerInfo.selectedCity == undefined ?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity)
       this.unsubscribe = this.ref.where('city','==',this.state.customerInfo.selectedCity == 'none' || this.state.customerInfo.selectedCity == undefined ?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity).onSnapshot(this.onCollectionUpdate);
       this.subscribe = this.catref.onSnapshot(this.onCategoriesUpdate);
   }
@@ -741,6 +741,7 @@ let Address ='';
     Animated.timing(this.Rotatevalue,{
       toValue:1,
       duration:3000,
+      useNativeDriver: true // Add This line
     }).start(()=>this.StartImageRotationFunction());
   }
   render() {
@@ -757,7 +758,8 @@ let Address ='';
       {rotate: RotateData}
     ]
   }
-   console.log('this.state.customerInfo.selectedCity: ', this.state.customerInfo.selectedCity)
+  console.log('this.state.customerInfo.selectedCity: ', this.state.customerInfo.selectedCity)
+   console.log('this.state.customerInfo.selectedCountry: ', this.state.customerInfo.selectedCountry)
     return (
       <Container style={{backgroundColor: '#a3b6c9'}}>
         

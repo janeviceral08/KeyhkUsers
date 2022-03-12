@@ -1203,6 +1203,7 @@ if(this.state.visibleAddressModal == true)
     Animated.timing(this.Rotatevalue,{
       toValue:1,
       duration:3000,
+      useNativeDriver: true, // Add this line
     }).start(()=>this.StartImageRotationFunction());
   }
   render() {
@@ -1527,13 +1528,13 @@ console.log("province", province)
        { /* <Card >
               
             </Card>*/} 
-              <Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/3:SCREEN_HEIGHT/5, borderTopRightRadius: 20, borderTopLeftRadius: 20,}}>
-              { this.state.present < 0? null: <TouchableOpacity style={{position: 'absolute',  top: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/9:SCREEN_HEIGHT/13, flex: 100}} onPress={()=> this.changeVehicleMinus()}>
+              <Card style={{height: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/5:SCREEN_HEIGHT/5, borderTopRightRadius: 20, borderTopLeftRadius: 20,}}>
+              { this.state.present < 0? null: <TouchableOpacity style={{position: 'absolute',  top: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/16:SCREEN_HEIGHT/13, flex: 100}} onPress={()=> this.changeVehicleMinus()}>
 <MaterialIcons name="keyboard-arrow-left" size={30} color={'black'} onPress={()=> this.changeVehicleMinus()} />       
          
 </TouchableOpacity>
 }
-              <View style={{flexDirection: 'row'}}>
+              <View style={{flexDirection: 'row'}} >
 <View style={{flexDirection: 'column', width: SCREEN_WIDTH/2}}>
 <Text style={{fontSize: SCREEN_HEIGHT < 767?18:28, marginLeft: 25, paddingTop: 10, fontWeight: 'bold'}}>
 {this.state.datas.vehicle}
@@ -1556,7 +1557,9 @@ Base fare:
 <Image style={{  width: SCREEN_WIDTH/2.2, height:SCREEN_WIDTH/2, resizeMode: 'contain', marginTop: -30}} source={{uri: this.state.datas.image[0]}} />
 </View>
 </View>
-{ this.state.present >= this.state.carsAvailable.length? null: <TouchableOpacity style={{position: 'absolute', right: 0, top: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/9:SCREEN_HEIGHT/13, flex: 100}} onPress={()=> this.changeVehicleAdd()}>
+{console.log('this.state.carsAvailable.length: ', this.state.carsAvailable.length)}
+{console.log('this.state.present: ', this.state.present)}
+{ this.state.present >= this.state.carsAvailable.length-1? null: <TouchableOpacity style={{position: 'absolute', right: 0, top: SCREEN_HEIGHT < 767?SCREEN_HEIGHT/16:SCREEN_HEIGHT/13, flex: 100}} onPress={()=> this.changeVehicleAdd()}>
 <MaterialIcons name="keyboard-arrow-right" size={30} color={'black'} onPress={()=> this.changeVehicleAdd()} />       
          
 </TouchableOpacity>

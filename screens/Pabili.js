@@ -104,19 +104,19 @@ export default class Pabili extends Component {
       billing_name: '',
       billing_postal: '',
       billing_phone: '',
-      billing_street: '',
+      billing_street: this.props.route.params.billing_streetTo,
       billing_country: '',
-      billing_province: '',
-      billing_city: '',
+      billing_province: this.props.route.params.billing_provinceTo,
+      billing_city: this.props.route.params.currentLocation,
       billing_barangay: '',
       billing_cluster: '',
       billing_nameTo: '',
       billing_postalTo: '',
       billing_phoneTo: '',
-      billing_streetTo:this.props.route.params.billing_streetTo,
+      billing_streetTo:'',
       billing_countryTo: '',
-      billing_provinceTo:this.props.route.params.billing_provinceTo,
-      billing_cityTo: this.props.route.params.currentLocation,
+      billing_provinceTo:'',
+      billing_cityTo: '',
       billing_barangayTo: '',
       billing_clusterTo: '',
       billing_streetcurrent:this.props.route.params.billing_streetTo,
@@ -174,10 +174,10 @@ export default class Pabili extends Component {
       SCity: 0,
       SMetro: 0,
       warningModal: false,
-      fromPlace: '',
-        Tolat:this.props.route.params.cLat,
-        Tolong:this.props.route.params.cLong,
-
+      fromPlace: this.props.route.params.fromPlace,
+      flat:this.props.route.params.cLat,
+      flong:this.props.route.params.cLong,
+        
        region:{ latitude:this.props.route.params.cLat,
       longitude:this.props.route.params.cLong,
       // latitudeDelta: 0.0005,
@@ -189,7 +189,7 @@ export default class Pabili extends Component {
         currentPlace:this.props.route.params.fromPlace,
       searchResult: [],
       searchResultto:[],
-      toPlace: this.props.route.params.fromPlace,
+      toPlace: '',
       isLoading: false,
        keyboard: false,
       photo: '',
@@ -223,6 +223,7 @@ export default class Pabili extends Component {
     listNo: 5,
     ListValue: [],
     pabiliList: [],
+    history:[],
       
   };
   this.getLocation();
@@ -270,7 +271,7 @@ console.log("newarrLenght value", arr[newarrLenght])
                fromPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+arr[newarrLenght]+', '+Newprovince, x: { latitude: region[1], longitude: region[0] },
                isLoading: false, LocationDoneto: true,
                })
-
+    
 console.log('Tolong: ',this.state.Tolong);
                if(this.state.Tolong != undefined){
                    console.log('working here')
@@ -370,51 +371,52 @@ Tolat:region[1],
           isLoading: false,
       })
 
-   if(this.state.x != undefined){
-       this.setState({isLoading:true})
-    axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
-    .then(res => {
-   
-        res.data.response.route[0].leg[0].shape.map(m => {
-          // here we are getting latitude and longitude in seperate variables because HERE sends it together, but we
-          // need it seperate for <Polyline/>
-          let latlong = m.split(',');
-          let latitude = parseFloat(latlong[0]);
-          let longitude = parseFloat(latlong[1]);
-          routeCoordinates.push([longitude,latitude]);
-      })
 
-       console.log('summary: ',  res.data.response.route[0].summary);
-       console.log("routeCoordinates", routeCoordinates)
-      this.setState({
-        routeForMap: {
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "properties": {},
-              "geometry": {
-                "type": "LineString",
-                "coordinates": routeCoordinates
-              }
-            }
-          ]
-        },
-        
-        
-        
-       
-          summary: res.data.response.route[0].summary,
-         
+   if(this.state.flat != undefined ){
+    this.setState({isLoading:true})
+ axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
+ .then(res => {
 
-          isLoading: false,
-      })
+     res.data.response.route[0].leg[0].shape.map(m => {
+       // here we are getting latitude and longitude in seperate variables because HERE sends it together, but we
+       // need it seperate for <Polyline/>
+       let latlong = m.split(',');
+       let latitude = parseFloat(latlong[0]);
+       let longitude = parseFloat(latlong[1]);
+       routeCoordinates.push([longitude,latitude]);
+   })
 
-      }).catch(err => {
-          console.log('here drop off: ',err)
-       })
+    console.log('summary: ',  res.data.response.route[0].summary);
+    console.log("routeCoordinates", routeCoordinates)
+   this.setState({
+     routeForMap: {
+       "type": "FeatureCollection",
+       "features": [
+         {
+           "type": "Feature",
+           "properties": {},
+           "geometry": {
+             "type": "LineString",
+             "coordinates": routeCoordinates
+           }
+         }
+       ]
+     },
+     
+     
+     
+    
+       summary: res.data.response.route[0].summary,
+      
 
-   }
+       isLoading: false,
+   })
+
+   }).catch(err => {
+       console.log('here drop off: ',err)
+    })
+
+}
        }).catch(err => {
            this.setState({ isLoading: false,})
         
@@ -705,7 +707,7 @@ _bootstrapAsync =async () =>{
   this.billinglistener = firestore().collection('users').where('userId','==', userId).onSnapshot(this.onCollectionUpdateBilling);      
 
   this.ordercounters = this.ordercounters.collection('orderCounter').onSnapshot(this.OrderCounter); 
-
+ firestore().collection('users').doc(userId).collection('history').onSnapshot(this.history);
   
   this.setState({ uid: userId })
   };
@@ -744,7 +746,19 @@ _bootstrapAsync =async () =>{
 
   }
 
+  history = (querySnapshot) => {
+   let history =[];
+    querySnapshot.forEach((doc) => {
+     
+      history.push(doc.data())
+     
+    });
+    console.log('history: ',history)
+    this.setState({
+      history  
+     });
 
+  }
   OrderCounter = (querySnapshot) => {
     querySnapshot.forEach((doc) => {
       this.setState({
@@ -982,6 +996,10 @@ navigateAddress(){
   this.props.navigation.navigate('Address')
 }
 
+deleteHistory(docID){
+  firestore().collection('users').doc(auth().currentUser.uid).collection('history').doc(docID).delete();
+}
+
  footer= () => {
     return(
     <View>
@@ -1010,7 +1028,7 @@ currentPickup(){
     console.log('Get current Location');
 const long=this.props.route.params.cLong;
 const lat=this.props.route.params.cLat;
-  this.setState({isLoading: true, keyboard: false})
+  this.setState({isLoading: true, keyboard: false,})
  axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${long},${lat}.json?access_token=sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA`)
      .then(res => {
     const item = res.data.features[0];
@@ -1040,7 +1058,7 @@ console.log("newarrLenght value", arr[newarrLenght])
      cLat:lat,
              
        showfromBotton: true,
-               fromPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+arr[newarrLenght]+', '+Newprovince, x: { latitude: lat, longitude: long },
+               fromPlace:this.props.route.params.fromPlace, x: { latitude: lat, longitude: long },
                isLoading: false, LocationDoneto: true,
                })
 
@@ -1110,21 +1128,21 @@ let from_long = flong
 let to_lat = lat
 let to_long = long
 // [125.53647997480391, 8.93336215559458]
-console.log('to_lat: ', to_lat)
-console.log('to_long: ', to_long)
+console.log('to_latcurrentDropoff: ', to_lat)
+console.log('to_longcurrentDropoff: ', to_long)
 let routeCoordinates = [];
 let str = item.place_name;
 
 let arr = str.split(',');
 
-console.log("str", str)
-console.log("arr", arr)
+console.log("strcurrentDropoff", str)
+console.log("arrcurrentDropoff", arr)
 const newarrLenght= arr.length-3
 const UserLocation = arr[newarrLenght]
-console.log("newarrLenght value", arr[newarrLenght])
+console.log("newarrLenght valuecurrentDropoff", arr[newarrLenght])
 const findCity = Province.ZipsCollection.find( (items) => items.area === res.data.features[0].context[2].text)
 
-console.log('UserLocation: ', UserLocation)
+console.log('UserLocationcurrentDropoff: ', UserLocation)
  const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
   const Newprovince =province == undefined? item.context[0].text:province.province;
 this.setState({
@@ -1141,11 +1159,13 @@ region:{ latitude:lat,
  longitude: 	long,
  latitudeDelta: 0.1,
  longitudeDelta: 0.1,},
-          toPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince, LocationDoneto: true, LocationDone: true,
+          toPlace:this.props.route.params.fromPlace, LocationDoneto: true, LocationDone: true,
      isLoading: false,
  })
 
-if(this.state.x != undefined){
+
+
+if(this.state.flat != undefined ){
   this.setState({isLoading:true})
 axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
 .then(res => {
@@ -1159,8 +1179,8 @@ axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5
      routeCoordinates.push([longitude,latitude]);
  })
 
-  console.log('summary: ',  res.data.response.route[0].summary);
-  console.log("routeCoordinates", routeCoordinates)
+  console.log('summary:currentDropoff ',  res.data.response.route[0].summary);
+  console.log("routeCoordinatescurrentDropoff", routeCoordinates)
  this.setState({
    routeForMap: {
      "type": "FeatureCollection",
@@ -1186,10 +1206,12 @@ axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5
  })
 
  }).catch(err => {
-     console.log('here drop off: ',err)
+     console.log('here drop offcurrentDropoff: ',err)
   })
 
 }
+
+
   }).catch(err => {
       this.setState({ isLoading: false,})
    
@@ -1311,6 +1333,7 @@ StartImageRotationFunction(){
   Animated.timing(this.Rotatevalue,{
     toValue:1,
     duration:3000,
+    useNativeDriver: true, // Add this line
   }).start(()=>this.StartImageRotationFunction());
 }
 render() {
@@ -1409,6 +1432,7 @@ const copyToClipboard = () => {
       {this.state.pabiliList.length == 0?
        <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addListBulk()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>Add List</Text></Button></View>
       :<FlatList
+ style={{marginTop: this.state.keyboard==true?1000: 0}}
         data={this.state.pabiliList}
         renderItem={
           ({item,index}) => 
@@ -1416,9 +1440,9 @@ const copyToClipboard = () => {
             return(
               <View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginVertical: 1}}>
               <Text style={{color: 'black', marginTop: 30}}>{index+1}.</Text>
-              <Input onSubmitEditing={(e)=> this.onNameUpdate(item, e.nativeEvent.text)} placeholder={item.name} style={{flex: 3, borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-              <Input keyboardType={'number-pad'}   onSubmitEditing={(e)=> { isNaN(e.nativeEvent.text)? null: this.onQtyUpdate(item, e.nativeEvent.text)}} placeholder={`${item.qty}`} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-              <Input  onSubmitEditing={(e)=> this.onUnitUpdate(item, e.nativeEvent.text)} placeholder={item.unit} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
+              <Input onSubmitEditing={(e)=> this.onNameUpdate(item, e.nativeEvent.text)} placeholder={item.name} style={{flex: 3, borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}   onFocus={() =>this.setState({keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})}/>
+              <Input keyboardType={'number-pad'}   onSubmitEditing={(e)=> { isNaN(e.nativeEvent.text)? null: this.onQtyUpdate(item, e.nativeEvent.text)}} placeholder={`${item.qty}`} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}} onFocus={() =>this.setState({keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})}/>
+              <Input  onSubmitEditing={(e)=> this.onUnitUpdate(item, e.nativeEvent.text)} placeholder={item.unit} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}} onFocus={() =>this.setState({keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})}/>
            </View> 
             )
           }
@@ -1427,7 +1451,7 @@ const copyToClipboard = () => {
         ListFooterComponent={() => <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addList()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>+</Text></Button></View>}
       />}
 <Button  style={{alignSelf:'center', backgroundColor:'#019fe8', width: '100%', alignContent: 'center'}}  onPress={()=>this.setState({listModal:false})}>
-            <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>Done</Text>
+            <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>Procceed</Text>
       </Button>
     </View>
 </Modal>
@@ -1466,12 +1490,14 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
     
 <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true} onUpdate={this.onUserLocationUpdate} />
 
-   { this.state.x == undefined? null:  
-            this.state.x != undefined && this.state.flat == this.props.route.params.clat?
+   { 
+            this.state.x == undefined?
+            <MapboxGL.PointAnnotation coordinate={[this.state.flong, this.state.flat]} onSelected={()=>console.log('Marker Selected')}/>
+            :
             <MapboxGL.PointAnnotation coordinate={[this.state.x.longitude, this.state.x.latitude]} onSelected={()=>console.log('Marker Selected')}/>
             
             
-            :  <MapboxGL.PointAnnotation coordinate={[this.state.flong, this.state.flat]} onSelected={()=>console.log('Marker Selected')}/>
+          
              
             
          }
@@ -1481,35 +1507,38 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
   </MapboxGL.MapView>
 
 
-  <Card style={{ left: 0, top: this.state.keyboard == true ? 130: 0, position: 'absolute', width: SCREEN_WIDTH/1.02}}>
-  <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
-    <Button transparent onPress={()=> this.setState({visibleModalPickup: false,visibleAddressModal: false ,visibleAddressModalPin:false})} style={{ width: 40}}>
-                 <MaterialIcons name="arrow-back" size={25} color="black" />
-                </Button> 
-                  <View regular style={{ height: 40, flexDirection: 'row', width: SCREEN_WIDTH/1.4}}>
-                <Text style={{fontWeight: 'bold'}}> Current Location: <Text> {this.state.currentPlace}</Text></Text>
-                    </View>
-                 <MaterialIcons name="my-location" size={25} color="black" onPress={()=>this.currentPickup()}/>
- 
-                </CardItem>
-   <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
+  <Card style={{ left: 0, top: this.state.keyboard == true ? 130: 0, position: 'absolute', width: SCREEN_WIDTH/1.01}}>
+  <View style={{borderWidth: 1.5, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 20, flexDirection:'row', margin: 5}} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
+
+                 <MaterialIcons name="arrow-back" size={25} color="black" onPress={()=> this.setState({visibleModalPickup: false,visibleAddressModal: false ,visibleAddressModalPin:false})} style={{ width: 40,top:5}} />
+             
+                {!this.state.loading &&
+                   
+                   <View regular style={{ height: 40, flexDirection: 'row', width: SCREEN_WIDTH/1.2}}>
+                   <Input value={this.state.fromPlace} placeholder="Choose Pickup location" style={{fontSize: 17}}  onChangeText={(text) => this.getLocationType(text, 'fromPlace')}  onFocus={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false,keyboard: true,LocationDone:false}) }  onBlur={()=>this.setState({keyboard: false})} />
+                      <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={15} onPress={()=>this.setState({fromPlace: '',x:undefined})}/> 
+                        </View>      }
+                </View>
+{/*   <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
   <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
    <View style={{flexDirection: 'column'}}>
 
    
-                    <Text style={{fontWeight: 'normal', fontSize: 17, color: 'green'}}>Pickup location </Text>
                       
-                    {!this.state.loading &&
                    
-                    <View regular style={{ height: 40, flexDirection: 'row', width: SCREEN_WIDTH/1.2}}>
-                    <Input value={this.state.fromPlace} style={{fontSize: 17}}  onChangeText={(text) => this.getLocationType(text, 'fromPlace')}  onFocus={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false,keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})} />
-                       <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={15} onPress={()=>this.setState({fromPlace: '',x:undefined})}/> 
-                         </View>      }
                          </View> 
-                </CardItem>
+                </CardItem>*/}
                 
                {this.state.LocationDone == false?<View><FlatList
-                                 
+                                         ListHeaderComponent={this.state.fromPlace==this.props.route.params.fromPlace?null:this.state.toPlace==this.props.route.params.fromPlace?null:
+                                          <View style={{padding: 10, marginLeft: 50}}>
+                                          <TouchableOpacity style={{flexDirection:'row'}} onPress={()=>this.currentPickup()}>
+                                            <MaterialIcons name="my-location" size={20} color="black" />
+                                        <Text style={{paddingLeft: 10}}>Your location</Text>
+                        
+                       
+       
+                                             </TouchableOpacity></View>}
         data={this.state.searchResult}
         renderItem={ ({ item }) => (
          <View style={{padding: 10, marginLeft: 50}}>
@@ -1535,6 +1564,57 @@ console.log("province", province)
     console.log('to_long: ', to_long)
     let routeCoordinates = [];
 
+
+
+    const newarrLenght= arr.length-3
+    const UserLocation = arr[newarrLenght]
+    console.log("newarrLenght value", arr[newarrLenght])
+    console.log('UserLocation: ', UserLocation)
+          this.setState({
+           
+            flat: item.center[1],
+            flong:item.center[0],
+           cLat: item.center[1],
+            cLong:item.center[0],
+             
+        billing_province:Newprovince,
+        billing_city: UserLocation,
+        billing_street:arr[0]+', '+ arr[1],
+        billing_postal: arr[3],
+        billing_barangay: item.context[1].text,
+      region:{ latitude:item.center[1],
+          longitude: 	item.center[0],
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,},
+          showfromBotton: true,
+                   fromPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince,x: { latitude: item.center[1], longitude: item.center[0] },
+                   isLoading: false, LocationDone: true,
+          })
+    
+          const newDocumentID =  firestore().collection('users').doc(auth().currentUser.uid).collection('history').doc().id;
+          firestore().collection('users').doc(auth().currentUser.uid).collection('history').doc(newDocumentID).set({ 
+            fromPlace: arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince,
+            id:newDocumentID,
+            region:{ latitude:item.center[1],
+              longitude: 	item.center[0],
+              latitudeDelta: 0.1,
+              longitudeDelta: 0.1,},
+              billing_province:Newprovince,
+              billing_city: UserLocation,
+              billing_street:arr[0]+', '+ arr[1],
+              billing_postal: arr[3],
+              billing_barangay: item.context[1].text,
+              rlat: item.center[1],
+            rlong:item.center[0],
+            context: item.context,
+            place_name: item.place_name,
+          })
+
+
+
+          
+    if(this.state.Tolong != undefined){
+
     axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
     .then(res => {
    
@@ -1547,10 +1627,7 @@ console.log("province", province)
           routeCoordinates.push([longitude,latitude]);
       })
 
-const newarrLenght= arr.length-3
-const UserLocation = arr[newarrLenght]
-console.log("newarrLenght value", arr[newarrLenght])
-console.log('UserLocation: ', UserLocation)
+
       this.setState({
         routeForMap: {
           "type": "FeatureCollection",
@@ -1565,30 +1642,20 @@ console.log('UserLocation: ', UserLocation)
             }
           ]
         },
-        flat: item.center[1],
-        flong:item.center[0],
-       cLat: item.center[1],
-        cLong:item.center[0],
+
           summary: res.data.response.route[0].summary,
          
-    billing_province:Newprovince,
-    billing_city: UserLocation,
-    billing_street:arr[0]+', '+ arr[1],
-    billing_postal: arr[3],
-    billing_barangay: item.context[1].text,
-  region:{ latitude:item.center[1],
-      longitude: 	item.center[0],
-      latitudeDelta: 0.1,
-      longitudeDelta: 0.1,},
-      showfromBotton: true,
-               fromPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince,x: { latitude: item.center[1], longitude: item.center[0] },
-               isLoading: false, LocationDoneto: true,
+
       })
+
+   
       //console.log('sum: ', res.data.response.route[0].summary);
       }).catch(err => {
      // console.log(err)
       })
-               
+
+
+    }
                
                }}>
  
@@ -1597,17 +1664,135 @@ console.log('UserLocation: ', UserLocation)
          </View>
         )}
         keyExtractor={item => item.id}
-      /></View>:null}
+      />
+      
+      
+      
+      
+      <FlatList
+                   
+        data={this.state.history}
+  
+        renderItem={ ({ item }) => (
+         <View style={{padding: 10, marginLeft: 50}}>
+           <TouchableOpacity 
+                 onLongPress={()=> this.deleteHistory(item.id)}
+           onPress={()=>{ 
+            
+ let str = item.place_name;
+
+let arr = str.split(',');
+
+
+const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
+             const Newprovince =province == undefined? item.context[0].text:province.province
+const region=  {latitude: item.rlat, latitudeDelta: 0.0999998484542477, longitude: item.rlong , longitudeDelta: 0.11949475854635239}
+console.log('region: ', region)
+console.log("province", province)
+  
+    const {Tolat, Tolong, } = this.state;
+    let from_lat = Tolat
+    let from_long = Tolong
+    let to_lat = item.rlat
+    let to_long = item.rlong
+  console.log('to_lat: ', to_lat)
+    console.log('to_long: ', to_long)
+    let routeCoordinates = [];
+
+
+
+    const newarrLenght= arr.length-3
+    const UserLocation = arr[newarrLenght]
+    console.log("newarrLenght value", arr[newarrLenght])
+    console.log('UserLocation: ', UserLocation)
+          this.setState({
+           
+            flat: item.rlat,
+            flong:item.rlong,
+           cLat: item.rlat,
+            cLong:item.rlong,
+             
+        billing_province:Newprovince,
+        billing_city: UserLocation,
+        billing_street:arr[0]+', '+ arr[1],
+        billing_postal: arr[3],
+        billing_barangay: item.context[1].text,
+      region:{ latitude:item.rlat,
+          longitude: 	item.rlong,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,},
+          showfromBotton: true,
+                   fromPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince,x: { latitude: item.rlat, longitude: item.rlong },
+                   isLoading: false, LocationDone: true,
+          })
+    
+         
+    if(this.state.Tolong != undefined){
+
+    axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
+    .then(res => {
+   
+        res.data.response.route[0].leg[0].shape.map(m => {
+          // here we are getting latitude and longitude in seperate variables because HERE sends it together, but we
+          // need it seperate for <Polyline/>
+          let latlong = m.split(',');
+          let latitude = parseFloat(latlong[0]);
+          let longitude = parseFloat(latlong[1]);
+          routeCoordinates.push([longitude,latitude]);
+      })
+
+
+      this.setState({
+        routeForMap: {
+          "type": "FeatureCollection",
+          "features": [
+            {
+              "type": "Feature",
+              "properties": {},
+              "geometry": {
+                "type": "LineString",
+                "coordinates": routeCoordinates
+              }
+            }
+          ]
+        },
+
+          summary: res.data.response.route[0].summary,
+         
+
+      })
+
+   
+      //console.log('sum: ', res.data.response.route[0].summary);
+      }).catch(err => {
+     // console.log(err)
+      })
+
+
+    }
+               
+               }}>
+ 
+           <Text style={{fontSize: 17}}>{item.place_name}</Text>
+          </TouchableOpacity>
+         </View>
+        )}
+        keyExtractor={item => item.id}
+      />
+      
+      
+      
+      </View>:null}
                
                    
 
              
          </Card>
-              {this.state.summary === undefined? null:<View style={{ height: 40, alignItems: 'center'}}>
+              <View style={{ height: 40, alignItems: 'center'}}>
 							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: '#019fe8', width: SCREEN_WIDTH, height: 40, borderRadius: 5, padding: 10}]} onPress={() => this.setState({visibleModalPickup: false,visibleAddressModal: false ,visibleAddressModalPin:false}) }>
 								<Text style={{color: '#ffffff'}}>DONE</Text>
 							</TouchableOpacity>
-            </View>}
+            </View>
   </View>
             </Modal>
   <Modal
@@ -1656,19 +1841,21 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
   </MapboxGL.MapView>
 
 
-  <Card style={{ left: 0, top: this.state.keyboard == true ? 130: 0, position: 'absolute', width: SCREEN_WIDTH/1.02}}>
-  <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalTo: false})}>
+  <Card style={{ left: 0, top: this.state.keyboard == true ? 130: 0, position: 'absolute', width: SCREEN_WIDTH/1.01}}>
+  <View style={{borderWidth: 1.5, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 20, flexDirection:'row', margin: 5}}  onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalTo: false})}>
 
-          <Button transparent onPress={()=> this.setState({visibleModalDropoff: false})} style={{ width: 40}}>
-                 <MaterialIcons name="arrow-back" size={25} color="black" />
-                </Button> 
-                  <View regular style={{ height: 40, flexDirection: 'row', width: SCREEN_WIDTH/1.4}}>
-                <Text style={{fontWeight: 'bold'}}> Current Location: <Text> {this.state.currentPlace}</Text></Text>
-                    </View>
-                 <MaterialIcons name="my-location" size={25} color="black" onPress={()=>this.currentDropoff()}/>
- 
-                </CardItem>
-   <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false})}>
+
+                 <MaterialIcons name="arrow-back" size={25} color="black" onPress={()=> this.setState({visibleModalDropoff: false})} style={{ width: 40,top:5}}/>
+     
+                
+                 {!this.state.loading &&
+                   
+                   <View regular style={{ height: 40, flexDirection: 'row', width: SCREEN_WIDTH/1.2}}>
+                   <Input value={this.state.toPlace} placeholder="Choose Drop-off location" style={{fontSize: 17}}  onChangeText={(text) => this.getLocationTypeto(text, 'toPlace')}  onFocus={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false, keyboard: true,LocationDoneto: false}) }  onBlur={()=>this.setState({keyboard: false})} />
+                      <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={15} onPress={()=>this.setState({toPlace: '',Tolat:undefined})}/> 
+                        </View>      }
+                </View>
+ { /* <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false})}>
   <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
    <View style={{flexDirection: 'column'}}>
 
@@ -1682,11 +1869,19 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
                       <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={15} onPress={()=>this.setState({toPlace: '',Tolat:undefined})}/> 
                         </View>      }
                         </View> 
-               </CardItem>
+                    </CardItem>*/}
               
                   
  {this.state.LocationDoneto == false?<View><FlatList
-                                
+                                 ListHeaderComponent={this.state.toPlace==this.props.route.params.fromPlace?null:this.state.fromPlace==this.props.route.params.fromPlace?null:
+                                  <View style={{padding: 10, marginLeft: 50}}>
+                                  <TouchableOpacity style={{flexDirection:'row'}} onPress={()=>this.currentDropoff()}>
+                                    <MaterialIcons name="my-location" size={20} color="black" onPress={()=>this.currentDropoff()}/>
+                                <Text style={{paddingLeft: 10}}>Your location</Text>
+                
+               
+
+                                     </TouchableOpacity></View>}
        data={this.state.searchResultto}
        renderItem={ ({ item }) => (
         <View style={{padding: 10, marginLeft: 50}}>
@@ -1712,6 +1907,49 @@ console.log("province", province)
    console.log('to_long: ', to_long)
    let routeCoordinates = [];
 
+
+   const newarrLenght= arr.length-3
+   const UserLocation = arr[newarrLenght]
+   console.log("newarrLenght value", arr[newarrLenght])
+   console.log('UserLocation: ', UserLocation)
+        this.setState({
+    
+          Tolat: item.center[1],
+          Tolong:item.center[0],
+         
+      billing_provinceTo:Newprovince.toLowerCase(),
+      billing_cityTo: UserLocation,
+      billing_streetTo:arr[0]+', '+ arr[1],
+      billing_postalTo: arr[3],
+      billing_barangayTo: item.context[1].text,
+      flatTo:item.geometry.coordinates[0] ,
+       flongTo:item.geometry.coordinates[1],
+    region:{ latitude:item.center[1],
+        longitude: 	item.center[0],
+        latitudeDelta: 0.1,
+        longitudeDelta: 0.1,},
+                 toPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince, LocationDoneto: true,    visibleAddressModalTo: false, 
+            isLoading: false,
+        })
+        const newDocumentID =  firestore().collection('users').doc(auth().currentUser.uid).collection('history').doc().id;
+        firestore().collection('users').doc(auth().currentUser.uid).collection('history').doc(newDocumentID).set({ 
+          fromPlace: arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince,
+          id:newDocumentID,
+          region:{ latitude:item.center[1],
+            longitude: 	item.center[0],
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,},
+            billing_province:Newprovince,
+            billing_city: UserLocation,
+            billing_street:arr[0]+', '+ arr[1],
+            billing_postal: arr[3],
+            billing_barangay: item.context[1].text,
+            rlat: item.center[1],
+          rlong:item.center[0],
+          context: item.context,
+          place_name: item.place_name,
+        })
+   if(this.state.flat != undefined ){
    axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
    .then(res => {
   
@@ -1724,10 +1962,7 @@ console.log("province", province)
          routeCoordinates.push([longitude,latitude]);
      })
 
-const newarrLenght= arr.length-3
-const UserLocation = arr[newarrLenght]
-console.log("newarrLenght value", arr[newarrLenght])
-console.log('UserLocation: ', UserLocation)
+
      this.setState({
        routeForMap: {
          "type": "FeatureCollection",
@@ -1742,29 +1977,19 @@ console.log('UserLocation: ', UserLocation)
            }
          ]
        },
-       Tolat: item.center[1],
-       Tolong:item.center[0],
+   
       
          summary: res.data.response.route[0].summary,
-        
-   billing_provinceTo:Newprovince.toLowerCase(),
-   billing_cityTo: UserLocation,
-   billing_streetTo:arr[0]+', '+ arr[1],
-   billing_postalTo: arr[3],
-   billing_barangayTo: item.context[1].text,
-   flatTo:item.geometry.coordinates[0] ,
-    flongTo:item.geometry.coordinates[1],
- region:{ latitude:item.center[1],
-     longitude: 	item.center[0],
-     latitudeDelta: 0.1,
-     longitudeDelta: 0.1,},
-              toPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince, LocationDoneto: true,    visibleAddressModalTo: false, 
-         isLoading: false,
+
+  
      })
+  
      //console.log('sum: ', res.data.response.route[0].summary);
      }).catch(err => {
     // console.log(err)
      })
+    }
+
 
   }}>
 
@@ -1773,7 +1998,113 @@ console.log('UserLocation: ', UserLocation)
         </View>
        )}
        keyExtractor={item => item.id}
-     /></View>:null}
+     />
+     
+     
+     <FlatList
+       data={this.state.history}
+       renderItem={ ({ item }) => (
+        <View style={{padding: 10, marginLeft: 50}}>
+          <TouchableOpacity 
+           onLongPress={()=> this.deleteHistory(item.id)}
+          onPress={()=>{ 
+            this.setState({isLoading: true})
+                let str = item.place_name;
+
+let arr = str.split(',');
+
+
+const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
+            const Newprovince =province == undefined? item.context[0].text:province.province
+const region={latitude: item.rlat, latitudeDelta: 0.0999998484542477, longitude: item.rlong , longitudeDelta: 0.11949475854635239}
+console.log('region: ', region)
+console.log("province", province)
+ 
+   const {flat, flong, } = this.state;
+   let from_lat = flat
+   let from_long = flong
+   let to_lat = item.rlat
+   let to_long =item.rlong
+ console.log('to_lat: ', to_lat)
+   console.log('to_long: ', to_long)
+   let routeCoordinates = [];
+
+
+   const newarrLenght= arr.length-3
+   const UserLocation = arr[newarrLenght]
+   console.log("newarrLenght value", arr[newarrLenght])
+   console.log('UserLocation: ', UserLocation)
+        this.setState({
+    
+          Tolat: item.rlat,
+          Tolong:item.rlong,
+         
+      billing_provinceTo:Newprovince.toLowerCase(),
+      billing_cityTo: UserLocation,
+      billing_streetTo:arr[0]+', '+ arr[1],
+      billing_postalTo: arr[3],
+      billing_barangayTo: item.context[1].text,
+      flatTo:item.rlat ,
+       flongTo:item.rlong,
+    region:{ latitude:item.rlat,
+        longitude: 	item.rlong,
+        latitudeDelta: 0.1,
+        longitudeDelta: 0.1,},
+                 toPlace:arr[0]+', '+arr[1]+', '+item.context[1].text+', '+UserLocation+', '+Newprovince, LocationDoneto: true,    visibleAddressModalTo: false, 
+            isLoading: false,
+        })
+ 
+   if(this.state.flat != undefined ){
+   axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
+   .then(res => {
+  
+       res.data.response.route[0].leg[0].shape.map(m => {
+         // here we are getting latitude and longitude in seperate variables because HERE sends it together, but we
+         // need it seperate for <Polyline/>
+         let latlong = m.split(',');
+         let latitude = parseFloat(latlong[0]);
+         let longitude = parseFloat(latlong[1]);
+         routeCoordinates.push([longitude,latitude]);
+     })
+
+
+     this.setState({
+       routeForMap: {
+         "type": "FeatureCollection",
+         "features": [
+           {
+             "type": "Feature",
+             "properties": {},
+             "geometry": {
+               "type": "LineString",
+               "coordinates": routeCoordinates
+             }
+           }
+         ]
+       },
+   
+      
+         summary: res.data.response.route[0].summary,
+
+  
+     })
+  
+     //console.log('sum: ', res.data.response.route[0].summary);
+     }).catch(err => {
+    // console.log(err)
+     })
+    }
+
+
+  }}>
+
+          <Text style={{fontSize: 17}}>{item.place_name}</Text></TouchableOpacity>
+        </View>
+       )}
+       keyExtractor={item => item.id}
+     />
+     
+     </View>:null}
             
         </Card>
              {this.state.toPlace == ""? null:<View style={{ height: 40, alignItems: 'center'}}>
@@ -1827,12 +2158,14 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
     
 <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true} onUpdate={this.onUserLocationUpdate} />
 
-   { this.state.x == undefined? null:  
-            this.state.x != undefined && this.state.flat == this.props.route.params.clat?
-            <MapboxGL.PointAnnotation coordinate={[this.state.x.longitude, this.state.x.latitude]} onSelected={()=>console.log('Marker Selected')} />
+{ 
+            this.state.x == undefined?
+            <MapboxGL.PointAnnotation coordinate={[this.state.flong, this.state.flat]} onSelected={()=>console.log('Marker Selected')}/>
+            :
+            <MapboxGL.PointAnnotation coordinate={[this.state.x.longitude, this.state.x.latitude]} onSelected={()=>console.log('Marker Selected')}/>
             
             
-            :  <MapboxGL.PointAnnotation coordinate={[this.state.flong, this.state.flat]} onSelected={()=>console.log('Marker Selected')}/>
+          
              
             
          }
@@ -1932,34 +2265,34 @@ zoomTapEnabled={false}
 
          <Card style={{ left: 0, top: 0, position: 'absolute', width: SCREEN_WIDTH/1.02}}>
    <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
-  <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
+  <FontAwesome name={'dot-circle-o'} color={'green'} style={{ marginRight: 10}}/> 
    <View style={{flexDirection: 'column'}}>
 
-   
-                    <Text style={{fontWeight: 'normal', fontSize: 13, color: 'green'}}>Pickup location </Text>
-                      
+   {/*
+                    <Text style={{fontWeight: 'normal', fontSize: 17, color: 'green'}}>Pickup location </Text>
+   */   }
                     {!this.state.loading &&
-                    <View regular style={{ height: 40}}>
+                    <View regular style={{borderWidth: 1.5, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 5, width: SCREEN_WIDTH/1.2, padding: 5}} >
                     <TouchableWithoutFeedback style={{width: SCREEN_WIDTH/1.02}} onPress={()=> this.setState({visibleModalPickup: true, visibleAddressModalPin: true})}>
-                   <Text style={{fontSize: 12}}>{this.state.fromPlace==""?'Enter Pickup Location Here':this.state.fromPlace}</Text>
+                   <Text style={{fontSize: 17}}>{this.state.fromPlace==""?'Enter Pickup Location Here':this.state.fromPlace==this.props.route.params.fromPlace?'Your Location':this.state.fromPlace}</Text>
                     </TouchableWithoutFeedback>
                          </View>}
                          </View> 
                 </CardItem>
                 
                
-                <CardItem style={{marginTop: -20}} onPress={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false})}>
-                  <FontAwesome name={'dot-circle-o'} style={{ marginRight: 10}}/> 
+                <CardItem onPress={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false})}>
+                  <FontAwesome name={'map-marker'} color={'tomato'} size={15} style={{ marginRight: 10}}/> 
                 <View style={{flexDirection: 'column'}}>
               
-  
-                    <Text style={{fontWeight: 'normal', fontSize: 13, color: 'blue'}}>Drop-off location</Text>
-                 
+  {/*
+                    <Text style={{fontWeight: 'normal', fontSize: 17, color: 'blue',marginTop: -20}}>Drop-off location</Text>
+  */ }
                     {!this.state.loading &&
                        
-                    <View regular style={{height: 40}}>
+                    <View regular style={{borderWidth: 1, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 5, width: SCREEN_WIDTH/1.2, padding: 5}} >
                         <TouchableWithoutFeedback style={{width: SCREEN_WIDTH/1.02}} onPress={()=> this.setState({visibleModalDropoff: true, visibleAddressModalTo: true,visibleAddressModal: false,visibleAddressModalToPin: true})}>
-                   <Text style={{fontSize: 12}}>{this.state.toPlace}</Text>
+                   <Text style={{fontSize: 17}}>{this.state.toPlace==""?'Enter Drop-off Location Here':this.state.toPlace}</Text>
                     </TouchableWithoutFeedback>
                      </View>  
                    }
@@ -1973,7 +2306,7 @@ zoomTapEnabled={false}
     borderWidth: 1,
     borderRadius: 1,
     width: 1,
-    height: this.state.LocationDoneto === false? '28%':'50%', position: 'absolute', left: 21, top:this.state.LocationDoneto === false? '15%': '25%'
+    height: this.state.LocationDoneto === false? '8%':'30%', position: 'absolute', left: 21, top: '35%'
   }}>
 </View>
              
@@ -2090,6 +2423,7 @@ console.log('this.state.photo: ', this.state.photo)
 
 
     const newDocumentID = this.checkoutref.collection('orders').doc().id;
+    
     const today = this.state.currentDate;
     const timeStamp= new Date().getTime();
     const date_ordered = moment(today).format('MMMM Do YYYY, h:mm:ss a');

@@ -194,6 +194,7 @@ export default class CartItems extends Component {
     Animated.timing(this.Rotatevalue,{
       toValue:1,
       duration:3000,
+      useNativeDriver: true, // Add this line
     }).start(()=>this.StartImageRotationFunction());
   }
   render() {
