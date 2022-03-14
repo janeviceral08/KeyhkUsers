@@ -107,6 +107,7 @@ export default class Pabili extends Component {
       billing_street: this.props.route.params.billing_streetTo,
       billing_country: '',
       billing_province: this.props.route.params.billing_provinceTo,
+      billing_context: this.props.route.params.context,
       billing_city: this.props.route.params.currentLocation,
       billing_barangay: '',
       billing_cluster: '',
@@ -256,6 +257,7 @@ console.log("newarrLenght value", arr[newarrLenght])
              this.setState({
     billing_province:Newprovince,
     billing_city: arr[newarrLenght],
+    billing_context: item.context,
     billing_street:arr[0]+', '+ arr[1],
     billing_postal: arr[3],
     billing_barangay: item.context[1].text,
@@ -358,6 +360,7 @@ Tolat:region[1],
         Tolong:region[0],
     billing_provinceTo:Newprovince,
     billing_cityTo: UserLocation,
+    billing_contextTo: item.context,
     billing_streetTo:arr[0]+', '+ arr[1],
     billing_postalTo: arr[3],
     billing_barangayTo: item.context[1].text,
@@ -586,6 +589,7 @@ console.log('UserLocation: ', UserLocation)
          
     billing_provinceTo:Newprovince,
     billing_cityTo: UserLocation,
+    billing_contextTo: item.context,
     billing_streetTo:arr[0]+', '+ arr[1],
     billing_postalTo: arr[3],
     billing_barangayTo: item.context[1].text,
@@ -1047,8 +1051,10 @@ console.log("newarrLenght value", arr[newarrLenght])
 
 
              this.setState({
+              billing_context:  this.props.route.params.context,
     billing_province:Newprovince,
     billing_city: arr[newarrLenght],
+    billing_context: item.context,
     billing_street:arr[0]+', '+ arr[1],
     billing_postal: arr[3],
     billing_barangay: item.context[1].text,
@@ -1146,10 +1152,12 @@ console.log('UserLocationcurrentDropoff: ', UserLocation)
  const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
   const Newprovince =province == undefined? item.context[0].text:province.province;
 this.setState({
+  billing_contextTo:  this.props.route.params.context,
 Tolat:lat,
    Tolong:long,
 billing_provinceTo:Newprovince,
 billing_cityTo: UserLocation,
+billing_contextTo: item.context,
 billing_streetTo:arr[0]+', '+ arr[1],
 billing_postalTo: arr[3],
 billing_barangayTo: item.context[1].text,
@@ -1579,6 +1587,7 @@ console.log("province", province)
              
         billing_province:Newprovince,
         billing_city: UserLocation,
+        billing_context: item.context,
         billing_street:arr[0]+', '+ arr[1],
         billing_postal: arr[3],
         billing_barangay: item.context[1].text,
@@ -1601,6 +1610,7 @@ console.log("province", province)
               longitudeDelta: 0.1,},
               billing_province:Newprovince,
               billing_city: UserLocation,
+              billing_context: item.context,
               billing_street:arr[0]+', '+ arr[1],
               billing_postal: arr[3],
               billing_barangay: item.context[1].text,
@@ -1714,6 +1724,7 @@ console.log("province", province)
              
         billing_province:Newprovince,
         billing_city: UserLocation,
+        billing_context: item.context,
         billing_street:arr[0]+', '+ arr[1],
         billing_postal: arr[3],
         billing_barangay: item.context[1].text,
@@ -1919,6 +1930,7 @@ console.log("province", province)
          
       billing_provinceTo:Newprovince.toLowerCase(),
       billing_cityTo: UserLocation,
+      billing_contextTo: item.context,
       billing_streetTo:arr[0]+', '+ arr[1],
       billing_postalTo: arr[3],
       billing_barangayTo: item.context[1].text,
@@ -1941,6 +1953,7 @@ console.log("province", province)
             longitudeDelta: 0.1,},
             billing_province:Newprovince,
             billing_city: UserLocation,
+            billing_context: item.context,
             billing_street:arr[0]+', '+ arr[1],
             billing_postal: arr[3],
             billing_barangay: item.context[1].text,
@@ -2041,6 +2054,7 @@ console.log("province", province)
          
       billing_provinceTo:Newprovince.toLowerCase(),
       billing_cityTo: UserLocation,
+      billing_contextTo: item.context,
       billing_streetTo:arr[0]+', '+ arr[1],
       billing_postalTo: arr[3],
       billing_barangayTo: item.context[1].text,
@@ -2473,6 +2487,7 @@ const DatasValue = {
             token:[],
     },
      Billing: {
+      context: this.state.billing_context,
        name: this.state.account_name,
        address: this.state.billing_street,
        phone: this.state.account_number,
@@ -2492,6 +2507,7 @@ const DatasValue = {
       Day: day,
       Timestamp: timeStamp
      },
+     billing_contextTo: this.state.billing_contextTo,
      billing_nameTo: this.state.account_name,
      billing_phoneTo:this.state.account_number,
      billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),

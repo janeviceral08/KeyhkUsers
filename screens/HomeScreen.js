@@ -596,6 +596,7 @@ const valprovince = province == undefined? arr[newarrLenght]:province.province;
                currentLocation:UserLocation,
                billing_streetTo:arr[0],
                billing_provinceTo:arr[1],
+               context:item.context,
                 fromPlace:arr[0]+', '+arr[1]+' '+item.context[1].text+' '+UserLocation+' '+valprovince+' '+arr[3],
                location:item.place_name, x: { latitude: coords.latitude, longitude: coords.longitude },loading:false })
 
@@ -941,7 +942,7 @@ let Address ='';
               style={{ height: 60, width: SCREEN_WIDTH/2, marginLeft: -10}}
               attributionEnabled={false}
               logoEnabled={false}
-           onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency,'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
+           onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency,'billing_streetTo':this.state.billing_streetTo,'context':this.state.context,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
               >
 <MapboxGL.Camera 
 centerCoordinate={[this.state.x.longitude, this.state.x.latitude]} 
@@ -952,7 +953,7 @@ followUserMode={'normal'}
          <MapboxGL.PointAnnotation coordinate={[this.state.x.longitude, this.state.x.latitude]} />
 </MapboxGL.MapView>
 <TouchableOpacity style={{justifyContent: "center", alignContent: "center", width: SCREEN_WIDTH/2.2, flexDirection: 'column',paddingTop:0, paddingLeft: 10}}
- onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
+ onPress = {()=>{this.props.navigation.navigate('Pabili',{'typeOfRate':this.state.typeOfRate, 'selectedCityUser':  this.state.selectedCityUser, 'cLat': this.state.x.latitude, 'cLong':this.state.x.longitude, fromPlace: this.state.fromPlace, 'code':this.state.CountryNow[0].code,'context':this.state.context, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'billing_streetTo':this.state.billing_streetTo,'billing_provinceTo':this.state.billing_provinceTo,'currentLocation':this.state.currentLocation, 'UserLocationCountry': this.state.UserLocationCountry})}} 
 >
 <Text style={{ fontSize: 11,paddingLeft: 5, color: 'white', left: 80}}>Starts at </Text>
 <Text style={{ fontSize: 20,paddingLeft: 5, color: 'white'}}>{ this.state.CountryNow.length == 0? '':this.state.CountryNow[0].labelRider}    {this.state.CountryNow.length == 0? '':this.state.CountryNow[0].currencyPabili} {this.state.CountryNow.length == 0? '':this.state.CountryNow[0].pabiliminim}</Text>
