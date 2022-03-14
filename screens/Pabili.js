@@ -1432,7 +1432,7 @@ const copyToClipboard = () => {
       {this.state.pabiliList.length == 0?
        <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addListBulk()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>Add List</Text></Button></View>
       :<FlatList
- style={{marginTop: this.state.keyboard==true?1000: 0}}
+ style={{marginTop: this.state.keyboard==true?100: 0}}
         data={this.state.pabiliList}
         renderItem={
           ({item,index}) => 
@@ -1451,7 +1451,7 @@ const copyToClipboard = () => {
         ListFooterComponent={() => <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addList()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>+</Text></Button></View>}
       />}
 <Button  style={{alignSelf:'center', backgroundColor:'#019fe8', width: '100%', alignContent: 'center'}}  onPress={()=>this.setState({listModal:false})}>
-            <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>Procceed</Text>
+            <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>Proceed</Text>
       </Button>
     </View>
 </Modal>
@@ -1510,13 +1510,13 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
   <Card style={{ left: 0, top: this.state.keyboard == true ? 130: 0, position: 'absolute', width: SCREEN_WIDTH/1.01}}>
   <View style={{borderWidth: 1.5, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 20, flexDirection:'row', margin: 5}} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
 
-                 <MaterialIcons name="arrow-back" size={25} color="black" onPress={()=> this.setState({visibleModalPickup: false,visibleAddressModal: false ,visibleAddressModalPin:false})} style={{ width: 40,top:5}} />
+                 <MaterialIcons name="arrow-back" size={25} color="black" onPress={()=> this.setState({visibleModalPickup: false,visibleAddressModal: false ,visibleAddressModalPin:false})} style={{ width: 40,top:8}} />
              
                 {!this.state.loading &&
                    
                    <View regular style={{ height: 40, flexDirection: 'row', width: SCREEN_WIDTH/1.2}}>
                    <Input value={this.state.fromPlace} placeholder="Choose Pickup location" style={{fontSize: 17}}  onChangeText={(text) => this.getLocationType(text, 'fromPlace')}  onFocus={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false,keyboard: true,LocationDone:false}) }  onBlur={()=>this.setState({keyboard: false})} />
-                      <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={15} onPress={()=>this.setState({fromPlace: '',x:undefined})}/> 
+                      <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={20} onPress={()=>this.setState({fromPlace: '',x:undefined})}/> 
                         </View>      }
                 </View>
 {/*   <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
@@ -1845,14 +1845,14 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
   <View style={{borderWidth: 1.5, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 20, flexDirection:'row', margin: 5}}  onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalTo: false})}>
 
 
-                 <MaterialIcons name="arrow-back" size={25} color="black" onPress={()=> this.setState({visibleModalDropoff: false})} style={{ width: 40,top:5}}/>
+                 <MaterialIcons name="arrow-back" size={25} color="black" onPress={()=> this.setState({visibleModalDropoff: false})} style={{ width: 40,top:8}}/>
      
                 
                  {!this.state.loading &&
                    
                    <View regular style={{ height: 40, flexDirection: 'row', width: SCREEN_WIDTH/1.2}}>
                    <Input value={this.state.toPlace} placeholder="Choose Drop-off location" style={{fontSize: 17}}  onChangeText={(text) => this.getLocationTypeto(text, 'toPlace')}  onFocus={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false, keyboard: true,LocationDoneto: false}) }  onBlur={()=>this.setState({keyboard: false})} />
-                      <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={15} onPress={()=>this.setState({toPlace: '',Tolat:undefined})}/> 
+                      <FontAwesome name={'times-circle-o'} style={{ marginRight: 5,top: 10}}size={20} onPress={()=>this.setState({toPlace: '',Tolat:undefined})}/> 
                         </View>      }
                 </View>
  { /* <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false})}>

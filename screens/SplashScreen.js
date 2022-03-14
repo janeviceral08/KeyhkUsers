@@ -33,9 +33,13 @@ class SplashScreen extends React.Component {
     const isLoggedIn= await AsyncStorage.getItem('uid');
     
    if (data !== null) {
-      this.props.navigation.reset({
-        index: 0,
-        routes: [{ name: isLoggedIn? 'Home' : 'Home2'}],})
+    setTimeout(() => {    this.props.navigation.reset({
+      index: 0,
+      routes: [{ name: isLoggedIn? 'Home' : 'Home2'}],})
+  
+  
+  }, 2000);
+    
     }
 
   }

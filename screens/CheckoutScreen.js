@@ -334,6 +334,7 @@ _bootstrapAsync =async () =>{
   querySnapshot.forEach((doc) => {
 
     this.setState({
+      context: doc.data().context == undefined? []:doc.data().context,
       userToken: doc.data().token,
       account_name: doc.data().Name,
       account_address: doc.data().Address.Address,
@@ -514,6 +515,7 @@ const databasecharge = item.Country.trim() == 'Philippines'?'AppShare':item.Coun
   
            this.setState({
              Country: item.Country,
+             billing_context: item.context == undefined? []:item.context,
             billing_name: item.name,
             billing_phone: item.phone,
             billing_province: item.province,
@@ -616,6 +618,7 @@ console.log('changeAddress databasecharge: ', databasecharge);
       });
   
   this.setState({
+    billing_context: item.context == undefined? []:item.context,
     billing_name: item.name,
     billing_phone: item.phone,
     billing_province: item.province,
@@ -1654,6 +1657,7 @@ Alert.alert('Submission Complete!', 'We will process your verification')
      adminID: getAdminId.adminID,
       originalAddress:this.props.route.params.fromPlace,
      AccountInfo: {
+      context: this.state.context,
        name: this.state.account_name,
        address: this.state.account_address,
        phone: this.state.account_number,
@@ -1665,6 +1669,7 @@ Alert.alert('Submission Complete!', 'We will process your verification')
        arrayofCity: this.state.arrayofCity,
      },
      Billing: {
+      context: this.state.billing_context,
        name: this.state.billing_name,
        address: this.state.billing_street,
        phone: this.state.billing_phone,

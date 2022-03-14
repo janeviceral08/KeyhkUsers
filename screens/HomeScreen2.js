@@ -1087,8 +1087,8 @@ shadowOffset: {
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
 elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==2 ?'#f06767':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 2})}>
-<Fontisto name={'shopping-bag-1'}  size={15} color={this.state.selectedcategories ==2 ?'white':'#525252'} />
-<Text style={{color: this.state.selectedcategories ==2 ?'white':'#525252',}}>  Gen. Merch.</Text>
+<Fontisto name={'shopping-bag-1'}  size={17} color={this.state.selectedcategories ==2 ?'white':'#525252'} />
+<Text style={{color: this.state.selectedcategories ==2 ?'white':'#525252',}}>  Merchandise</Text>
 
     </TouchableOpacity>
     </View>
@@ -1164,7 +1164,7 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
 <HomeScreenService navigation={this.props.navigation} selectedCityUser={this.state.selectedCityUser} typeOfRate={this.state.typeOfRate} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/>
     }
 
-{this.state.orders > 0 ?<Draggable z={12} x={0} y={0} renderSize={56}  children={   <View>
+{/*this.state.orders > 0 ?<Draggable z={12} x={0} y={0} renderSize={56}  children={   <View>
         <Icon.Button name="profile" size={25} color={'white'} backgroundColor="none" style={{borderRadius: 50, backgroundColor:'#f06767' }} onPress={()=> this.props.navigation.navigate("Orders")} ></Icon.Button>
      
           <Badge style={{position: 'absolute', top: -3, right: 3, backgroundColor: '#ee4e4e'}}>
@@ -1176,7 +1176,7 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
 
     
       </View>
-  } isCircle /> : null}
+  } isCircle /> : null*/}
    </Container>
     );
   }

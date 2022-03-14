@@ -237,6 +237,7 @@ const province = Province.ZipsCollection.find( (items) => items.zip === item.con
 
 
              this.setState({
+              billing_context: item.context,
     billing_province:item.context[0].text,
     billing_city: arr[2],
     billing_street:arr[0]+', '+ arr[1],
@@ -350,7 +351,7 @@ console.log("arr", arr)
         Tolong:region[0],
        
           summary: res.data.response.route[0].summary,
-         
+          billing_contextTo: item.context,
     billing_provinceTo:item.context[0].text,
     billing_cityTo: arr[2],
     billing_streetTo:arr[0]+', '+ arr[1],
@@ -1005,6 +1006,7 @@ if(this.state.visibleAddressModal == true)
   
   
                this.setState({
+                billing_context: item.context,
       billing_province:item.context[0].text,
       billing_city: arr[2],
       billing_street:arr[0]+', '+ arr[1],
@@ -1119,7 +1121,7 @@ if(this.state.visibleAddressModal == true)
           Tolong:coords.longitude,
          
             summary: res.data.response.route[0].summary,
-           
+            billing_contextTo: item.context,
       billing_provinceTo:item.context[0].text,
       billing_cityTo: arr[2],
       billing_streetTo:arr[0]+', '+ arr[1],
@@ -1395,7 +1397,7 @@ const region=  {latitude: item.center[1], latitudeDelta: 0.0999998484542477, lon
 console.log('region: ', region)
 
              this.setState({
- 
+              billing_context: item.context,
     billing_province:item.context[0].text,
     billing_city: arr[2],
     billing_street:arr[0]+', '+ arr[1],
@@ -1492,7 +1494,7 @@ console.log("province", province)
         Tolong:item.center[0],
        
           summary: res.data.response.route[0].summary,
-         
+          billing_contextTo: item.context,
     billing_provinceTo:province == undefined?item.context[0].text :province.province,
     billing_cityTo: arr[2],
     billing_streetTo:arr[0]+', '+ arr[1],
@@ -1900,6 +1902,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
        status: this.state.account_status,
      },
      Billing: {
+      context: this.state.billing_context,
        name: this.state.account_name,
        address: this.state.billing_street,
        phone: this.state.phone,
@@ -1919,6 +1922,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
       Day: day,
       Timestamp: timeStamp
      },
+     billing_contextTo: this.state.billing_contextTo,
      billing_nameTo: this.state.account_name,
      billing_phoneTo:this.state.phone,
      billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),

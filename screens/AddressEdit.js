@@ -253,6 +253,8 @@ updateTextInput = (text, field) => {
     let itemIndex = updatedCart.findIndex(item => this.state.id === item.id); /* Get the index of the item we want to delete */
     
     /* Set item quantity */
+
+    updatedCart[itemIndex]['context'] = this.state.context;
     updatedCart[itemIndex]['postal'] = this.state.postal;
     updatedCart[itemIndex]['address'] = this.state.address; 
     updatedCart[itemIndex]['city'] = this.state.selectedCity; 
@@ -296,6 +298,8 @@ else{
       let itemIndex = updatedCart.findIndex(item => this.state.id === item.id); /* Get the index of the item we want to delete */
       
       /* Set item quantity */
+    
+      updatedCart[itemIndex]['context'] = this.state.context;
       updatedCart[itemIndex]['postal'] = this.state.postal;
       updatedCart[itemIndex]['address'] = this.state.address; 
       updatedCart[itemIndex]['city'] = this.state.selectedCity; 
@@ -334,6 +338,7 @@ else{
   editAddress(item){
     this.setState({
        region:[item.long, item.lat],
+       context: item.context,
       postal: item.postal,
       address:item.address,
       selectedCity: item.city,
@@ -416,6 +421,7 @@ else{
                 city: this.state.selectedCity,
                 postal: this.state.postal,
                 address: this.state.address,
+                context: this.state.context,
                 lat: this.state.region[1],
                 long: this.state.region[0],
             };
@@ -652,7 +658,7 @@ console.log('region on press',item.geometry.coordinates);
                Country: arr[arrcountry].trim(),
                postal:arr[3],
                address: arr[0]+', '+ arr[1],
-               
+               context: item.context,
                location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })
               
     }
@@ -671,7 +677,7 @@ console.log('region on press',item.geometry.coordinates);
                Country: arr[arrcountry].trim(),
                postal:arr[3],
                address: arr[0]+', '+ arr[1],
-               
+               context: item.context,
                location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })}
     
 }
@@ -864,6 +870,7 @@ const province = Province.ZipsCollection.find( (items) => items.zip === item.con
                selectedBarangay:item.context[1].text,
                postal:arr[3],
                address: arr[0]+', '+ arr[1],
+               context: item.context,
                location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })
              }
              else{
@@ -878,6 +885,7 @@ this.setState({
   selectedCity:arr[arr.length-3].trim(),
   selectedBarangay:item.context[1].text,
   postal:arr[3],
+  context: item.context,
   address: arr[0]+', '+ arr[1],
   location:item.place_name, x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true })
              }

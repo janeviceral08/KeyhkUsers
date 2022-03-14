@@ -187,6 +187,7 @@ console.log('city.length: ',city.length)
             status: 'New',
             Country: this.state.Country.trim(),
             Address: {
+              context: this.state.context,
               Address: this.state.address,
               Barangay: this.state.selectedBarangay,
               City: this.state.selectedCity.trim(),
@@ -196,6 +197,7 @@ console.log('city.length: ',city.length)
               long:this.state.userPoint.longitude,
             },
             Shipping_Address: [{
+              context: this.state.context,
                 Country: this.state.Country.trim(),
               id: userId,
               default: true,
@@ -330,6 +332,7 @@ console.log('selectedCity:', arr[2])
 const region=  {latitude: item.center[1], latitudeDelta: 0.0999998484542477, longitude: item.center[0], longitudeDelta: 0.11949475854635239}
 console.log('region: ', region)
              this.setState({
+              context: item.context,
                userPoint: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] },
                province: item.context[0].text,
                selectedCity:arr[2],
