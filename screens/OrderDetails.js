@@ -343,7 +343,7 @@ if(parseFloat(this.state.rating) == 0){
    
                    
                     </Card>}
-                    {orders.OrderStatus=='Processed' || orders.OrderStatus=='Processing' ||orders.OrderStatus == 'Pending'?     <View style={styles.stepIndicator}>
+                    { orders.Mode == 'Pick-up' ? null:orders.OrderStatus=='Processed' || orders.OrderStatus=='Processing' ||orders.OrderStatus == 'Pending'?     <View style={styles.stepIndicator}>
           <StepIndicator  
             stepCount={3}   
             customStyles={secondIndicatorStyles}
@@ -356,7 +356,7 @@ if(parseFloat(this.state.rating) == 0){
           />
                
         </View>:null}
-                    {orders.OrderStatus=='Processed'|| orders.OrderStatus=='Processing' || orders.OrderStatus == 'Pending'? 
+                    { orders.Mode == 'Pick-up' ? null:orders.OrderStatus=='Processed'|| orders.OrderStatus=='Processing' || orders.OrderStatus == 'Pending'? 
                      <Card>
                 <Body >
                
@@ -411,7 +411,7 @@ if(parseFloat(this.state.rating) == 0){
                   
                    
                     </Card>}
-        {  orders.OrderStatus == 'Pending'? null:
+        {  orders.Mode == 'Pick-up' ? null: orders.OrderStatus == 'Pending'? null:
         
         
         orders.OrderStatus=='Processed'|| orders.OrderStatus=='Processing'?       <Card>
@@ -669,7 +669,7 @@ logoEnabled={false}
        />
         </Card>
       
-          <CardItem>
+         {  orders.Mode == 'Pick-up' ? null:<CardItem>
             <Body>
               <Text style={{fontSize: 15, color: 'gray'}}>Delivery Charge</Text>
             </Body>
@@ -678,7 +678,7 @@ logoEnabled={false}
               {this.props.route.params.orders.currency}{(Math.round(parseFloat(this.state.delivery)*10)/10+Math.round(parseFloat(this.state.extra)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
               </Text>
             </Right>
-          </CardItem>       
+          </CardItem> }      
        {this.props.route.params.orders.USERAdd> 0? <CardItem>
             <Body>
               <Text style={{fontSize: 15, color: 'gray'}}>Reservation Charge</Text>
@@ -704,17 +704,32 @@ logoEnabled={false}
             <Left>
                <Text style={{color:'orange'}}>{this.state.paymentmethod}<Text style={{color:'orange', fontWeight: 'bold'}}> TOTAL</Text></Text>
             </Left>
-            <Right>
+     
+
+               { orders.Mode == 'Pick-up' ?        <Right>
               {console.log('extra: ', this.state.extra)}
               {console.log('storeTotal: ', this.storeTotal())}
               {console.log('delivery: ', this.state.delivery)}
               {this.props.route.params.orders.USERAdd> 0?
               
-               <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() + this.props.route.params.orders.USERAdd +this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+               <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.storeTotal() + this.props.route.params.orders.USERAdd - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
           :
-          <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() + this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+          <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.storeTotal() - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
               }
-               </Right>
+               </Right>:
+                      <Right>
+                      {console.log('extra: ', this.state.extra)}
+                      {console.log('storeTotal: ', this.storeTotal())}
+                      {console.log('delivery: ', this.state.delivery)}
+                      {this.props.route.params.orders.USERAdd> 0?
+                      
+                       <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() + this.props.route.params.orders.USERAdd +this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                  :
+                  <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() +  this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                      }
+                       </Right>
+               
+               }
           </CardItem>
       
      </View>     

@@ -95,6 +95,7 @@ export default class ProfileScreen extends Component {
       wallet:0,
        loggedIn: '',
        modalSelectedCity:false,
+       modalSelectedCityNoUser:false,
        UserLocationCountry:'',
       AvailableOn:[],
       currentLocation: '',
@@ -107,6 +108,8 @@ export default class ProfileScreen extends Component {
       photo:'',
       processing: 0,
       delivered:0,
+      asyncselectedCity:null,
+      asyncselectedCountry:null
       };
       this.FetchProfile();
   }
@@ -134,7 +137,7 @@ export default class ProfileScreen extends Component {
                         photo: data.photo,
                         wallet: data.wallet,
                         selectedCity: data.selectedCity,
-                        selectedCountry: data.selectedCountry,
+                        selectedCountryUser: data.selectedCountry,
                       });
                     });
                 
@@ -222,6 +225,11 @@ console.log('BackPressed')
       this.backHandler.remove();
     }
   async componentDidMount() {
+
+    const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
+const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
+
+this.setState({asyncselectedCity,asyncselectedCountry})
     this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       this.backAction
@@ -406,12 +414,13 @@ console.log("UserLocationCountry ", UserLocationCountry)
 
         async getCountryCity(PressedCountrycode){
           const userId =  auth().currentUser.uid;
+          const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
           firestore().collection('users').doc(userId).update({  selectedCountry: PressedCountrycode.trim()})
           console.log('PressedCountrycode: ',PressedCountrycode)
           this.setState({loading: true})
             const city = [];
-            const collect= PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city';
-            await  firestore().collection(collect).where('country', '==', PressedCountrycode)
+            const collect= asyncselectedCountry == null?PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city':asyncselectedCountry.trim()+'.city';
+            await  firestore().collection(collect).where('country', '==', asyncselectedCountry == null?PressedCountrycode:asyncselectedCountry)
               .onSnapshot(querySnapshot => {
                 querySnapshot.docs.forEach(doc => {
                   console.log('getCountryCity: ', doc.data().label)
@@ -448,8 +457,54 @@ changeCity (item){
 }
 
 
+async getCountryCityNoUser(PressedCountrycode){
+      this.setState({loading: true})
+    const city = [];
+ 
+    AsyncStorage.setItem('asyncselectedCountry', PressedCountrycode.trim())
+    const collect= PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city';
+    console.log('getCountryCityNoUser: ', collect)
+    await  firestore().collection(collect).where('country', '==', PressedCountrycode)
+      .onSnapshot(querySnapshot => {
+        querySnapshot.docs.forEach(doc => {
+          console.log('getCountryCity: ', doc.data().label)
+        city.push(doc.data());
+      })
+      });
+    
+    if( this.state.AvailableOn.length <1){
+      this.setState({
+        CountryNow:[{labelRider: '', currency: '', currencyPabili:''}]
+      })
+    }
+
+    const CountryNow = this.state.AvailableOn.filter(items => {
+      const itemData = items.label;
+      const textData = PressedCountrycode;
+     
+      return itemData.indexOf(textData) > -1
+    })
+      
+    this.setState({
+      CountryNow:CountryNow.length < 1?[{labelRider: '', currency: '', currencyPabili:''}]: CountryNow,
+      cities: city,
+      loading:false,
+    })  
+   
+}
+
+changeCityNoUser (item){
+  //this.state.currentLocation.trim() == item.label
+ 
+     console.log('asyncselectedCity: ', item.label)
+  AsyncStorage.setItem('asyncselectedCity', item.label.trim())
+this._bootstrapAsync(true, item.label, item.typeOfRate, this.state.cities);
+this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
+  
+}
   render() {
     const {uid}=this.state;
+    console.log('uid: ', uid)
     return (
       <Container>
       <CustomHeader title="Account Settings" isHome={true} Cartoff={true} navigation={this.props.navigation}/>
@@ -537,6 +592,92 @@ changeCity (item){
                   }
                 </View>
                 </Modal>
+
+
+
+                <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.modalSelectedCityNoUser}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                  onBackButtonPress={() => this.setState({ modalSelectedCityNoUser: false })}
+                  onBackdropPress={() => this.setState({modalSelectedCityNoUser: false})} transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT,width: SCREEN_WIDTH, backgroundColor: 'white', marginLeft: -20}]}> 
+                <Card style={{ width: SCREEN_WIDTH, marginTop: this.state.keyboardav == true? 130:0}}>
+  <CardItem listItemPadding={0} >
+ <Left style={{flex:1}}>
+          <Button transparent onPress={()=> this.setState({modalSelectedCityNoUser: false})}>
+                 <MaterialIcons name="arrow-back" size={25} color="black" />
+                </Button> 
+          </Left>
+          <Right>
+          <TouchableOpacity onPress={()=> this.setState({ViewCountry : !this.state.ViewCountry})}>
+          <Text>{this.state.asyncselectedCountry == null?this.state.selectedCountry == ''?this.state.UserLocationCountry:this.state.selectedCountry:this.state.asyncselectedCountry}</Text>
+           </TouchableOpacity>
+          </Right>
+                </CardItem>
+                </Card>
+                  { this.state.ViewCountry==true?
+                  
+                    <Card>
+                    <Item>
+                    <Input placeholder="Search..." value={this.state.searchCountry} onChangeText={(text) => {
+                      
+                      
+                      this.setState({SelectedAvailableOn: this.state.AvailableOn.filter(items => {
+        const itemData = items.label;
+        const textData = text;
+       
+        return itemData.indexOf(textData) > -1
+      }),searchCountry:text })}} placeholderTextColor="#687373"  onFocus={()=> this.setState({keyboardav: true})} onBlur={()=> this.setState({keyboardav: false})}/>
+                    </Item>
+                     <FlatList
+                  data={this.state.SelectedAvailableOn.length < 1? this.state.AvailableOn:this.state.SelectedAvailableOn}
+                  renderItem={({ item,index }) => (
+                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row'}} key={index} button  onPress={() => {this.getCountryCityNoUser(item.label);this.setState({selectedCountry: item.label,SelectedAvailableOn:[], searchCountry:'', ViewCountry: false, keyboardav: false});  }}>
+                       <Image style={{  width: 70, height: 50,}} resizeMethod="scale" resizeMode="contain" source={{uri: item.flag}} />
+                      <Text style={{fontSize: 17, paddingLeft: 20}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
+                    </CardItem>
+                  )}
+                  keyExtractor = { (item,index) => index.toString() }
+                />
+
+
+                    </Card>
+
+                    :
+
+
+                   <Card>
+                    <Item>
+                    <Input placeholder="Search..." value={this.state.searchcity} onChangeText={(text) => {
+                      
+                      
+                      this.setState({newCity: this.state.cities.filter(items => {
+        const itemData = items.label;
+        const textData = text;
+       
+        return itemData.indexOf(textData) > -1
+      }),searchcity:text })}} placeholderTextColor="#687373"  onFocus={()=> this.setState({keyboardav: true})} onBlur={()=> this.setState({keyboardav: false})}/>
+                    </Item>
+                     <FlatList
+                  data={this.state.newCity.length < 1? this.state.cities:this.state.newCity}
+                  renderItem={({ item,index }) => (
+                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH,}} key={index} button  onPress={() => {this.changeCityNoUser(item)}}>
+                      <Text style={{fontSize: 17}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
+                    </CardItem>
+                  )}
+                  keyExtractor = { (item,index) => index.toString() }
+                />
+
+
+
+                    </Card>
+
+                  }
+                </View>
+                </Modal>
       {uid ?
         <ScrollView>
         <Card>
@@ -582,6 +723,8 @@ changeCity (item){
           
           </Card>
           <ListItem itemDivider style={{backgroundColor: "#FFFFFF"}}/> 
+        
+        
           <ListItem icon onPress={()=>this.setState({modalSelectedCity: true})}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
@@ -595,6 +738,7 @@ changeCity (item){
             <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
             </Right>
           </ListItem>
+             
           <View style={{
     borderBottomColor: '#dddddd',
     borderBottomWidth: 1,
@@ -849,19 +993,19 @@ changeCity (item){
            
           </ListItem>
           <ListItem itemDivider style={{backgroundColor: "#FFFFFF"}}/> 
-          <ListItem icon onPress={()=>this.setState({modalSelectedCity: true})}>
-            <Left>
-              <Button style={{ backgroundColor: "#FFFFFF" }}>
-              <MaterialIcons name="my-location" size={25} color="gray" />
-              </Button>
-            </Left>
-            <Body>
-              <Text>City: {this.state.selectedCityUser}</Text>
-            </Body>
-            <Right>       
-            <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
-            </Right>
-          </ListItem>
+          <ListItem icon onPress={()=>this.setState({modalSelectedCityNoUser: true})}>
+              <Left>
+                <Button style={{ backgroundColor: "#FFFFFF" }}>
+                <MaterialIcons name="my-location" size={25} color="gray" />
+                </Button>
+              </Left>
+              <Body>
+                <Text>City: {this.state.asyncselectedCity == null?this.state.selectedCityUser:this.state.asyncselectedCity}</Text>
+              </Body>
+              <Right>       
+              <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
+              </Right>
+            </ListItem>
           <ListItem icon onPress={()=> this.props.navigation.navigate("Vouchers")}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>

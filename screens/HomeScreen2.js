@@ -157,7 +157,7 @@ export default class HomeScreen2 extends Component {
       searchCountry:'',
       selectedCountry:'',
       CountryNow:[{labelRider: '', currency: '', currencyPabili:''}],
-  
+      asyncselectedCity:null,
       orders:0,
     }
     this.arrayholder = [];
@@ -283,8 +283,9 @@ const UserLocationCountry = arr[newarrLenghtCountry]
      this.setState({loading: true})
      //const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
 //console.log('asyncselectedCity: ', asyncselectedCity)
-
-
+const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
+const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
+this.setState({asyncselectedCity})
 
          if(Platform.OS === 'android')
     {
@@ -358,11 +359,11 @@ console.log("UserLocationCountry ", UserLocationCountry)
                 }
             );
      // this.getUserCity();
-  
-      this.unsubscribe = this.ref.where('city','==', 
-    this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser).onSnapshot(this.onCollectionUpdate);
+
+      this.unsubscribe = this.ref.where('city','==', asyncselectedCity == null?
+    this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser:asyncselectedCity).onSnapshot(this.onCollectionUpdate);
       this.subscribe = this.catref.onSnapshot(this.onCategoriesUpdate);
-      console.log('city show ', this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser)
+      console.log('city show ',asyncselectedCity==null? this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser:asyncselectedCity)
     }
    
     onPrentals = (querySnapshot) => {
@@ -419,19 +420,22 @@ console.log("UserLocationCountry ", UserLocationCountry)
     
   _bootstrapAsync =async(selected,item, typeOfRate, city) =>{
     console.log('Reading bootstrapasync')
-      
-      const NewCityItem = item.trim();
+    const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
+    const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
+    console.log('asyncselectedCountry:', asyncselectedCountry)
+    console.log('asyncselectedCity:', asyncselectedCity)
+      const NewCityItem =asyncselectedCity== null? item.trim():asyncselectedCity.trim();
       console.log('NewCityItem: ',NewCityItem.trim())
 //console.log('cities: ', city)
 //console.log('cities find: ',  city.find( (items) => items.label === NewCityItem))
       const NewValueofCityUser = city.find( (items) => items.label === NewCityItem);
 
-//console.log('NewValueofCityUser: ',NewValueofCityUser)
- //console.log('typeOfRates: ',NewValueofCityUser.typeOfRate)
+console.log('NewValueofCityUser: ',NewValueofCityUser)
+ console.log('typeOfRates: ',NewValueofCityUser.typeOfRate)
     this.setState({selectedCityUser: item, typeOfRate: NewValueofCityUser.typeOfRate})
     this.ref.where('city','==',NewCityItem).onSnapshot(this.onCollectionUpdate);
-  const userId= await AsyncStorage.getItem('uid');
-   const newUserLocationCountry = this.state.UserLocationCountry.trim() =='Philippines'?'vehicles':this.state.UserLocationCountry.trim()+'.vehicles';
+
+   const newUserLocationCountry = asyncselectedCountry == null? this.state.UserLocationCountry.trim() =='Philippines'?'vehicles':this.state.UserLocationCountry.trim()+'.vehicles':asyncselectedCountry.trim() =='Philippines'?'vehicles': asyncselectedCountry+'.vehicles';
    console.log('newUserLocationCountry: ',newUserLocationCountry)
    firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
     this.cityRef.collection('products').where('rentalType','==', 'Property').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onPrentals)
@@ -442,7 +446,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
             querySnapshot.docs.forEach(doc => {
             city.push(doc.data());
           });
-        console.log('Stores: ',city )
+       // console.log('Stores: ',city )
         this.setState({
           dataSource: city,//.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
           loading: false
@@ -463,12 +467,14 @@ async getCountryCity(PressedCountrycode){
     this.setState({loading: true})
     //  console.log('getCountryCity')
  // console.log('PressedCountrycode: ', PressedCountrycode)
+
+ const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
       const city = [];
-      const collect= PressedCountrycode =='Philippines'?'city':this.state.UserLocationCountry+'.city';
+      const collect= asyncselectedCountry == null? PressedCountrycode =='Philippines'?'city':this.state.UserLocationCountry+'.city':asyncselectedCountry+'.city';
     //   console.log('collect: ', collect)
       //     console.log('UserLocationCountry: ', this.state.UserLocationCountry)
        //          console.log('selectedCountry: ', this.state.selectedCountry)
-        firestore().collection(collect).where('country', '==', PressedCountrycode)
+        firestore().collection(collect).where('country', '==', asyncselectedCountry == null? PressedCountrycode:asyncselectedCountry)
         .onSnapshot(querySnapshot => {
           querySnapshot.docs.forEach(doc => {
           city.push(doc.data());
@@ -501,27 +507,29 @@ async getCountryCity(PressedCountrycode){
     async getAllCity() {
   this.setState({loading: true})
       const city = [];
+      const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
+      const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
      // const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
-      const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.trim()+'.city';
-     //  console.log('collect: ', collect)
+      const collect= asyncselectedCountry == null? this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.trim()+'.city':asyncselectedCountry.trim() =='Philippines'?'city':asyncselectedCountry+'.city';
+      console.log('getAllCity collect: ', collect)
       //     console.log('UserLocationCountry: ', this.state.UserLocationCountry)
       //           console.log('selectedCountry: ', this.state.selectedCountry)
-        firestore().collection(collect).where('country', '==', this.state.UserLocationCountry.trim())
+        firestore().collection(collect).where('country', '==', asyncselectedCountry == null? this.state.UserLocationCountry.trim():asyncselectedCountry.trim())
         .onSnapshot(querySnapshot => {
           querySnapshot.docs.forEach(doc => {
           city.push(doc.data());
       //    console.log('collect data: ', doc.data())
         });
       }); 
-
+      
          const CountryNow = this.state.AvailableOn.filter(items => {
         const itemData = items.label;
-        const textData = this.state.UserLocationCountry;
+        const textData = asyncselectedCountry == null? this.state.UserLocationCountry:asyncselectedCountry;
        
         return itemData.indexOf(textData) > -1
       })
-     //    console.log('CountryNow: ', CountryNow)
-  
+       console.log('city: ', city)
+       console.log('CountryNow: ', CountryNow)
       this.setState({
         cities: city,
         CountryNow,
@@ -1149,7 +1157,7 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
         </View>
         </View>*/}
      </View>:
-     this.state.selectedIndex == 1?<View style={{ flex: 1 }}><HomeScreenRentals navigation={this.props.navigation}  typeOfRate={this.state.typeOfRate} selectedCityUser={this.state.selectedCityUser} cLat={this.state.x.latitude} cLong={this.state.x.longitude} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/></View>:
+     this.state.selectedIndex == 1?<View style={{ flex: 1 }}><HomeScreenRentals navigation={this.props.navigation}  typeOfRate={this.state.typeOfRate} selectedCityUser={this.state.asyncselectedCity == null?this.state.selectedCityUser:this.state.asyncselectedCity} cLat={this.state.x.latitude} cLong={this.state.x.longitude} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/></View>:
      this.state.selectedIndex == 2?
      <FlatList
           data={this.state.carsAvailable}
@@ -1161,7 +1169,7 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
           columnWrapperStyle={{justifyContent:'space-between'}}
           keyExtractor={(item, index) => index.toString()}
           />:
-<HomeScreenService navigation={this.props.navigation} selectedCityUser={this.state.selectedCityUser} typeOfRate={this.state.typeOfRate} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/>
+<HomeScreenService navigation={this.props.navigation} selectedCityUser={this.state.asyncselectedCity == null?this.state.selectedCityUser:this.state.asyncselectedCity} typeOfRate={this.state.typeOfRate} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/>
     }
 
 {/*this.state.orders > 0 ?<Draggable z={12} x={0} y={0} renderSize={56}  children={   <View>

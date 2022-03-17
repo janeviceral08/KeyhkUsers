@@ -34,7 +34,7 @@ export default class SignUpScreenGoogle extends Component {
             this.subscribe= null;
             this.state = {
               email: '',
-              name: '',
+              name:  '',
               username: '',
               password: '',
               rePassword: '',
@@ -114,8 +114,60 @@ export default class SignUpScreenGoogle extends Component {
           this.StartImageRotationFunction()
           const token= await AsyncStorage.getItem('token');
             console.log('current: ', auth().currentUser.uid)
-            console.log('current: ', auth().currentUser)
+            console.log('current: ', auth().currentUser.displayName)
             const userId = auth().currentUser.uid;
+this.setState({    name:  auth().currentUser.displayName,})
+            firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
+
+              querySnapshot.forEach(doc => {
+                if(doc.data().userId == auth().currentUser.uid){
+                  messaging().getToken().then(token => {
+                    firestore().collection('users').doc(auth().currentUser.uid).update({token: firestore.FieldValue.arrayUnion(token)})
+                    firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
+                  
+                      querySnapshot.forEach(doc => {
+                        if(doc.data().userId == auth().currentUser.uid){
+                          
+                                        const usersRef = firestore().collection('users').doc(auth().currentUser.uid)
+                                        const updateRef = firestore().collection('users').doc(auth().currentUser.uid);
+                                        updateRef.update({
+                                          token: firestore.FieldValue.arrayUnion(token),
+                                        });
+                                    usersRef.get()
+                                        .then((docSnapshot) => {
+                                          if (docSnapshot.exists) {
+                                            usersRef.onSnapshot((doc) => {
+                                            
+                                    console.log('working here 2')
+                                    console.log('current: ', auth().currentUser.uid)
+                                          AsyncStorage.setItem('uid',  auth().currentUser.uid);
+                                  this.setState({
+                                      loading: false,
+                                      email: '', 
+                                      password: ''
+                                    })
+                                    this.props.navigation.reset({
+                                        index: 0,
+                                        routes: [{ name: 'Home' }],})
+                                            });
+                                          } else {
+                                            this.setState({ errorMessage: 'Invalid Email or Password', loading: false })
+                                          }
+                                      });
+                  
+                        }
+                      })
+                  })
+                  })
+                                
+                  
+                              
+                      
+                  
+                  
+                }
+              })
+            })
              firestore().collection('users').where('userId', '==', userId)
             .onSnapshot(querySnapshot => {
                 let city=[];
@@ -161,10 +213,10 @@ console.log('city.length: ',city.length)
           }
   
         
-          if(this.state.mobile.length < 11|| this.state.mobile.length > 11) {
+         /* if(this.state.mobile.length < 11|| this.state.mobile.length > 11) {
             this.setState({hasError: true, errorText: 'Mobile number must contains at least 11 characters !',loading: false});
             return;
-          }
+          }*/
        
           this.setState({hasError: false});
           this.saveUserdata();
@@ -176,6 +228,8 @@ console.log('city.length: ',city.length)
           const userId =  this.props.route.params.uid;
           AsyncStorage.setItem('uid', userId);
           this.ref.collection('users').doc(userId).set({
+            selectedCountry: '',
+            selectedCity:'none',
             photo:'',
             modeoflogin: 'Google',
             Name: this.state.name,
@@ -220,7 +274,9 @@ console.log('city.length: ',city.length)
             this.setState({
               loading: false,
             });
-            this.props.navigation.navigate('Home')
+            this.props.navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],})
   }).catch((error)=> this.setState({
             loading: false,hasError: true, errorText: error
           }))
@@ -309,12 +365,12 @@ const trans={
         
             <Item>
                 <AntDesign name="user" size={20} color={"#687373"}/>
-                <Input placeholder='Name' onChangeText={(text) => this.setState({name: text})} placeholderTextColor="#687373" />
+                <Input placeholder={'Name'} value={this.state.name} onChangeText={(text) => this.setState({name: text})} placeholderTextColor="#687373" />
             </Item>
      
             <Item>
                 <AntDesign name="mobile1" size={20} color={"#687373"}/>
-                <Input placeholder='Mobile Number' onChangeText={(text) => this.setState({mobile: text})} placeholderTextColor="#687373" />
+                <Input placeholder='Mobile Number' onChangeText={(text) => this.setState({mobile: text})} keyboardType="number-pad" placeholderTextColor="#687373" />
             </Item>
             <Item>
                 <AntDesign name="enviromento" size={20} color={"#687373"}/>

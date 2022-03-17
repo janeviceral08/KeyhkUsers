@@ -367,7 +367,7 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
       })
     })
   
-  this.setState({ 'uid': userId })
+  this.setState({ uid: userId })
   };
 
 
@@ -1001,9 +1001,9 @@ console.log('out: ', out);
     />
      </ScrollView>   
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
-        onPress={() => {this.state.storewallet < 1? null:this.FinalCheckouts()}}
+        onPress={() => {this.state.uid == null?null:this.state.storewallet < 1? null:this.FinalCheckouts()}}
       >
-       <Text style={{color:'white'}}>{this.state.storewallet < 1? 'Unavailable':'Continue Booking'}</Text>
+       <Text style={{color:'white'}}>{this.state.uid == null?'Log in to Continue':this.state.storewallet < 1? 'Unavailable':'Continue Booking'}</Text>
       </Button>
     </Card>
     </Modal>
@@ -1240,15 +1240,15 @@ if(this.state.phone == ''|| this.state.phone == undefined ||this.state.phone == 
     const updatecounts =  firestore().collection('orderCounter').doc('orders');
     const updateUserOrders =  firestore().collection('users').doc(userId);
     
-let in_check_extension =  moment(this.state.newstartDate*1000).format('YYYY-MM-D hh:mm:ss')
-let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D hh:mm:ss')
+let in_check_extension =  moment(this.state.newstartDate*1000).format('YYYY-MM-D H:mm:ss')
+let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D H:mm:ss')
 
 const a =moment(in_check_extension.toString());  
 const b = moment(out_check_extension.toString());  
 const diff = b.diff(a, 'hours'); 
 
     const dataNow={
-      newratemode: this.state.datas.newratemode,
+      newratemode: this.props.route.params.datas.newratemode == undefined? '':this.props.route.params.datas.newratemode,
       accname:newData.length>0? newData[0].accname:'',
       accno:newData.length>0? newData[0].accno:'',
       bankNote:newData.length>0? newData[0].bankNote:'',

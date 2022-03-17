@@ -27,7 +27,7 @@ export default class StoreCard extends Component {
   };
 
   render() {
-    console.log('StoreCard',this.props.product)
+  //  console.log('StoreCard',this.props.product)
     const status = this.props.product.status;
    let Closing = false;
 
@@ -52,7 +52,7 @@ endDate.setSeconds(endTime.split(":")[2]);
 Closing =valid = startDate < currentDate && endDate > currentDate;
 console.log('res: ', valid = startDate < currentDate && endDate > currentDate)
 }
-console.log('fromPlace: ', this.props.fromPlace  )
+//console.log('fromPlace: ', this.props.fromPlace  )
     return(
    this.props.product.status == false? null:
         <Card style={{  flex:1, marginHorizontal: 10, flexDirection: 'row',backgroundColor: '#313131'}} >

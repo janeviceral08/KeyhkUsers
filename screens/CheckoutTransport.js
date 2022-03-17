@@ -849,6 +849,7 @@ defaultShippingAddress(){
            this.setState({
             billing_name: item.name,
             billing_phone: item.phone,
+            billing_context: item.context,
             billing_province: item.province,
             billing_barangay: item.barangay,
             billing_city: this.props.route.params.selectedCityUser,
@@ -1955,7 +1956,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
     vehicle: this.state.datas.vehicle,
     ProductType: 'Transport',
     }
-
+console.log('datavalue: ',datavalue)
   Alert.alert(
             'Process this transaction?',
             'are you sure?',

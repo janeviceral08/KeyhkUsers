@@ -143,8 +143,9 @@ messaging().getToken().then(token => {
       
         // Sign-in the user with the credential
          auth().signInWithCredential(facebookCredential).then((res) => {
-
-  firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
+          this.props.navigation.navigate('SignUpScreenFB', {'uid':auth().currentUser.uid, 'email':auth().currentUser.email, 'displayName':auth().currentUser.displayName})
+               
+ /* firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
 
                     querySnapshot.forEach(doc => {
                       if(doc.data().userId == auth().currentUser.uid){
@@ -159,7 +160,7 @@ messaging().getToken().then(token => {
                       }
                     })
               })
-
+*/
 
          
            }).catch(error => this.setState({ errorMessage: error.message, loading: false }));
@@ -186,16 +187,16 @@ messaging().getToken().then(token => {
          auth().signInWithCredential(googleCredential).then(async (res) => {
             console.log('working google')
                 console.log('current: ', auth().currentUser.uid)
-                console.log('current: ', auth().currentUser)
-
-                  firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
+                console.log('currentUser: ', auth().currentUser)
+                this.props.navigation.navigate('SignUpScreenGoogle', {'uid':auth().currentUser.uid, 'email':auth().currentUser.email,})
+                  /*firestore().collection('users').where('userId', '==', auth().currentUser.uid).onSnapshot(querySnapshot => {
 
                     querySnapshot.forEach(doc => {
                       if(doc.data().userId == auth().currentUser.uid){
-                         this.props.navigation.navigate('SignUpScreenGoogle', {'uid':auth().currentUser.uid, 'email':auth().currentUser.email})
+                        
                       }
                     })
-              })
+              })*/
 
                
                

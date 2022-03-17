@@ -173,6 +173,8 @@ console.log('city.length: ',city.length)
           const userId =  this.props.route.params.uid;
           AsyncStorage.setItem('uid', userId);
           this.ref.collection('users').doc(userId).set({
+            selectedCountry: '',
+            selectedCity:'none',
             photo:'',
             modeoflogin: 'Phone Authentication',
             Name: this.state.name,
@@ -216,7 +218,9 @@ console.log('city.length: ',city.length)
             this.setState({
               loading: false,
             });
-            this.props.navigation.navigate('Home')
+            this.props.navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],})
   }).catch((error)=> this.setState({
             loading: false,hasError: true, errorText: error
           }))

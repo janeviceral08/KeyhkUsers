@@ -385,7 +385,7 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
       })
     })
   
-  this.setState({ 'uid': userId })
+  this.setState({ uid: userId })
 
 
 firestore().collection('charges').where('id', '==', this.props.route.params.datas.adminID).onSnapshot((querySnapshot) => {
@@ -822,8 +822,8 @@ navigateAddress(){
 
 FinalCheckouts (){
 
-let in_check_extension =  moment(this.state.newstartDate*1000).format('YYYY-MM-D hh:mm:ss')
-let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D hh:mm:ss')
+let in_check_extension =  moment(this.state.newstartDate*1000).format('YYYY-MM-D H:mm:ss')
+let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D H:mm:ss')
 
 const a =moment(in_check_extension.toString());  
 const b = moment(out_check_extension.toString());  
@@ -1190,9 +1190,9 @@ console.log('imageArray: ', this.state.datas.imageArray);
     />
      </ScrollView>   
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
-        onPress={() =>{this.state.storewallet < 1? null: this.FinalCheckouts()}}
+        onPress={() =>{this.state.uid == null?null:this.state.storewallet < 1? null: this.FinalCheckouts()}}
       >
-       <Text style={{color:'white'}}>{this.state.storewallet < 1? 'Unavailable':'Continue Booking'}</Text>
+       <Text style={{color:'white'}}>{this.state.uid == null?'Log in to Continue':this.state.storewallet < 1? 'Unavailable':'Continue Booking'}</Text>
       </Button>
     </Card>
     </Modal>
@@ -1397,8 +1397,8 @@ if(this.state.datas.rentalType =='Vehicle'){
     const updatecounts =  firestore().collection('orderCounter').doc('orders');
     const updateUserOrders =  firestore().collection('users').doc(userId);
     
-let in_check_extension =  moment(this.state.newstartDate*1000).format('YYYY-MM-D hh:mm:ss')
-let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D hh:mm:ss')
+let in_check_extension =  moment(this.state.newstartDate*1000).format('YYYY-MM-D H:mm:ss')
+let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D H:mm:ss')
 
 const a =moment(in_check_extension.toString());  
 const b = moment(out_check_extension.toString());  

@@ -125,6 +125,7 @@ constructor(props) {
                     searchResult: [],
       LocationDone:false,
       Country: '',
+      context:[],
             };
         }
 
@@ -277,6 +278,7 @@ updateTextInput = (text, field) => {
         mobile: '',
         name: '',
         id: '',
+        context:[],
         visibleEditModal: false
       })
     
@@ -321,6 +323,7 @@ else{
           mobile: '',
           name: '',
           id: '',
+          context:[],
           visibleEditModal: false
         })
       
@@ -560,7 +563,7 @@ console.log("arr", arr)
                    <View style={{flexDirection: 'row', justifyContent:'space-between'}}>
                   <Text style={{marginTop: 15, fontSize: 18}}>Create new address</Text>
                   <TouchableOpacity onPress={()=> this.setState({visibleModal: false,mobile:'',
-                  location:'',
+                  location:'',context:[],
                                                                                       name:'',
                                                                                       address:'',
                                                                                       postal:'',
@@ -781,6 +784,7 @@ console.log('region on press',item.geometry.coordinates);
                   <TouchableOpacity onPress={()=> this.setState({visibleEditModal: false,mobile:'',location:'',
                                                                                       name:'',
                                                                                       address:'',
+                                                                                      context:[],
                                                                                       postal:'',
                                                                                       city:'',
                                                                                       province:'',

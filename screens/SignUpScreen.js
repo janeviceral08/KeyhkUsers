@@ -180,6 +180,8 @@ fetch(CLOUDINARY_URL, {
           const userId =  auth().currentUser.uid;
           AsyncStorage.setItem('uid', userId);
           this.ref.collection('users').doc(userId).set({
+            selectedCountry: '',
+            selectedCity:'none',
             photo:'https'+data.url.slice(4),
             Name: this.state.name,
             Username: this.state.name,

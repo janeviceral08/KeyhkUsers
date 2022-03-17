@@ -226,7 +226,7 @@ let arr = str.split(',');
 const newarrLenghtCountry= arr.length-1
 const UserLocationCountry = arr[newarrLenghtCountry]
             this.setState({
-              UserLocationCountry: this.state.customerInfo.selectedCountry == undefined? UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
+              UserLocationCountry: this.state.customerInfo.selectedCountry == undefined || this.state.customerInfo.selectedCountry == ''? UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
            })
            this.getAllCity()
        }).catch(err => {
@@ -348,7 +348,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
 
 
              this.setState({
-               UserLocationCountry: this.state.customerInfo.selectedCountry == undefined? UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
+               UserLocationCountry: this.state.customerInfo.selectedCountry == undefined || this.state.customerInfo.selectedCountry=="" ? UserLocationCountry.trim(): this.state.customerInfo.selectedCountry.trim(),
            })
            this.getAllCity()
        }).catch(err => {
@@ -504,7 +504,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
 async getCountryCity(PressedCountrycode){
     this.setState({loading: true})
     //  console.log('getCountryCity')
- // console.log('PressedCountrycode: ', PressedCountrycode)
+ console.log('PressedCountrycode: ', PressedCountrycode)
       const city = [];
       const collect= PressedCountrycode =='Philippines'?'city':this.state.UserLocationCountry+'.city';
     //   console.log('collect: ', collect)
