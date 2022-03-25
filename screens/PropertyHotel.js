@@ -8,6 +8,7 @@ import HotelCard from "../components/HotelCard";
 import auth from '@react-native-firebase/auth';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
@@ -67,12 +68,12 @@ render() {
    console.log('typeOfRate: ', this.props.route.params.typeOfRate)
     return (
     <Container style={{flex: 1}}>
-     <Header androidStatusBarColor="#396ba0" style={{height: 150}}>
-         <ImageBackground source={{ uri: this.state.background }} resizeMode="cover" style={{height: 150}}>
+     <Header androidStatusBarColor="#396ba0" style={{height: SCREEN_HEIGHT/6}}>
+         <ImageBackground source={{ uri: this.state.background }} resizeMode="cover" style={{height: SCREEN_HEIGHT/6}}>
 
           <Left style={{flex:2, width: '100%',marginTop: 20, flexDirection: 'row'}}>
     
-        <Image style={{  width: 100, height: 100, borderRadius: 50, borderWidth: 2,borderColor: 'white', overflow: "hidden", marginLeft: '5%'}} source={{uri: this.state.storeImage}} />
+        <Image style={{  width: SCREEN_HEIGHT/8, height: SCREEN_HEIGHT/8, borderRadius: 50, borderWidth: 2,borderColor: 'white', overflow: "hidden", marginLeft: '5%'}} source={{uri: this.state.storeImage}} />
           <View style={{flexDirection: 'column',width: '80%', marginLeft: 15, marginTop: 20,backgroundColor: 'rgba(255, 255, 255, 0.4)',paddingLeft: 10}}>
           <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.state.storeName}</Text>
           <Text style={{color: 'white', fontSize: 12,width: '80%'}}>{this.state.storeAddress}</Text>

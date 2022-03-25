@@ -5,6 +5,7 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 // Our custom files and classes import
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -182,6 +183,15 @@ export default class CheckoutTransport extends Component {
   //longitudeDelta: 0.05
             latitudeDelta: 0.01,
               longitudeDelta: 0.005},
+              CurrentfromPlace: this.props.route.params.fromPlace,
+              Currentflat:this.props.route.params.cLat,
+              Currentflong:this.props.route.params.cLong,
+              Currentregion:{ latitude:this.props.route.params.cLat,
+      longitude:this.props.route.params.cLong,
+      // latitudeDelta: 0.0005,
+  //longitudeDelta: 0.05
+            latitudeDelta: 0.01,
+              longitudeDelta: 0.005},
       searchResult: [],
       searchResultto:[],
       toPlace: '',
@@ -211,6 +221,11 @@ export default class CheckoutTransport extends Component {
       paymentMethods:[],
       present: -1,
       carsAvailable:[],
+      RushHour:this.props.route.params.datas.RushHour == undefined?[]:this.props.route.params.datas.RushHour,
+      isRushHour:false,
+MinuteCity:this.props.route.params.datas.MinuteCity == undefined?0:this.props.route.params.datas.MinuteCity,
+MinuteMetro:this.props.route.params.datas.MinuteMetro == undefined?0:this.props.route.params.datas.MinuteMetro,
+MinuteBase:this.props.route.params.datas.MinuteBase == undefined?0:this.props.route.params.datas.MinuteBase,
   };
   this.getLocation();
 
@@ -359,7 +374,7 @@ console.log("arr", arr)
     billing_barangayTo: item.context[1].text,
     flatTo:region[1],
      flongTo:region[0],
-  region:{ latitude:region[1],
+     regionTo:{ latitude:region[1],
       longitude: 	region[0],
       latitudeDelta: 0.1,
       longitudeDelta: 0.1,},
@@ -442,7 +457,10 @@ console.log('doc.data(): ', doc.data())
               SCity: doc.data().SCity,
                 SMetro: doc.data().SMetro,
                 RiderToken: doc.data().tokens,
-      
+                RushHour:doc.data().RushHour == undefined?[]:doc.data().RushHour,
+                MinuteCity:doc.data().MinuteCity == undefined?0:doc.data().MinuteCity,
+                MinuteMetro:doc.data().MinuteMetro == undefined?0:doc.data().MinuteMetro,
+                MinuteBase:doc.data().MinuteBase == undefined?0:doc.data().MinuteBase,
      });
     })
   })
@@ -458,9 +476,9 @@ console.log('doc.data(): ', doc.data())
     
        handleConfirm = (date) => {
         console.warn("A date has been picked: ", date);
-          this.setState({startDate: date, AlwaysOpen: false})
-        this.hideDatePicker();
-      };
+    this.setState({startDate: date, AlwaysOpen: false})
+        this.hideDatePicker();}
+    
 
 
 
@@ -1172,6 +1190,11 @@ if(this.state.visibleAddressModal == true)
               SMetro: this.state.carsAvailable[this.state.present+1].datas.SMetro,
               RiderToken: this.state.carsAvailable[this.state.present+1].datas.tokens,
               present: this.state.present+1,
+              MinuteCity: this.state.carsAvailable[this.state.present+1].datas.MinuteCity == undefined? 0:this.state.carsAvailable[this.state.present+1].datas.MinuteCity,
+              MinuteMetro: this.state.carsAvailable[this.state.present+1].datas.MinuteMetro == undefined? 0:this.state.carsAvailable[this.state.present+1].datas.MinuteMetro,
+              MinuteBase: this.state.carsAvailable[this.state.present+1].datas.MinuteBase == undefined? 0:this.state.carsAvailable[this.state.present+1].datas.MinuteBase,
+              RushHour: this.state.carsAvailable[this.state.present+1].datas.RushHour == undefined? []:this.state.carsAvailable[this.state.present+1].datas.RushHour,
+              
       })
   }
 
@@ -1189,6 +1212,11 @@ if(this.state.visibleAddressModal == true)
               SMetro: this.state.carsAvailable[this.state.present-1].datas.SMetro,
               RiderToken: this.state.carsAvailable[this.state.present-1].datas.tokens,
               present: this.state.present-1,
+              MinuteCity: this.state.carsAvailable[this.state.present-1].datas.MinuteCity == undefined? 0:this.state.carsAvailable[this.state.present+1].datas.MinuteCity,
+              MinuteMetro: this.state.carsAvailable[this.state.present-1].datas.MinuteMetro == undefined? 0:this.state.carsAvailable[this.state.present+1].datas.MinuteMetro,
+              MinuteBase: this.state.carsAvailable[this.state.present-1].datas.MinuteBase == undefined? 0:this.state.carsAvailable[this.state.present+1].datas.MinuteBase,
+              RushHour: this.state.carsAvailable[this.state.present-1].datas.RushHour == undefined? []:this.state.carsAvailable[this.state.present+1].datas.RushHour,
+    
       })}
       else{
       this.getLocation();
@@ -1199,6 +1227,246 @@ if(this.state.visibleAddressModal == true)
 
       }
       
+  }
+
+
+  currentPickup() {
+
+    this.setState({isLoading: true})
+    axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${this.state.Currentflong},${this.state.Currentflat}.json?access_token=sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA`)
+        .then(res => {
+       const item = res.data.features[0];
+   
+           let str = item.place_name;
+   
+   let arr = str.split(',');
+   
+   console.log("str", str)
+   console.log("arr", arr)
+   const province = Province.ZipsCollection.find( (items) => items.zip === item.context[0].text)
+               
+   
+   
+                this.setState({
+                 billing_context: item.context,
+       billing_province:item.context[0].text,
+       billing_city: arr[2],
+       billing_street:arr[0]+', '+ arr[1],
+       billing_postal: arr[3],
+       billing_barangay: item.context[1].text,
+       flat:this.state.Currentflat,
+       flong: this.state.Currentflong,
+       cLong:this.state.Currentflong,
+        cLat:this.state.Currentflat,
+                  region:{ latitude:this.state.Currentflat,
+         longitude: 	this.state.Currentflong,
+         latitudeDelta: 0.1,
+         longitudeDelta: 0.1,},
+                  fromPlace:this.state.CurrentfromPlace, x: { latitude: this.state.Currentflat, longitude: this.state.Currentflong },
+                  isLoading: false,
+                  })
+   
+                  console.log('Tolong: ',this.state.Tolong);
+                  if(this.state.Tolong != undefined){
+                      console.log('working here')
+                 this.setState({isLoading: true})    
+                let routeCoordinates = []
+       axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${this.state.Currentflat},${this.state.Currentflong}&waypoint1=geo!${this.state.Tolat},${this.state.Tolong}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
+       .then(res => {
+      
+           res.data.response.route[0].leg[0].shape.map(m => {
+             // here we are getting latitude and longitude in seperate variables because HERE sends it together, but we
+             // need it seperate for <Polyline/>
+             let latlong = m.split(',');
+             let latitude = parseFloat(latlong[0]);
+             let longitude = parseFloat(latlong[1]);
+            routeCoordinates.push([longitude,latitude]);
+         })
+         this.setState({
+           routeForMap: {
+             "type": "FeatureCollection",
+             "features": [
+               {
+                 "type": "Feature",
+                 "properties": {},
+                 "geometry": {
+                   "type": "LineString",
+                   "coordinates": routeCoordinates
+                 }
+               }
+             ]
+           },
+                  summary: res.data.response.route[0].summary,
+            isLoading: false,
+   
+         })
+   
+         })
+        
+                  }
+   
+          }).catch(err => {
+             console.log('Region axios: ',err)
+          })
+       
+  }
+
+
+  currentDropoff(){
+    this.setState({
+      isLoading: true,
+    })
+
+    axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${this.state.Currentflong},${this.state.Currentflat}.json?access_token=sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA`)
+    .then(res => {
+   const item = res.data.features[0];
+
+   
+   const {flat, flong, } = this.state;
+   let from_lat = flat
+   let from_long = flong
+   let to_lat = this.state.Currentflat
+   let to_long = this.state.Currentflong
+ console.log('to_lat: ', to_lat)
+   console.log('to_long: ', to_long)
+   let routeCoordinates = [];
+   let str = item.place_name;
+
+let arr = str.split(',');
+this.setState({
+
+  Tolat:this.state.Currentflat,
+  Tolong:this.state.Currentflong,
+ 
+    billing_contextTo: item.context,
+billing_provinceTo:item.context[0].text,
+billing_cityTo: arr[2],
+billing_streetTo:arr[0]+', '+ arr[1],
+billing_postalTo: arr[3],
+billing_barangayTo: item.context[1].text,
+flatTo:this.state.Currentflat,
+flongTo:this.state.Currentflong,
+regionTo:{ latitude:this.state.Currentflat,
+longitude: 	this.state.Currentflong,
+latitudeDelta: 0.1,
+longitudeDelta: 0.1,},
+         toPlace:this.state.CurrentfromPlace, LocationDoneto: true,   
+    isLoading: false,
+})
+console.log("str", str)
+console.log("arr", arr)
+console.log("this.state.fromPlace", this.state.fromPlace)
+if(this.state.fromPlace!=''){
+   axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
+   .then(res => {
+  
+       res.data.response.route[0].leg[0].shape.map(m => {
+         // here we are getting latitude and longitude in seperate variables because HERE sends it together, but we
+         // need it seperate for <Polyline/>
+         let latlong = m.split(',');
+         let latitude = parseFloat(latlong[0]);
+         let longitude = parseFloat(latlong[1]);
+         routeCoordinates.push([longitude,latitude]);
+     })
+     this.setState({
+       routeForMap: {
+         "type": "FeatureCollection",
+         "features": [
+           {
+             "type": "Feature",
+             "properties": {},
+             "geometry": {
+               "type": "LineString",
+               "coordinates": routeCoordinates
+             }
+           }
+         ]
+       },
+    
+         summary: res.data.response.route[0].summary,
+      
+         isLoading: false,
+     })
+
+     })
+    }
+      }).catch(err => {
+         console.log('Region axios: ',err)
+      })
+      
+  }
+
+
+
+  SwitchLocation(){
+    const DataValue={
+      billing_context: this.state.billing_contextTo,
+      billing_province: this.state.billing_provinceTo,
+      billing_city: this.state.billing_cityTo,
+      billing_street: this.state.billing_streetTo,
+      billing_postal: this.state.billing_postalTo,
+      billing_barangay: this.state.billing_barangayTo,
+      flat: this.state.flatTo,
+      flong: this.state.flongTo,
+      cLong:this.state.flongTo,
+       cLat:this.state.flatTo,
+                 region:this.state.regionTo,
+                 fromPlace:this.state.toPlace, x: { latitude: this.state.flatTo, longitude: this.state.flongTo },
+
+
+                 Tolat:this.state.flat,
+                 Tolong:this.state.flong,
+                
+                   billing_contextTo: this.state.billing_context,
+               billing_provinceTo:this.state.billing_province,
+               billing_cityTo: this.state.billing_city,
+               billing_streetTo:this.state.billing_street,
+               billing_postalTo: this.state.billing_postal,
+               billing_barangayTo: this.state.billing_barangay,
+               flatTo:this.state.flat,
+               flongTo:this.state.flong,
+               regionTo:this.state.region,
+                        toPlace:this.state.fromPlace, isLoading: false,
+
+    }
+    console.log('Switch DataValue',DataValue)
+    this.setState(DataValue)
+
+  }
+  SwitchLocation(){
+    const DataValue={
+      billing_context: this.state.billing_contextTo,
+      billing_province: this.state.billing_provinceTo,
+      billing_city: this.state.billing_cityTo,
+      billing_street: this.state.billing_streetTo,
+      billing_postal: this.state.billing_postalTo,
+      billing_barangay: this.state.billing_barangayTo,
+      flat: this.state.flatTo,
+      flong: this.state.flongTo,
+      cLong:this.state.flongTo,
+       cLat:this.state.flatTo,
+                 region:this.state.regionTo,
+                 fromPlace:this.state.toPlace, x: { latitude: this.state.flatTo, longitude: this.state.flongTo },
+
+
+                 Tolat:this.state.flat,
+                 Tolong:this.state.flong,
+                
+                   billing_contextTo: this.state.billing_context,
+               billing_provinceTo:this.state.billing_province,
+               billing_cityTo: this.state.billing_city,
+               billing_streetTo:this.state.billing_street,
+               billing_postalTo: this.state.billing_postal,
+               billing_barangayTo: this.state.billing_barangay,
+               flatTo:this.state.flat,
+               flongTo:this.state.flong,
+               regionTo:this.state.region,
+                        toPlace:this.state.fromPlace, LocationDoneto: true,   isLoading: false,
+
+    }
+    console.log('Switch DataValue',DataValue)
+    this.setState(DataValue)
+
   }
 
   StartImageRotationFunction(){
@@ -1244,6 +1512,7 @@ if(this.state.visibleAddressModal == true)
 console.log('typeOfRate: ', typeOfRate);
 //console.log('summary: ', summary);
 console.log('region: ', this.state.region);
+console.log('this.state.RushHour: ', this.state.RushHour)
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -1287,7 +1556,7 @@ console.log('region: ', this.state.region);
   onRegionDidChange={() => {Keyboard.dismiss();}}
   >
   <MapboxGL.Camera 
-  centerCoordinate={[this.props.route.params.cLong,this.props.route.params.cLat]} 
+  centerCoordinate={[this.state.flong, this.state.flat]} 
   zoomLevel={15}
   followUserMode={'normal'}
             followUserLocation
@@ -1309,82 +1578,40 @@ console.log('region: ', this.state.region);
 
   </MapboxGL.MapView>
 
-    {/*<MapView
-      mapPadding={{top:0, right:0, left:0, bottom:230}}
-            testID="map"
-        provider={PROVIDER_GOOGLE}
-    onRegionChangeComplete={() => {Keyboard.dismiss();}}
-        showsUserLocation={true}
-          style={{ position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0}}
-    initialRegion={this.state.region}
-    showsMyLocationButton={true}
-  
-          showsBuildings={true}
-          maxZoomLevel={17.5}
-          loadingEnabled={true}
-zoomTapEnabled={false}
-      zoomEnabled={true}
-        scrollEnabled={true}
-        onPress={e => {this.state.visibleAddressModal == true? this.onRegionChange(e.nativeEvent.coordinate):
-          this.state.visibleAddressModalTo == true?this.onRegionChange(e.nativeEvent.coordinate):null
-        }}
-          >
-              
-             {this.state.routeForMap && (
-                <Polyline
-                  key="editingPolyline"
-                  coordinates={this.state.routeForMap}
-                  strokeColor="#019fe8"
-                  fillColor="#019fe8"
-                  strokeWidth={5}
-                />
-              )}
-              
-          { this.state.flong == undefined? null:  
-          <MapView.Marker
-             coordinate={{latitude: this.state.flat, longitude: this.state.flong}}
-             title={"From"}
-             description={this.state.fromPlace}
-             image={Rider_img}
-          />}
-           {  this.state.Tolong == undefined? null:
-           
-           <MapView.Marker
-             coordinate={{latitude: this.state.Tolat, longitude: this.state.Tolong}}
-             title={"To"}
-             description={this.state.toPlace}
-             image={customer_img}
-       />}
-          
-          </MapView>*/}
-        { /* <MaterialIcons name="my-location" size={40} style={{backgroundColor: 'white', width: 40,  right: 10, top: 150, position: 'absolute'}} onPress={()=> this.getLocationNow()} />       
-        */ }  
+
         
        <Card style={{ left: 0, top: 0, position: 'absolute'}}>
         <CardItem>
-                    <Text style={{fontWeight: 'bold'}}>From: </Text>
+        <FontAwesome name={'dot-circle-o'} color={'green'} size={25} style={{ marginRight: 10, marginLeft: -15}}/>
                     {!this.state.loading &&
                    
-                    <Item regular style={{width: '80%', height: 40}}>
-                    <Input value={this.state.fromPlace} style={{fontSize: 13}}   onChangeText={(text) => this.getLocationType(text, 'fromPlace')}  onFocus={() =>this.setState({visibleAddressModal: true, visibleAddressModalTo: false}) } />
+                    <Item regular style={{width: '90%', height: 40}}>
+                    <Input placeholder="Choose Location" value={this.state.fromPlace==""?'':this.state.fromPlace==this.state.CurrentfromPlace?'Your Location':this.state.fromPlace} style={{fontSize: 18}}   onChangeText={(text) => this.getLocationType(text, 'fromPlace')}  onFocus={() =>this.setState({visibleAddressModal: true, visibleAddressModalTo: false}) } />
                        
                          </Item>      }
-                         <MaterialIcons name="clear" size={20} onPress={()=>Alert.alert('Are you sure to clear?', 'Clear the address', [ {
+                        {this.state.visibleAddressModal == false?<MaterialIcons name="swap-vert" size={25} onPress={()=>this.SwitchLocation()}/> 
+                        
+                        : <MaterialIcons name="clear" size={20} onPress={()=>Alert.alert('Are you sure to clear?', 'Clear the address', [ {
           text: "Cancel",
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "OK", onPress: () => this.setState({fromPlace: '',LocationDone: true,visibleAddressModal: true, visibleAddressModalTo: false}) }])}/>       
+        { text: "OK", onPress: () => this.setState({fromPlace: '',LocationDone: true,visibleAddressModal: true, visibleAddressModalTo: false}) }])}/>  
+        }     
                 </CardItem>
                  {this.state.LocationDone == false?<View style={{height: 100}}><FlatList
-                                 
+                                 ListHeaderComponent={this.state.fromPlace==this.state.CurrentfromPlace?null:this.state.toPlace==this.state.CurrentfromPlace?null:
+                                  <View style={{padding: 10, marginLeft: 50}}>
+                                  <TouchableOpacity style={{flexDirection:'row'}} onPress={()=>this.currentPickup()}>
+                                    <MaterialIcons name="my-location" size={20} color="black" />
+                                <Text style={{paddingLeft: 10}}>Your location</Text>
+                
+               
+
+                                     </TouchableOpacity></View>}
         data={this.state.searchResult}
         renderItem={ ({ item }) => (
-         <View style={{padding: 10}}>
+         <View style={{padding: 10, marginLeft: 50}}>
            <TouchableOpacity onPress={()=>{ 
                  let str = item.place_name;
 
@@ -1416,7 +1643,49 @@ console.log('region: ', region)
       longitude: 	item.center[0],
       latitudeDelta: 0.1,
       longitudeDelta: 0.1,},
-               fromPlace:arr[0]+', '+arr[1]+' '+item.context[1].text+' '+arr[2]+' '+item.context[0].text+' '+arr[3], x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true,    visibleAddressModalTo: false, })}}>
+               fromPlace:arr[0]+', '+arr[1]+' '+item.context[1].text+' '+arr[2]+' '+item.context[0].text+' '+arr[3], x: { latitude: item.geometry.coordinates[1], longitude: item.geometry.coordinates[0] }, LocationDone: true,    visibleAddressModalTo: false, })
+               
+               if(this.state.Tolong != undefined){
+                console.log('working here')
+           this.setState({isLoading: true})    
+          let routeCoordinates = []
+ axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${this.state.Currentflat},${this.state.Currentflong}&waypoint1=geo!${this.state.Tolat},${this.state.Tolong}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
+ .then(res => {
+
+     res.data.response.route[0].leg[0].shape.map(m => {
+       // here we are getting latitude and longitude in seperate variables because HERE sends it together, but we
+       // need it seperate for <Polyline/>
+       let latlong = m.split(',');
+       let latitude = parseFloat(latlong[0]);
+       let longitude = parseFloat(latlong[1]);
+      routeCoordinates.push([longitude,latitude]);
+   })
+   this.setState({
+     routeForMap: {
+       "type": "FeatureCollection",
+       "features": [
+         {
+           "type": "Feature",
+           "properties": {},
+           "geometry": {
+             "type": "LineString",
+             "coordinates": routeCoordinates
+           }
+         }
+       ]
+     },
+            summary: res.data.response.route[0].summary,
+      isLoading: false,
+
+   })
+
+   })
+  
+            }
+               
+               
+               
+               }}>
  
            <Text>{item.place_name}</Text>
            {console.log('coordinates:', item.geometry.coordinates)}</TouchableOpacity>
@@ -1425,25 +1694,35 @@ console.log('region: ', region)
         keyExtractor={item => item.id}
       /></View>:null}
                 <CardItem>
-                    <Text style={{fontWeight: 'bold'}}>To:      </Text>
+                <FontAwesome name={'map-marker'} color={'tomato'} size={25} style={{ marginRight: 10, marginLeft: -10}}/> 
                     {!this.state.loading &&
                        
-                    <Item regular style={{width: '80%', height: 40}}>
-                    <Input value={this.state.toPlace} style={{fontSize: 13}}   onChangeText={(text) => this.getLocationTypeto(text, 'toPlace')}  onFocus={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false}) }  />
+                    <Item regular style={{width:  '90%', height: 40}}>
+                    <Input placeholder="Choose Location" value={this.state.toPlace==""?'':this.state.toPlace==this.state.CurrentfromPlace?'Your Location':this.state.toPlace} style={{fontSize: 18}}   onChangeText={(text) => this.getLocationTypeto(text, 'toPlace')}  onFocus={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false}) }  />
                          </Item>  
                    }
-                   <MaterialIcons name="clear" size={20} onPress={()=>Alert.alert('Are you sure to clear?', 'Clear the address', [ {
+                   { this.state.visibleAddressModal == true || this.state.visibleAddressModalTo == false?<MaterialIcons name="swap-vert" size={25} onPress={()=>this.SwitchLocation()}/> 
+        :<MaterialIcons name="clear" size={20} onPress={()=>Alert.alert('Are you sure to clear?', 'Clear the address', [ {
           text: "Cancel",
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "OK", onPress: () => this.setState({toPlace: '',LocationDoneto: true,visibleAddressModalTo: true,visibleAddressModal: false}) }])}/> 
+        { text: "OK", onPress: () => this.setState({toPlace: '',LocationDoneto: true,visibleAddressModalTo: true,visibleAddressModal: false}) }])}/> }
                 </CardItem>
+
                      {this.state.LocationDoneto == false?<View style={{height: 100}}><FlatList
-                                 
+                                  ListHeaderComponent={this.state.fromPlace==this.state.CurrentfromPlace?null:this.state.toPlace==this.state.CurrentfromPlace?null:
+                                    <View style={{padding: 10, marginLeft: 50}}>
+                                    <TouchableOpacity style={{flexDirection:'row'}} onPress={()=>this.currentDropoff()}>
+                                      <MaterialIcons name="my-location" size={20} color="black" />
+                                  <Text style={{paddingLeft: 10}}>Your location</Text>
+                  
+                 
+  
+                                       </TouchableOpacity></View>}
         data={this.state.searchResultto}
         renderItem={ ({ item }) => (
-         <View style={{padding: 10}}>
+         <View style={{padding: 10, marginLeft: 50}}>
            <TouchableOpacity onPress={()=>{ 
              this.setState({isLoading: true})
                  let str = item.place_name;
@@ -1465,7 +1744,28 @@ console.log("province", province)
   console.log('to_lat: ', to_lat)
     console.log('to_long: ', to_long)
     let routeCoordinates = [];
-
+    this.setState({
+      
+      Tolat: item.center[1],
+      Tolong:item.center[0],
+     
+        billing_contextTo: item.context,
+  billing_provinceTo:province == undefined?item.context[0].text :province.province,
+  billing_cityTo: arr[2],
+  billing_streetTo:arr[0]+', '+ arr[1],
+  billing_postalTo: arr[3],
+  billing_barangayTo: item.context[1].text,
+  flatTo:item.geometry.coordinates[0] ,
+   flongTo:item.geometry.coordinates[1],
+regionTo:{ latitude:item.center[1],
+    longitude: 	item.center[0],
+    latitudeDelta: 0.1,
+    longitudeDelta: 0.1,},
+             toPlace:arr[0]+', '+arr[1]+' '+item.context[1].text+' '+arr[2]+' '+item.context[0].text+' '+arr[3], LocationDoneto: true,    visibleAddressModalTo: false, 
+        isLoading: false,
+    })
+if(this.state.fromPlace!=''){
+  this.setState({ isLoading: true,})
     axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;car;traffic:disabled&legAttributes=shape`)
     .then(res => {
    
@@ -1491,29 +1791,16 @@ console.log("province", province)
             }
           ]
         },
-        Tolat: item.center[1],
-        Tolong:item.center[0],
-       
+     
           summary: res.data.response.route[0].summary,
-          billing_contextTo: item.context,
-    billing_provinceTo:province == undefined?item.context[0].text :province.province,
-    billing_cityTo: arr[2],
-    billing_streetTo:arr[0]+', '+ arr[1],
-    billing_postalTo: arr[3],
-    billing_barangayTo: item.context[1].text,
-    flatTo:item.geometry.coordinates[0] ,
-     flongTo:item.geometry.coordinates[1],
-  region:{ latitude:item.center[1],
-      longitude: 	item.center[0],
-      latitudeDelta: 0.1,
-      longitudeDelta: 0.1,},
-               toPlace:arr[0]+', '+arr[1]+' '+item.context[1].text+' '+arr[2]+' '+item.context[0].text+' '+arr[3], LocationDoneto: true,    visibleAddressModalTo: false, 
+         
           isLoading: false,
       })
       //console.log('sum: ', res.data.response.route[0].summary);
       }).catch(err => {
      // console.log(err)
       })
+    }
 
    }}>
  
@@ -1523,6 +1810,14 @@ console.log("province", province)
         )}
         keyExtractor={item => item.id}
       /></View>:null}
+      <View style={{
+    borderStyle: 'dotted',
+    borderWidth: 1,
+    borderRadius: 1,
+    width: 1,
+    height: this.state.LocationDoneto === false? '8%':'30%', position: 'absolute', left: 12, top: '35%'
+  }}>
+</View>
        </Card>
         </View>
          </View>
@@ -1724,7 +2019,7 @@ Base fare:
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
         onPress={() => this.checkOut()}
       >
-       <Text style={{color:'white'}}>Procceed</Text>
+       <Text style={{color:'white'}}>Proceed</Text>
       </Button>
     </Card>
     </Modal>
@@ -1789,7 +2084,356 @@ Base fare:
 
 
   async checkOut(){
-console.log('this.state.photo: ', this.state.photo)
+    let within = 0;
+    let Baserate = "";
+    let Cityrate = "";
+    let Metrorate = "";
+    let SCity = "";
+    let SMetro = "";
+    let succeed = "";
+    let MinuteCity = 0;
+    let MinuteMetro = 0;
+    let MinuteBase = 0;
+console.log('check this.state.RushHour: ', this.state.RushHour.length)
+    if(this.state.RushHour.length> 0){
+     if(this.state.AlwaysOpen == true){
+      this.setState({isRushHour: true})
+   
+      this.state.RushHour.forEach((items)=>{
+       
+        const dateHourSelected = moment().format('H:mm')
+        const dateDaySelected = moment().format('YYYY-D-M')
+        const BaseHourFrom =items.from
+        const BaseHourTo =items.to
+        const SelectedDateBase = moment(dateDaySelected+'T'+dateHourSelected+':19.560Z')
+        const newDateBaseFrom = moment(dateDaySelected+'T'+BaseHourFrom+':19.560Z')
+        const newDateBaseTo = moment(dateDaySelected+'T'+BaseHourTo+':19.560Z')
+    
+            if(moment(newDateBaseFrom).unix() <= moment(SelectedDateBase).unix() && moment(newDateBaseTo).unix()>= moment(SelectedDateBase).unix()){
+                console.log('withins: ', BaseHourFrom)
+                Baserate = items.Baserate;
+                Cityrate = items.Cityrate;
+                Metrorate = items.Metrorate;
+                SCity = items.SCity;
+                SMetro = items.SMetro;
+                succeed = items.succeed;
+                MinuteCity = items.MinuteCity== undefined? 0:items.MinuteCity;
+                MinuteMetro = items.MinuteMetro== undefined? 0:items.MinuteMetro;
+                MinuteBase = items.MinuteBase == undefined? 0:items.MinuteBase;
+                within = within+1;
+                return;
+        }
+        else{
+          console.log('not withins: ', BaseHourFrom)
+          return;
+        }
+    })
+  }
+     else{ this.setState({isRushHour: true})
+ 
+      this.state.RushHour.forEach((items)=>{
+        const date = this.state.startDate;
+        const dateHourSelected = moment(date).format('H:mm')
+        const dateDaySelected = moment().format('YYYY-D-M')
+        const BaseHourFrom =items.from
+        const BaseHourTo =items.to
+        const SelectedDateBase = moment(dateDaySelected+'T'+dateHourSelected+':19.560Z')
+        const newDateBaseFrom = moment(dateDaySelected+'T'+BaseHourFrom+':19.560Z')
+        const newDateBaseTo = moment(dateDaySelected+'T'+BaseHourTo+':19.560Z')
+    
+        if(moment(newDateBaseFrom).unix() <= moment(SelectedDateBase).unix() && moment(newDateBaseTo).unix()>= moment(SelectedDateBase).unix()){
+            console.log('withins: ', BaseHourFrom)
+             Baserate = items.Baserate;
+             Cityrate = items.Cityrate;
+             Metrorate = items.Metrorate;
+             SCity = items.SCity;
+             SMetro = items.SMetro;
+             succeed = items.succeed;
+             MinuteCity = items.MinuteCity== undefined? 0:items.MinuteCity;
+                MinuteMetro = items.MinuteMetro== undefined? 0:items.MinuteMetro;
+                MinuteBase = items.MinuteBase == undefined? 0:items.MinuteBase;
+            within = within+1;
+            return;
+          
+        }else{
+          console.log('not withins: ', BaseHourFrom)
+          return;
+        }
+      })
+    }
+      console.log('withinLog',within)
+  
+      if(within == 1){
+        console.log('withinLog',within)
+        console.log('Baserate',Baserate)
+        console.log('Cityrate',Cityrate)
+        console.log('Metrorate',Metrorate)
+        console.log('SCity',SCity)
+        console.log('succeed',succeed)
+        console.log('SMetro',SMetro)
+        const distance = this.state.summary === undefined? null: this.state.summary.distance/1000;
+  
+        let amount_base = this.props.route.params.typeOfRate =='Municipal Rate'?Baserate:this.props.route.params.typeOfRate =='City Rate'?Cityrate:Metrorate;
+          let newDistance = distance<this.state.base_dist?0:distance - this.state.base_dist;
+          let distanceAmount = newDistance*succeed;
+          let amountpay= amount_base +distanceAmount;
+            let distanceAmountCity = newDistance*SCity;
+          let amountpayCity= Cityrate+distanceAmountCity;
+           let distanceAmountMetro= newDistance*SMetro;
+          let amountpayMetro= Metrorate+distanceAmountMetro;
+          console.log('distance within',distance)
+          console.log('base_dist within',this.state.base_dist)
+          console.log('distance within',distance)
+          console.log('amount_base within',amount_base)
+          console.log('newDistance within',newDistance)
+          console.log('distanceAmount within',distanceAmount)
+          console.log('amountpay within',amountpay)
+          console.log('distanceAmountCity within',distanceAmountCity)
+          console.log('amountpayCity within',amountpayCity)
+          console.log('distanceAmountMetro within',distanceAmountMetro)
+          console.log('amountpayMetro within',amountpayMetro)
+          console.log('this.props.route.params.typeOfRate within',this.props.route.params.typeOfRate)
+          const actualAmountPay = this.props.route.params.typeOfRate =='Municipal Rate'?amountpay:this.props.route.params.typeOfRate =='City Rate'?amountpayCity:amountpayMetro
+          const MinuteRate = this.props.route.params.typeOfRate =='Municipal Rate'?MinuteBase:this.props.route.params.typeOfRate =='City Rate'?MinuteCity:MinuteMetro
+        Alert.alert(
+          'New Total: '+this.props.route.params.currency+Math.round((actualAmountPay*10)/10),
+          'Rate change because you book during rush hour',
+          [ {
+            text: "Cancel",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel"
+          },
+          { text: "Continue", onPress: () =>  this.ifRushhour(Baserate,Cityrate,Metrorate,SCity,succeed,SMetro,MinuteRate) }]
+        )
+       
+      }else {       
+  
+
+        this.elseResult();
+      
+      
+      }
+
+    }
+else {       
+  
+
+  this.elseResult();
+
+
+}
+  }
+  async ifRushhour(Baserate,Cityrate,Metrorate,SCity,succeed,SMetro,MinuteRate){
+    console.log('this.state.photo: ', this.state.photo)
+console.log('this.state.startDate: ', this.state.startDate)
+if(this.state.PassengerDescription == ''){
+  Alert.alert(
+       'Enter Passenger Description',
+       '',
+       [
+         {text: 'OK'},
+       ]
+     )
+     return;
+}
+if(this.state.phone == ''|| this.state.phone == undefined ||this.state.phone == 'Select Phone Number' ){
+  Alert.alert(
+       'Add Phone Number',
+       '',
+       [
+         {text: 'OK'},
+       ]
+     )
+     return;
+}
+if(this.state.photo == ''|| this.state.photo == undefined){
+       Alert.alert(
+            'Please Update Your Photo',
+            '',
+            [
+              {text: 'OK'},
+            ]
+          )
+          return;
+}
+    if(this.state.passenger=='0' || this.state.passenger==''){
+        Alert.alert(
+            'Declare number of Passenger',
+            '',
+            [
+              {text: 'OK'},
+            ]
+          )
+          return;
+    }
+    if(this.state.AlwaysOpen == false && this.state.startDate==undefined){
+        Alert.alert(
+            'Set Time',
+            '',
+            [
+              {text: 'OK'},
+            ]
+          )
+          return;
+    }
+        
+    const distance = this.state.summary === undefined? null: this.state.summary.distance/1000;
+  
+    let amount_base = this.props.route.params.typeOfRate =='Municipal Rate'?Baserate:this.props.route.params.typeOfRate =='City Rate'?Cityrate:Metrorate;
+    let newDistance = distance<this.state.base_dist?0:distance - this.state.base_dist;
+    let distanceAmount = newDistance*succeed;
+    let amountpay= amount_base +distanceAmount;
+      let distanceAmountCity = newDistance*SCity;
+    let amountpayCity= Cityrate+distanceAmountCity;
+     let distanceAmountMetro= newDistance*SMetro;
+    let amountpayMetro= Metrorate+distanceAmountMetro;
+    const actualAmountPay = this.props.route.params.typeOfRate =='Municipal Rate'?amountpay:this.props.route.params.typeOfRate =='City Rate'?amountpayCity:amountpayMetro
+   
+    const newDocumentID = this.checkoutref.collection('orders').doc().id;
+    const today = this.state.currentDate;
+    const timeStamp= new Date().getTime();
+    const date_ordered = moment(today).format('MMMM Do YYYY, h:mm:ss a');
+    const week_no = moment(today , "MMDDYYYY").isoWeek();
+    const time =  moment(today).format('h:mm:ss a');
+    const date = moment(today).format('MMMM D, YYYY');
+    const day = moment(today).format('dddd');
+    const month = moment(today).format('MMMM');
+    const year = moment(today).format('YYYY');
+    const userId= await AsyncStorage.getItem('uid');
+    const token = await AsyncStorage.getItem('token');
+    const updatecounts =  firestore().collection('orderCounter').doc('orders');
+    const updateUserOrders =  firestore().collection('users').doc(userId);
+
+    const datavalue = {
+      pickupTime: null,
+      dropoffTime:null,
+      startTime: false,
+      pauseTime: false,
+      stopTime: false,
+      travelTime: 0,
+      MinuteRate,
+      RushHour: true,
+      admin_token:this.state.admin_token.concat(this.state.RiderToken).filter((a)=>a),
+      city:this.state.billing_city.trim(),
+      ExtraBaggage:this.state.ExtraBaggage,
+      willingtopay:this.state.willingtopay,
+      tip:this.state.tip,
+      adult: this.state.adult,
+      children: this.state.children,
+      currency:this.props.route.params.currency,
+        Customerimage:this.state.photo,
+     OrderNo : this.state.counter,
+     OrderId: newDocumentID,
+     OrderStatus: 'Pending',
+     passengers: this.state.adult+ this.state.children,
+     pickupArrive: false,
+     dropOffArrive: false,
+     needAsap:this.state.AlwaysOpen,
+     pickupTime:this.state.startDate === undefined? null:this.state.startDate,
+     adminID: '',
+     PassengerDescription: this.state.PassengerDescription,
+     AccountInfo: {
+       name: this.state.account_name,
+       address: this.state.account_address,
+       phone: this.state.phone,
+       email: this.state.account_email,
+       barangay: this.state.account_barangay==undefined?'': this.state.account_barangay,
+       city: this.state.account_city.trim(),
+       province: this.state.account_province.toLowerCase(),
+       status: this.state.account_status,
+     },
+     Billing: {
+      context: this.state.billing_context,
+       name: this.state.account_name,
+       address: this.state.billing_street,
+       phone: this.state.phone,
+       barangay:this.state.billing_barangay==undefined?'':  this.state.billing_barangay,
+       province: this.state.billing_province.toLowerCase(),
+       billing_city: this.state.billing_city.trim(),
+
+     },
+     OrderDetails: {
+      Date_Ordered: date_ordered,
+      Preffered_Delivery_Time_Date:this.state.preffered_delivery_time,
+      Week_No: week_no,
+      Year: year,
+      Month: month,
+      Time: time,
+      Date: date,
+      Day: day,
+      Timestamp: timeStamp
+     },
+     billing_contextTo: this.state.billing_contextTo,
+     billing_nameTo: this.state.account_name,
+     billing_phoneTo:this.state.phone,
+     billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),
+     billing_cityTo: this.state.billing_cityTo,
+     billing_streetTo: this.state.billing_streetTo,
+     billing_postalTo: this.state.billing_postalTo,
+     billing_barangayTo:this.state.billing_barangayTo,
+     Timestamp: moment().unix(),
+     user_token : token,
+     Note: this.state.note,
+     PaymentMethod: this.state.paymentMethod,
+     DeliveredBy: '',
+     rider_id:'',
+     isCancelled: false,
+     userId: userId,
+     distance: this.state.summary.distance,
+     flat: this.state.flat,
+     flong:this.state.flong,
+     Tolong: this.state.Tolong,
+     Tolat: this.state.Tolat,
+     discount: this.state.discount,
+     voucherUsed: this.state.voucherCode,
+     km:  this.state.summary.distance/1000,
+     total:   actualAmountPay,
+     exkm: newDistance,
+     estTime:  this.state.summary.baseTime,
+     succeding: succeed,
+     amount_base: amount_base,
+     base_dist: this.state.base_dist,
+    vehicle: this.state.datas.vehicle,
+    ProductType: 'Transport',
+    }
+console.log('datavalue: ',datavalue)
+  Alert.alert(
+            'Process this transaction?',
+            'are you sure?',
+            [
+                 {
+        text: "Cancel",
+        onPress: () => null,
+        style: "cancel"
+      },
+      { text: "YES", onPress: () => {
+         this.setState({loading: true})
+        this.checkoutref.collection('orders').doc(newDocumentID).set(datavalue).then(
+      updatecounts.update({ counter:   firestore.FieldValue.increment(1) }),
+      updateUserOrders.update({ ordered_times:   firestore.FieldValue.increment(1) }),
+  
+      this.setState({
+        loading: false,
+        visibleModal: true
+      })
+    )  .catch((error)=>     Alert.alert(
+        'Try Again',
+        '',
+        [
+          {text: 'OK'},
+        ]
+      ))
+
+      }} 
+            ]
+          )
+    
+  }
+
+
+
+  async elseResult(){
+    console.log('this.state.photo: ', this.state.photo)
 console.log('this.state.startDate: ', this.state.startDate)
 if(this.state.PassengerDescription == ''){
   Alert.alert(
@@ -1855,7 +2499,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
     
     const actualAmountPay = this.props.route.params.typeOfRate =='Municipal Rate'?amountpay:this.props.route.params.typeOfRate =='City Rate'?amountpayCity:amountpayMetro
   const typeOfRate = this.props.route.params.typeOfRate; 
-
+  const MinuteRate = this.props.route.params.typeOfRate =='Municipal Rate'?this.state.MinuteBase:this.props.route.params.typeOfRate =='City Rate'?this.state.MinuteCity:this.state.MinuteMetro
 
     const newDocumentID = this.checkoutref.collection('orders').doc().id;
     const today = this.state.currentDate;
@@ -1871,8 +2515,16 @@ if(this.state.photo == ''|| this.state.photo == undefined){
     const token = await AsyncStorage.getItem('token');
     const updatecounts =  firestore().collection('orderCounter').doc('orders');
     const updateUserOrders =  firestore().collection('users').doc(userId);
-
+  
     const datavalue = {
+      pickupTime: null,
+      dropoffTime:null,
+      startTime: false,
+      pauseTime: false,
+      stopTime: false,
+      travelTime: 0,
+      MinuteRate,
+      RushHour: false,
       admin_token:this.state.admin_token.concat(this.state.RiderToken).filter((a)=>a),
       city:this.state.billing_city.trim(),
       ExtraBaggage:this.state.ExtraBaggage,

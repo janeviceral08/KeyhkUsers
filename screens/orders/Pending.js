@@ -9,6 +9,7 @@ import moment from "moment";
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loader from "../../components/Loader";
 import CustomHeader from '../Header';
@@ -52,11 +53,37 @@ export default class Pending extends Component {
       formValid: true,
       error: "",
       loading: false,
+      dataSource:[],
       
     };
      }
      componentDidMount(){
-     this.StartImageRotationFunction()}
+     this.StartImageRotationFunction()
+     this._bootstrapAsync();
+    }
+    getData=()=>{
+      this._bootstrapAsync();
+    }
+    onCollectionUpdate = (querySnapshot) => {
+      const orders = [];
+      querySnapshot.forEach((doc) => {
+       orders.push ({
+              datas : doc.data(),
+              key : doc.id
+              });
+      })
+      this.setState({
+        dataSource : orders,
+        loading: false,
+  
+     })
+    }
+ 
+    _bootstrapAsync =async () =>{
+      const userId= await AsyncStorage.getItem('uid');
+      this.unsubscribe = firestore().collection('orders').where('userId', '==', userId).orderBy('OrderNo', 'asc').onSnapshot(this.onCollectionUpdate) ;
+      this.setState({ 'uid': userId, loading: false })
+      };
      
      StartImageRotationFunction(){
       this.Rotatevalue.setValue(0);
@@ -80,13 +107,15 @@ export default class Pending extends Component {
         {rotate: RotateData}
       ]
     }
-    const newOrders = this.props.orders.filter(item => {
+    const newOrders = this.state.dataSource.filter(item => {
       const itemData = item.datas.OrderStatus;
       const textData = 'Pending';
       const textDataProcessing =  'Processing';
      
       return itemData === 'Processing' ? itemData.indexOf(textDataProcessing ) > -1 :  itemData.indexOf(textData ) > -1
     })
+
+    console.log('newOrders: ',newOrders.length)
     return (
       <Container style={{flex: 1}}> 
         <Loader loading={this.state.loading}  trans={trans}/>
@@ -95,6 +124,8 @@ export default class Pending extends Component {
   
         <FlatList
         key={'#'}
+        refreshing={this.state.loading}
+        onRefresh={this.getData}
                data={newOrders}
                renderItem={({ item,index }) => (
                 <View key={index}>

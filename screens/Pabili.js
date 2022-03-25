@@ -1069,7 +1069,7 @@ console.log("newarrLenght value", arr[newarrLenght])
                })
 
 console.log('Tolong: ',this.state.Tolong);
-               if(this.state.Tolong != undefined){
+            if(this.state.Tolong != undefined){
                    console.log('working here')
               this.setState({isLoading: true})    
              let routeCoordinates = []
@@ -1229,6 +1229,44 @@ axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5
 
 
 }
+
+
+SwitchLocation(){
+  const DataValue={
+    billing_context:  this.state.billing_contextTo,
+    billing_province:this.state.billing_provinceTo,
+    billing_city: this.state.billing_cityTo,
+    billing_street:this.state.billing_streetTo,
+    billing_postal: this.state.billing_postalTo,
+    billing_barangay: this.state.billing_barangayTo,
+    flat:this.state.Tolat,
+    flong:this.state.Tolong,
+    cLong:this.state.Tolong,
+     cLat:this.state.Tolat,
+     fromPlace:this.state.toPlace,
+
+
+     billing_contextTo:  this.state.billing_context,
+  Tolat:this.state.flat,
+     Tolong:this.state.flong,
+  billing_provinceTo:this.state.billing_province,
+  billing_cityTo: this.state.billing_city,
+  billing_streetTo:this.state.billing_street,
+  billing_postalTo: this.state.billing_postal,
+  billing_barangayTo: this.state.billing_barangay,
+  flatTo:this.state.flat,
+  flongTo:this.state.flong,
+  toPlace:this.state.fromPlace,
+
+
+  }
+
+console.log('DataValue: ',DataValue)
+  this.setState(DataValue)
+  
+}
+
+
 
 pushAItem(){
   let ItemList = this.state.ItemList
@@ -2191,95 +2229,17 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
 {console.log('this.state.Tolat: ', this.state.x)}
   </MapboxGL.MapView>
 
-  {/*
-  
-   <MapView
-            testID="map"
-        provider={PROVIDER_GOOGLE}
-        onRegionChangeComplete={() => {Keyboard.dismiss(); this.setState({LocationDoneto: true, LocationDone: true})}}
-        onPress = {() => {Keyboard.dismiss();}}
-        showsUserLocation={true}
-          style={{ position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0}}
-         mapPadding={{ right: 0, top: SCREEN_HEIGHT/1.4, bottom: 150 }}
-    initialRegion={this.state.region}
-    showsMyLocationButton={true}
-    pitchEnabled={false}
-          showsBuildings={true}
-          maxZoomLevel={17.5}
-          loadingEnabled={true}
-zoomTapEnabled={false}
-      zoomEnabled={true}
-        scrollEnabled={true}
-        onPress={e => {this.state.visibleAddressModal == true? this.onRegionChange(e.nativeEvent.coordinate):
-          this.state.visibleAddressModalTo == true?this.onRegionChange(e.nativeEvent.coordinate):null
-        }}
-          >
-              
-             {this.state.routeForMap && (
-                <Polyline
-                  key="editingPolyline"
-                  coordinates={this.state.routeForMap}
-                  strokeColor="#019fe8"
-                  fillColor="#019fe8"
-                  strokeWidth={5}
-                />
-              )}
-              {console.log('clat: ', this.props.route.params.cLat)}
-               {console.log('flat: ', this.state.flat)}
-          { this.state.x == undefined? null:  
-            this.state.x != undefined && this.state.flat == this.props.route.params.clat?
-             <MapView.Marker
-             coordinate={{latitude: this.state.x.latitude, longitude: this.state.x.longitude}}
-             title={"From"}
-             description={this.state.fromPlace}
-             image={Rider_img}
-          />
-            : <MapView.Marker
-             coordinate={{latitude: this.state.flat, longitude: this.state.flong}}
-             title={"From"}
-             description={this.state.fromPlace}
-             image={Rider_img}
-          />}
-           {  this.state.Tolat == undefined? null:
-         
-           <MapView.Marker
-             coordinate={{latitude: this.state.Tolat, longitude: this.state.Tolong}}
-             title={"To"}
-             description={this.state.toPlace}
-             image={customer_img}
-       />}
- 
-          
-          </MapView>
-  
-  */ }
+
           <Card>
           </Card>
           
-    {/*   <View style={{ right: 0, top: '20%', position: 'absolute'}} >
-  <TouchableOpacity onPress={()=> this.setState({visibleAddressModal: true, visibleAddressModalToPin: false})}>
-        <Image style={{height: 36,
-  width: 36,}} source={marker} />
-</TouchableOpacity>
-      </View>
-         
-        <View style={{ right: 0, top: '25%', position: 'absolute',
-  }}>
-  <TouchableOpacity onPress={()=> this.setState({visibleAddressModalToPin: true, visibleAddressModal: false})}>
-        <Image style={{height: 36,
-  width: 36,}} source={marker} />
-  </TouchableOpacity>
-      </View>*/}
+
 
 
 
          <Card style={{ left: 0, top: 0, position: 'absolute', width: SCREEN_WIDTH/1.02}}>
    <CardItem listItemPadding={0} onPress={() =>this.setState({visibleAddressModal: true, visibleAddressModalto: false})}>
-  <FontAwesome name={'dot-circle-o'} color={'green'} style={{ marginRight: 10}}/> 
+  <FontAwesome name={'dot-circle-o'} color={'green'} size={25} style={{ marginRight: 10, marginLeft: -15}}/> 
    <View style={{flexDirection: 'column'}}>
 
    {/*
@@ -2296,8 +2256,8 @@ zoomTapEnabled={false}
                 
                
                 <CardItem onPress={() =>this.setState({visibleAddressModalTo: true,visibleAddressModal: false})}>
-                  <FontAwesome name={'map-marker'} color={'tomato'} size={15} style={{ marginRight: 10}}/> 
-                <View style={{flexDirection: 'column'}}>
+                  <FontAwesome name={'map-marker'} color={'tomato'} size={25} style={{ marginRight: 12, marginLeft: -10}}/> 
+                <View style={{flexDirection: 'row'}}>
               
   {/*
                     <Text style={{fontWeight: 'normal', fontSize: 17, color: 'blue',marginTop: -20}}>Drop-off location</Text>
@@ -2310,6 +2270,7 @@ zoomTapEnabled={false}
                     </TouchableWithoutFeedback>
                      </View>  
                    }
+                   <MaterialIcons name="swap-vert" size={25} onPress={()=>this.SwitchLocation()} style={{marginTop: 7}}/> 
                    </View>
                   
                 </CardItem>
@@ -2320,7 +2281,7 @@ zoomTapEnabled={false}
     borderWidth: 1,
     borderRadius: 1,
     width: 1,
-    height: this.state.LocationDoneto === false? '8%':'30%', position: 'absolute', left: 21, top: '35%'
+    height: this.state.LocationDoneto === false? '8%':'30%', position: 'absolute', left: 12, top: '35%'
   }}>
 </View>
              

@@ -422,7 +422,8 @@ async addonsdeleteCart(item){
       }
     
       router(item){
-          if(!item.status || item.quantity<= 0  || !item.admin_control){
+      
+          if(!item.status || item.quantity<= 0){
               return null;
           }else{
               if(item.addons == null || item.addons.length == 0){
@@ -438,7 +439,7 @@ async addonsdeleteCart(item){
   rowRenderer = (type, data) => {
     const { name, price, quantity, featured_image, unit, status, id,admin_control, storeId, sale_price,sale_description, brand ,cluster, addons} = data;
     return (
-      
+      quantity< 1?null:
  <Card style={{borderRadius: 20, }}>
       <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20,}}>
       <TouchableOpacity style={{width:SCREEN_WIDTH/2, flex: 1}} onPress={()=> this.router(data) }>
@@ -457,15 +458,14 @@ async addonsdeleteCart(item){
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
-      <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
+      <View style={{backgroundColor: 'rgba(49,49,49, 0.8)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, flexDirection: 'row' }}>
         <Text  numberOfLines={1} style={{fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,
-    paddingHorizontal: 20,width:SCREEN_WIDTH/3}}>{name}</Text>
-         <Text style={{fontStyle: "italic",  fontSize: 13,width:100, marginLeft: -25, marginTop: 2}}>Stock :{quantity}</Text>
+    paddingHorizontal: 20,width:SCREEN_WIDTH/2}}>{name}</Text>
       </View>  
             {!admin_control || !status ? 
          <View style={styles.text}>
@@ -480,7 +480,7 @@ async addonsdeleteCart(item){
       }
      
      
-        <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>
+       {brand == ''?null: <Text style={{fontStyle: "italic", color: 'white', fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>}
        
 
         {sale_price ? 
@@ -534,7 +534,7 @@ async addonsdeleteCart(item){
 
   loadProducts(loadmore, fromComponent) {
     const self = this;
-    var productQuery =  firestore().collection('products').where('category', 'array-contains', this.props.title);
+    var productQuery =  firestore().collection('products').where('category', 'array-contains', this.props.title).where('status', '==', true);
     productQuery = productQuery.where('storeId', '==', this.props.storeId);
     
     if( this.state.searchEnabled ){

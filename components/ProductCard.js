@@ -234,7 +234,7 @@ export default class Products extends Component {
 
   loadProducts(loadmore, fromComponent) {
     const self = this;
-    var productQuery =  firestore().collection('products').where('category', 'array-contains', this.props.title);
+    var productQuery =  firestore().collection('products').where('category', 'array-contains', this.props.title).where('status', '==', true);
     productQuery = productQuery.where('storeId', '==', this.props.storeId);
     
     if( this.state.searchEnabled ){

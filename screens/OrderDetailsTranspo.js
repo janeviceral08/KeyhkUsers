@@ -136,6 +136,9 @@ export default class OrderDetailsTranspo extends Component {
       Tolong: cart.Tolong,
       showURL:false,
       ModalHelp: false,
+      travelTime:cart.travelTime,
+      MinuteRate:cart.MinuteRate,
+      estTime:cart.estTime,
       
   };
 
@@ -146,6 +149,20 @@ export default class OrderDetailsTranspo extends Component {
 
 async componentDidMount() {
   this.StartImageRotationFunction()
+  
+  firestore().collection('orders').where('OrderId', '==', this.props.route.params.orders.OrderId).onSnapshot((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+
+
+      console.log('travelTime: ', doc.data().travelTime )
+      this.setState({
+        estTime:doc.data().estTime,
+        MinuteRate:doc.data().MinuteRate,
+        travelTime : doc.data().travelTime,
+     });
+    })
+  })
+
      const getData= firestore().collection('charges').doc(this.props.route.params.orders.adminID);
     const doc = await getData.get();
     if (!doc.exists) {
@@ -159,12 +176,9 @@ async componentDidMount() {
           mobile_help: doc.data().mobile_help,
           
        })}
-    this.getLocation();
   
   }
-  getLocation (){
 
-  }
  footer= () => {
     return(
     <View>
@@ -212,15 +226,33 @@ const trans={
     let distance =  this.state.cart.distance/1000;
     let newDistance = distance - this.state.base_dist;
     let distanceAmount = newDistance*this.state.succeding;
-    let amountpay= this.state.amount_base +distanceAmount;
+
 
     let from_lat = this.state.cLat
     let from_long = this.state.cLong
     let to_lat = this.state.Tolat
     let to_long = this.state.Tolong
 
-
-console.log('cLat: ', this.state.cLat);
+    const estTime = this.state.estTime;
+    const TimeConsume = (this.state.travelTime+59900) / 1000;
+    const NewTravelTime = TimeConsume -estTime;
+    const MinuteRate = this.state.MinuteRate;
+    const minuteValue = NewTravelTime/60;
+    const MinuteCharge = minuteValue * MinuteRate;
+    console.log('estTime: ',estTime)
+    console.log('TimeConsume: ',TimeConsume)
+    console.log('NewTravelTime: ',NewTravelTime)
+    console.log('MinuteRate: ',MinuteRate)
+    console.log('minuteValue: ',minuteValue)
+    console.log('MinuteCharge: ',MinuteCharge)
+    console.log('tip: ',Math.round((this.props.route.params.orders.tip*10)/10))
+    console.log('total: ',Math.round((this.props.route.params.orders.total*10)/10))
+ 
+    const MinuteChargePayable= MinuteCharge > 0? MinuteCharge:0;
+    const NewTotalPayable = MinuteChargePayable+Math.round((this.props.route.params.orders.total*10)/10)+Math.round((this.props.route.params.orders.tip*10)/10);
+    console.log('MinuteChargePayable: ',MinuteChargePayable)
+    console.log('NewTotalPayable: ',NewTotalPayable)
+    let amountpay= MinuteCharge > 0? MinuteCharge+this.state.amount_base +distanceAmount:this.state.amount_base +distanceAmount;
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -391,9 +423,9 @@ console.log('cLat: ', this.state.cLat);
 </Body>
 <Right style={{top: SCREEN_HEIGHT < 767?-70:-80,}}>
 <View style={{ backgroundColor: '#396ba0', borderRadius: 10, width: '40%'}}>
-<Text style={{textAlign: 'center', fontSize: 14, color: 'white'}}>ETA
+<Text style={{textAlign: 'center', fontSize: 13, color: 'white'}}>ETA
 </Text>
-<Text style={{textAlign: 'center', fontSize: 14, color: 'white'}}>{this.state.cart.distance === undefined? null: Math.round(((this.state.cart.estTime/60)*10)/10)} mins</Text>
+<Text style={{textAlign: 'center', fontSize: 18, color: 'white'}}>{this.state.cart.distance === undefined? null: Math.round(((this.state.cart.estTime/60)*10)/10)} mins</Text>
 </View>
 </Right>
 
@@ -432,7 +464,7 @@ console.log('cLat: ', this.state.cLat);
                 <TouchableOpacity style={{top: -70, flexDirection: 'row', marginLeft: 10,}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>
                    <View style={{flexDirection: 'row'}}>
                     <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14}}>Tip:   <Text style={{fontSize: 14}}>{parseFloat(this.state.cart.tip).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text></Text>
-                    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14, paddingLeft: SCREEN_WIDTH/4}}>Charge:   <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14}}>{this.state.cart.total.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text></Text>
+                    <Text style={{fontWeight: 'bold', fontSize: SCREEN_HEIGHT < 767?12:14, paddingLeft: SCREEN_WIDTH/4}}>Charge:   <Text style={{fontSize: SCREEN_HEIGHT < 767?12:14}}>{this.state.cart.RushHour == true? this.state.cart.amount_base.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.cart.total.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} {minuteValue <1? null: '+ '+Math.round((minuteValue*10)/10)+ 'mins'}</Text></Text>
                       
                      </View>
           
@@ -444,10 +476,10 @@ console.log('cLat: ', this.state.cLat);
                      </View>
                      
                   { this.state.cart.distance === undefined? null:    <View style={{flexDirection: 'column',position: 'absolute', right: 0, top: 20}}>
-                       <Text style={{fontSize: SCREEN_HEIGHT < 767?18:20, fontWeight: 'bold', marginRight: 20}}>{this.state.cart.distance === undefined? null: distanceAmount < 1?this.props.route.params.orders.currency+' '+Math.round((this.props.route.params.orders.tip*10)/10+parseFloat(this.state.amount_base)).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'): this.props.route.params.orders.currency+' '+Math.round((amountpay*10)/10+Math.round((this.props.route.params.orders.tip*10)/10)).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                  {this.state.cart.RushHour == true? <Text style={{fontSize: SCREEN_HEIGHT < 767?18:20, fontWeight: 'bold', marginRight: 20}}>{this.state.cart.distance === undefined? null: distanceAmount <= 1?this.props.route.params.orders.currency+' '+(Math.round((this.props.route.params.orders.tip*10)/10+(this.state.amount_base))+MinuteChargePayable).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'): this.props.route.params.orders.currency+' '+NewTotalPayable.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').toString()}</Text>
+                  : <Text style={{fontSize: SCREEN_HEIGHT < 767?18:20, fontWeight: 'bold', marginRight: 20}}>{this.state.cart.distance === undefined? null: distanceAmount <= 1?this.props.route.params.orders.currency+' '+(Math.round((this.props.route.params.orders.tip*10)/10+(this.state.amount_base))+(MinuteChargePayable)).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'): this.props.route.params.orders.currency+' '+Math.round((amountpay*10)/10+Math.round((this.props.route.params.orders.tip*10)/10)).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>}
                           <Text style={{fontSize: SCREEN_HEIGHT < 767?11:13, fontWeight: 'bold', marginBottom: 10, textAlign: 'right', paddingRight: 10}}>{this.props.route.params.orders.PaymentMethod}</Text>
                     </View>}
-                   {console.log('tip: ',this.props.route.params.orders.tip)}
                 </TouchableOpacity> 
 
                 <TouchableOpacity style={{top: -70, flexDirection: 'row', marginLeft: 10}} onPress={()=> {this.props.route.params.orders.OrderStatus=='Cancelled'?null:this.setState({visibleAddressModalTo: true})}}>

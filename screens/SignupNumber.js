@@ -28,6 +28,7 @@ import OTPTextInput  from 'react-native-otp-textinput';
 import CountDown from 'react-native-countdown-component';
 import firestore from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
+import RNOtpVerify from 'react-native-otp-verify';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -68,7 +69,7 @@ export default class SignupNumber extends Component  {
               return;
           }
           console.log('phoneNumber: ', phoneNumber);
-         this.setState({loading: true})
+         this.setState({loading: true, errorMessage: ''})
         /* auth().signInWithPhoneNumber(phoneNumber).then((res) => {
             console.log('working number')
                
@@ -78,11 +79,13 @@ export default class SignupNumber extends Component  {
                          this.setState({ errorMessage: error, loading: false })
             });*/
        const confirmation = await auth().signInWithPhoneNumber(this.state.phoneCode+phoneNumber).catch(error => {
-        console.log('err: ', error)
-                  this.setState({ errorMessage: 'Too many Request Try again after 24Hours', loading: false })
+        console.log('errs: ', error)
+        const messageArray = error.code
+        console.log('messageArray eee: ', messageArray)
+                  this.setState({ errorMessage: error.code, loading: false })
      })
        //setConfirm(confirmation);
-       if(this.state.errorMessage !='Too many Request Try again after 24Hours'){
+       if(this.state.errorMessage ==''){
        console.log('SignInWithPhoneNumbers confirmation: ', confirmation);
        this.setState({setConfirm:confirmation,loading:false })
         this.toggleOverlay()}
@@ -121,12 +124,56 @@ export default class SignupNumber extends Component  {
         }
       }
 
+
+      async  confirmCodeAutomatic(otp) {
+        console.log('setCode: ',  otp.trim())
+        console.log('setConfirm: ', this.state.setConfirm)
+        this.setState({loading: true})
+      try {
+        await this.state.setConfirm.confirm(otp.trim())
+        this.setState({loading: false})
+        this.toggleOverlay();
+        console.log('current currentUser: ', auth().currentUser)
+       this.props.navigation.navigate('SignUpScreenNumber', {'uid':auth().currentUser.uid, 'phoneNumber':auth().currentUser.phoneNumber})
+      } catch (error) {
+          this.setState({ errorMessage: 'Invalid code', loading: false })
+          console.log('error confirmCodeAutomatic: ', error);
+        console.log('Invalid code.');
+      }
+    }
+
       toggleOverlay = () => {
         this.setState({setVisible:!this.state.setVisible })
         //setVisible(!visible);
       };
 
       componentDidMount(){
+        RNOtpVerify.getOtp()
+        .then(p =>{
+          RNOtpVerify.addListener(message =>{
+            console.log('message addListener: ', message );
+            try{
+              if(message){
+                  const messageArray = message.split('\n')
+                  console.log('messageArray: ',messageArray)
+                  console.log('messageArray[0]: ',messageArray[0])
+                  if(messageArray[0]){
+                    const otp =messageArray[0].split(' ')[0];
+                    if(otp.length === 6){
+                      this.setState({setVisible:true,setCode:otp.trim() })
+                      console.log('otp: ', otp.trim())
+                      this.confirmCodeAutomatic(otp.trim())
+                    }
+                  }
+              }
+            }catch (error){
+              console.log('error: ', error.message)
+            }
+          })
+        }
+          )
+        .catch(error =>{console.log('error RNOTP'. error.message)});
+    
         this.StartImageRotationFunction()
 
         firestore().collection('AvailableOn').where('status', '==', true).orderBy('label', 'asc').onSnapshot(
@@ -316,6 +363,7 @@ export default class SignupNumber extends Component  {
                     </View>
                     <OTPTextInput 
                             tintColor={'#019fe8'}
+                            //value={this.state.setCode}
                             inputCount={6} 
                             handleTextChange={(e)=>{ console.log('e: ',e); this.setState({setCode: e})}} 
                             textInputStyle={{

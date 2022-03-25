@@ -62,7 +62,7 @@ export default class OrderScreen extends Component {
       <CustomHeader title="Order History" isHome={true} Cartoff={true} navigation={this.props.navigation}/>
         <Tabs renderTabBar={()=> <ScrollableTab style={{ backgroundColor: "white" }} />}>
           <Tab heading="Transactions" tabStyle={{backgroundColor: '#FFFFFF', borderRadius: 20}} textStyle={{color: 'tomato'}} activeTabStyle={{ height: 35,backgroundColor: 'salmon',borderRadius: 20,marginTop: 10,}} activeTextStyle={{color: '#fff', fontWeight: 'normal'}}>
-            <Pending orders={this.state.dataSource} uid={this.state.uid} navigation={this.props.navigation}/>
+            <Pending uid={this.state.uid} navigation={this.props.navigation}/>
           </Tab>
           <Tab heading="Delivered" tabStyle={{backgroundColor: '#FFFFFF'}} textStyle={{color: 'tomato'}} activeTabStyle={{ height: 35,backgroundColor: '#33c37d',borderRadius: 20,marginTop: 10,}} activeTextStyle={{color: '#fff', fontWeight: 'normal'}}>
             <Delivered orders={this.state.dataSource} uid={this.state.uid} navigation={this.props.navigation}/>

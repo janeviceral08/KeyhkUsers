@@ -343,7 +343,7 @@ if(parseFloat(this.state.rating) == 0){
    
                    
                     </Card>}
-                    { orders.Mode == 'Pick-up' ? null:orders.OrderStatus=='Processed' || orders.OrderStatus=='Processing' ||orders.OrderStatus == 'Pending'?     <View style={styles.stepIndicator}>
+                    { orders.OrderStatus=='Processed' || orders.OrderStatus=='Processing' ||orders.OrderStatus == 'Pending'?     <View style={styles.stepIndicator}>
           <StepIndicator  
             stepCount={3}   
             customStyles={secondIndicatorStyles}
@@ -356,7 +356,7 @@ if(parseFloat(this.state.rating) == 0){
           />
                
         </View>:null}
-                    { orders.Mode == 'Pick-up' ? null:orders.OrderStatus=='Processed'|| orders.OrderStatus=='Processing' || orders.OrderStatus == 'Pending'? 
+                    {orders.OrderStatus=='Processed'|| orders.OrderStatus=='Processing' || orders.OrderStatus == 'Pending'? 
                      <Card>
                 <Body >
                

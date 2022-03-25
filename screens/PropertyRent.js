@@ -1,11 +1,13 @@
 import React, { Component } from "react";
-import { Platform, StyleSheet,  View,Image, ImageBackground } from "react-native";
+import { Platform, StyleSheet,  View,Image, ImageBackground,Dimensions } from "react-native";
 import DynamicTabView from "react-native-dynamic-tab-view";
 import { Container, Header, Item, Input, Icon, Button, Text, Left, Right,Body,Title,Form, Picker } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from './Header';
 import PRCard from "../components/PRCard";
 import auth from '@react-native-firebase/auth';
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export default class PropertyRent extends Component{
   constructor(props) {
@@ -49,12 +51,12 @@ render() {
    console.log('typeOfRate: ', this.props.route.params.typeOfRate)
     return (
     <Container style={{flex: 1}}>
-     <Header androidStatusBarColor="#396ba0" style={{height: 150}}>
-         <ImageBackground source={{ uri: this.state.background }} resizeMode="cover" style={{height: 150}}>
+     <Header androidStatusBarColor="#396ba0" style={{height: SCREEN_HEIGHT/6}}>
+         <ImageBackground source={{ uri: this.state.background }} resizeMode="cover" style={{height: SCREEN_HEIGHT/6}}>
 
           <Left style={{flex:2, width: '85%',marginTop: 20, flexDirection: 'row'}}>
     
-        <Image style={{  width: 100, height: 100, borderRadius: 50, borderWidth: 2, borderColor: 'white', overflow: "hidden"}} source={{uri: this.state.storeImage}} />
+        <Image style={{  width: SCREEN_HEIGHT/8, height: SCREEN_HEIGHT/8, borderRadius: 50, borderWidth: 2, borderColor: 'white', overflow: "hidden"}} source={{uri: this.state.storeImage}} />
           <View style={{flexDirection: 'column',width: '100%', marginLeft: 10, marginTop: 20}}>
           <Text style={{color: 'white', fontSize: 18}}>{this.state.storeName}</Text>
           <Text style={{color: 'white', fontSize: 12,width: '100%'}}>{this.state.storeAddress}</Text>

@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingLeft: 20,
     fontWeight: "bold",
-    color: 'black',
+    color: 'white',
     padding : 1,
   
   },
   categoriesPriceSale: {
     fontSize: 10,
-    color: 'black',
+    color: 'white',
     padding : 1,
     textDecorationLine: 'line-through',
   

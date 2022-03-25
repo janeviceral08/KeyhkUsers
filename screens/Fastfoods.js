@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Platform, StyleSheet, View, ImageBackground, Image } from "react-native";
+import { Platform, StyleSheet, View, ImageBackground, Image,Dimensions } from "react-native";
 import DynamicTabView from "react-native-dynamic-tab-view";
 import { Container, Header, Item, Input, Icon, Button, Text, Left, Right,Body,Title,Form, Picker } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +7,8 @@ import CustomHeader from './Header';
 import FFCard from "../components/FFCard";
 import CartBadge from '../components/CartBadge';
 import auth from '@react-native-firebase/auth';
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export default class FastFoods extends Component{
   constructor(props) {
@@ -60,12 +62,12 @@ render() {
             
           </Right>
 </Header>*/}
-        <Header androidStatusBarColor="#396ba0" style={{height: 150}}>
-         <ImageBackground source={{/* uri: this.props.route.params.store.foreground */}} resizeMode="cover" style={{height: 150, backgroundColor: '#ee4e4e'}}>
+        <Header androidStatusBarColor="#396ba0" style={{height: SCREEN_HEIGHT/6}}>
+         <ImageBackground source={{/* uri: this.props.route.params.store.foreground */}} resizeMode="cover" style={{height: SCREEN_HEIGHT/6, backgroundColor: '#ee4e4e'}}>
 
           <Left style={{flex:2, width: '100%',marginTop: 20, flexDirection: 'row'}}>
     
-        <Image style={{width: 100, height: 100, borderRadius: 50, borderWidth: 2,borderColor: 'white', overflow: "hidden", marginLeft: '5%'}} source={{uri: this.props.route.params.store.foreground}} />
+        <Image style={{width: SCREEN_HEIGHT/8, height: SCREEN_HEIGHT/8, borderRadius: 50, borderWidth: 2,borderColor: 'white', overflow: "hidden", marginLeft: '5%'}} source={{uri: this.props.route.params.store.foreground}} />
           <View style={{flexDirection: 'column',width: '80%', marginLeft: 15, marginTop: 30,backgroundColor: 'rgba(255, 255, 255, 0.6)',paddingLeft: 10}}>
           <Text style={{color: 'white', fontSize: 18, fontWeight: 'bold'}}>{this.state.name}</Text>
           <Text style={{color: 'white', fontSize: 12,width: '80%'}}>{this.props.route.params.store.address + ', ' + this.props.route.params.store.city}</Text>

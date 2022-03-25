@@ -108,7 +108,7 @@ export default class Cart extends Component {
     let quantity = Object.keys(cart).length && Object.values(cart).find(item => item.quantity <= 0);
     let checkout = true;
 
-    if(status || admin_control || quantity){
+    if(status || quantity){
       	Alert.alert(
         'Note:',
         'Please remove unavailable products.',
@@ -304,7 +304,7 @@ async onRemoveFromCart (id) {
                  return(
                    <View key={i}>       
                             
-                    {item.status && item.quantity > 0 && item.admin_control ?
+                    {item.status && item.quantity > 0 ?
                    <View style={{width:width,marginRight: 0,backgroundColor:'white', flexDirection:'row', borderBottomWidth:2, borderColor:"#cccccc",paddingHorizontal: 10}}>
                      <Image resizeMode={"cover"} style={{width:width/4,height:width/4, borderRadius: 15, marginTop: 5}} source={{uri: item.featured_image}} />
                      
