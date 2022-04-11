@@ -189,7 +189,15 @@ async componentDidMount() {
     )
   }
 ReasonOfCancel(){
-
+if(this.props.route.params.orders.OrderStatus != 'Pending' ){
+  const update_StoreTransaction = firestore().collection('stores').doc(this.props.route.params.orders.RentStoreId);
+  update_StoreTransaction.update({ 
+    0: firestore.FieldValue.increment(1),
+    TransactionCancelled: firestore.FieldValue.increment(1),
+    Transactionprocessing: this.props.route.params.orders.OrderStatus == 'Processing'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+    TransactionPending: this.props.route.params.orders.OrderStatus == 'Pending'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+  })
+}
     const ref = firestore().collection('orders').doc(this.props.route.params.orders.OrderId);
     ref.update({ 
         OrderStatus : "Cancelled",

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {FlatList, TouchableOpacity, Dimensions, View, Alert, StatusBar, StyleSheet, ScrollView, TouchableHighlight, Image, Pressable,Animated} from 'react-native';
+import {FlatList,Platform , TouchableOpacity, Dimensions, View, Alert, StatusBar, StyleSheet, ScrollView, TouchableHighlight, Image, Pressable,Animated} from 'react-native';
 import { Col, Card, CardItem, Body, Button, Left, ListItem, List, Content, Thumbnail, Right, Text,Grid, Icon,  Container, Header,Item, Input, Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -18,7 +18,7 @@ import { RadioButton, Divider } from 'react-native-paper';
 import Loader from './Loader';
 import { FlatGrid } from 'react-native-super-grid';
 import {LayoutUtil} from './LayoutUtil';
-
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
 
 
 export default class SearchRentals extends Component {
@@ -102,8 +102,11 @@ export default class SearchRentals extends Component {
       selectedFilter: 'Alphabetical-(A-Z)',
       searchEnabled: false,
       showToast: false,
-   
-      }
+  
+      },
+      SliderminimumValue:[0, 50000],
+      SlidermaximumValue:100000,
+   setSliderminimumValue: false,
         };
     
         this.arrayholder = [];
@@ -437,6 +440,9 @@ export default class SearchRentals extends Component {
     console.log('selectedFilter: ', this.state.selectedFilter)
 
     switch(this.state.selectedFilter) {
+      case 'PriceRange':
+				productQuery = productQuery.where('FinalPrice', '>=', parseFloat(this.state.SliderminimumValue[0])).where('FinalPrice', '<=', parseFloat(this.state.SliderminimumValue[1])).orderBy('FinalPrice', 'asc');
+        break;
       case 'Price-Ascending':
 				productQuery = productQuery.orderBy('price', 'asc');
         break;
@@ -463,12 +469,12 @@ export default class SearchRentals extends Component {
 			let productChunk = [];
 			
 			snapshot.docChanges().forEach(function(change) {
-				if (change.type === "added") {
+				if (change.type === "added"  && change.doc.data().admin_control) {
 					/* Add more items to the screen...   const itemData = items.ProductType;
         const textData = 'Transport';*/
           if(change.doc.data().ProductType != 'Transport'){
 					productChunk.push({ ...change.doc.data(), pid: change.doc.id })}
-				} else if (change.type === "modified") {
+				} else if (change.type === "modified"  && change.doc.data().admin_control) {
 					/* If there is a change in realtime... */
 					/* Apply the modification to the item directly without changing the current item index. */
 					self.setState({
@@ -951,7 +957,7 @@ export default class SearchRentals extends Component {
        <CustomHeader title={'Search from '+this.state.store_name}  navigation={this.props.navigation} fromPlace={this.props.route.params.fromPlace} currency={this.props.route.params.currency}/>
         <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
-                <Fontisto name="search" size={20} color={"#000000"}/>
+                <Fontisto name="search" size={20} color={"#000000"} onPress={()=> this.loadProducts()}/>
                 <Input placeholder="Search..."
                 onChangeText={(text) => this.setState({searchText: text})}
                 onSubmitEditing={()=> this.loadProducts()}
@@ -981,7 +987,7 @@ export default class SearchRentals extends Component {
             }
            {  this.state.alpaOrder==false? 
            <TouchableOpacity style={{flexDirection: "row"}} onPress={()=> {this.setState({alpaOrder: !this.state.alpaOrder,selectedFilter: this.state.alpaOrder==true? 'Alphabetical-(A-Z)':'Alphabetical-(Z-A)'});this.loadProducts()}}>
-             <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} onPress={()=> {this.setState({alpaOrder: !this.state.alpaOrder,selectedFilter: this.state.alpaOrder==true? 'Alphabetical-(A-Z)':'Alphabetical-(Z-A)'});this.loadProducts()}} style={{transform: [{ rotate: '90deg' },{rotateY: '180deg'}], marginLeft: 20}}/>
+             <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} onPress={()=> {this.setState({alpaOrder: !this.state.alpaOrder,selectedFilter: this.state.alpaOrder==true? 'Alphabetical-(A-Z)':'Alphabetical-(Z-A)'});this.loadProducts()}} style={{transform: [{ rotate: '90deg' },{rotateY: '180deg'}], marginLeft: 10}}/>
             <View style={{flexDirection: 'column'}}>
             <Text style={{fontSize: 9, color: 'white'}}>Z</Text>
              <Text style={{fontSize: 9, color: 'white'}}>A</Text>
@@ -989,12 +995,18 @@ export default class SearchRentals extends Component {
             </TouchableOpacity>
            
            : <TouchableOpacity style={{flexDirection: "row"}} onPress={()=> {this.setState({alpaOrder: !this.state.alpaOrder,selectedFilter: this.state.alpaOrder==true? 'Alphabetical-(A-Z)':'Alphabetical-(Z-A)'});this.loadProducts()}}>
-             <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} onPress={()=> {this.setState({alpaOrder: !this.state.alpaOrder,selectedFilter: this.state.alpaOrder==true? 'Alphabetical-(A-Z)':'Alphabetical-(Z-A)'});this.loadProducts()}} style={{transform: [{ rotate: '90deg' }], marginLeft: 20}}/>
+             <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} onPress={()=> {this.setState({alpaOrder: !this.state.alpaOrder,selectedFilter: this.state.alpaOrder==true? 'Alphabetical-(A-Z)':'Alphabetical-(Z-A)'});this.loadProducts()}} style={{transform: [{ rotate: '90deg' }], marginLeft: 15}}/>
             <View style={{flexDirection: 'column'}}>
             <Text style={{fontSize: 9, color: 'white'}}>A</Text>
              <Text style={{fontSize: 9, color: 'white'}}>Z</Text>
             </View>
             </TouchableOpacity>}
+
+
+            <TouchableOpacity style={{flexDirection: "column"}} onPress={()=> {this.setState({visibleModal: !this.state.visibleModal})}}>
+             <FontAwesome name="sliders" size={20} color={"#FFFFFF"} onPress={()=> {this.setState({visibleModal: !this.state.visibleModal})}} style={{ marginLeft: 10}}/>
+    
+            </TouchableOpacity>
             </Left>
         </Header>
           <Modal
@@ -1006,41 +1018,94 @@ export default class SearchRentals extends Component {
             useNativeDriver={true}
             onBackdropPress={() => this.setState({visibleModal: false})} transparent={true}>
            <View style={style.content}> 
-           <Text style={{justifyContent: "center", textAlign:"center", paddingVertical: 10, color: '#019fe8', fontWeight:'bold'}}>Select Filter</Text>
+           <Text style={{justifyContent: "center", textAlign:"center", paddingVertical: 10, color: '#019fe8', fontWeight:'bold'}}>Price Range</Text>
            <Divider />
            <View style={{flexDirection: 'row'}}>
-                    <RadioButton
-                    value="Price-Ascending"
-                    status={selectedFilter === 'Price-Ascending'? 'checked' : 'unchecked'}
-                    onPress={() => { this.setState({ selectedFilter: 'Price-Ascending' }); }}
-                    />
-                    <Text style={{padding: 5}}>Price-Ascending</Text>
+             <Text style={{color: 'gray', fontWeight: 'bold', fontSize:13}}>{parseFloat(this.state.SliderminimumValue[0]).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').toString()}</Text>
+             <Text style={{position: 'absolute', right:0, color: 'gray', fontWeight: 'bold', fontSize:13}}>{parseFloat(this.state.SliderminimumValue[1]).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').toString()}</Text>
+             </View>
+           <MultiSlider
+          markerStyle={{
+            ...Platform.select({
+              ios: {
+                height: 30,
+                width: 30,
+                shadowColor: '#000000',
+                shadowOffset: {
+                  width: 0,
+                  height: 3
+                },
+                shadowRadius: 1,
+                shadowOpacity: 0.1
+              },
+              android: {
+                height: 30,
+                width: 30,
+                borderRadius: 50,
+                backgroundColor: '#1792E8'
+              }
+            })
+          }}
+          pressedMarkerStyle={{
+            ...Platform.select({
+              android: {
+                height: 30,
+                width: 30,
+                borderRadius: 20,
+                backgroundColor: '#148ADC'
+              }
+            })
+          }}
+          selectedStyle={{
+            backgroundColor: '#1792E8'
+          }}
+          trackStyle={{
+            backgroundColor: '#CECECE'
+          }}
+          touchDimensions={{
+            height: 40,
+            width: 40,
+            borderRadius: 20,
+            slipDisplacement: 40
+          }}
+          values={this.state.SliderminimumValue}
+          sliderLength={SCREEN_WIDTH -70}
+          onValuesChange={(values) => {this.setState({SliderminimumValue:values, selectedFilter: 'PriceRange'})}}
+          min={0}
+          max={this.state.SlidermaximumValue}
+          allowOverlap={false}
+          minMarkerOverlapDistance={10}
+        />
+           <View style={{flexDirection: 'row'}}>
+           <View style={{flexDirection: 'column'}}>
+          <Text style={{color: 'gray', fontWeight: 'bold', fontSize:13}}>Min</Text>
+              <View style={{borderRadius: 5, borderColor: 'gray', borderWidth: 1, flexDirection: 'row', width: SCREEN_WIDTH/3, height: 40}}>
+              <Text style={{color: 'gray', fontWeight: 'bold', fontSize:15, justifyContent: 'center', alignSelf: 'center'}}>{this.props.route.params.currency}</Text>
+              <Input
+              keyboardType={'number-pad'}
+              value={this.state.SliderminimumValue[0].toString()}
+              onChangeText={(text) => {isNaN(text)? this.setState({SliderminimumValue: [text, this.state.SliderminimumValue[1]]}):null}}
+            style={{ justifyContent: 'center', alignSelf: 'center'}}
+      />
                 </View>
-                <View style={{flexDirection: 'row'}}>
-                    <RadioButton
-                    value="Price-Descending"
-                    status={selectedFilter === 'Price-Descending'? 'checked' : 'unchecked'}
-                    onPress={() => { this.setState({ selectedFilter: 'Price-Descending' }); }}
-                    />
-                    <Text style={{padding: 5}}>Price-Descending</Text>
                 </View>
-                <View style={{flexDirection: 'row'}}>
-                    <RadioButton
-                    value="Alphabetical-(A-Z)"
-                    status={selectedFilter === 'Alphabetical-(A-Z)'? 'checked' : 'unchecked'}
-                    onPress={() => { this.setState({ selectedFilter: 'Alphabetical-(A-Z)' }); }}
-                    />
-                    <Text style={{padding: 5}}>Alphabetical-(A-Z)</Text>
+              
+
+
+                <View style={{flexDirection: 'column', position: 'absolute', right: 0}}>
+          <Text style={{color: 'gray', fontWeight: 'bold', fontSize:13}}>Max</Text>
+              <View style={{borderRadius: 5, borderColor: 'gray', borderWidth: 1, flexDirection: 'row', width: SCREEN_WIDTH/3, height: 40}}>
+              <Text style={{color: 'gray', fontWeight: 'bold', fontSize:15, justifyContent: 'center', alignSelf: 'center'}}>{this.props.route.params.currency}</Text>
+              <Input 
+                 keyboardType={'number-pad'}
+              value={this.state.SliderminimumValue[1].toString()}
+              onChangeText={(text) => {isNaN(text)? this.setState({SliderminimumValue: [this.state.SliderminimumValue[0], text]}):null}}
+            style={{ justifyContent: 'center', alignSelf: 'center'}}
+      />
                 </View>
-                <View style={{flexDirection: 'row'}}>
-                    <RadioButton
-                    value="Alphabetical-(Z-A)"
-                    status={selectedFilter === 'Alphabetical-(Z-A)'? 'checked' : 'unchecked'}
-                    onPress={() => { this.setState({ selectedFilter: 'Alphabetical-(Z-A)' }); }}
-                    />
-                    <Text style={{padding: 5}}>Alphabetical-(Z-A)</Text>
                 </View>
-            
+                </View>
+             
                 <Button bordered  block style={{marginVertical: 10, justifyContent: "center", textAlign: 'center', borderColor:'#019fe8'}} onPress={()=> this.loadProducts()}>
                   <Text style={{color:'#019fe8'}}>Done</Text>
                 </Button>

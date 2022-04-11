@@ -488,12 +488,7 @@ this.setState({ItemList: NewListItem})
          <View style={{flex: 3,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey'}}>
           <Text style={{textAlign:'center'}}>Item</Text>
           </View>
-          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey'}}>
-          <Text style={{textAlign:'center'}}>Quantity</Text>
-          </View> 
-          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey'}}>
-          <Text style={{textAlign:'center'}}>Unit</Text>
-          </View>
+    
        </View>}
        
       {this.state.ItemList.length == 0?
@@ -501,14 +496,18 @@ this.setState({ItemList: NewListItem})
       :<FlatList
         data={this.state.ItemList}
         renderItem={
-          ({item}) => 
+          ({item, index}) => 
           {
             return(
-              <View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginVertical: 1}}>
-              <Input  value={item.name} style={{flex: 3, borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-              <Input   value={`${item.qty}`} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-              <Input  value={item.unit} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-           </View> 
+              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+              <Left style={{left: 10}}>
+              <Text style={{color: 'black',}}>{index+1}.</Text>
+              </Left>
+              <Body>
+              <Input  value={item.name} />
+              
+  </Body>
+            </ListItem>
             )
           }
         }
@@ -1005,6 +1004,17 @@ this.setState({visibleModal: false})
         style: 'cancel'
       },
       { text: 'OK', onPress: () => {
+
+        if(this.props.route.params.orders.OrderStatus != 'Pending'){
+        const update_StoreTransaction = firestore().collection('riders').doc(this.props.route.params.orders.DeliveredBy.id);
+        update_StoreTransaction.update({ 
+          userTransactionCancelled: firestore.FieldValue.increment(1),
+          TransactionCancelled: firestore.FieldValue.increment(1),
+          Transactionprocessing: this.props.route.params.orders.OrderStatus == 'Processing'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+          TransactionPending: this.props.route.params.orders.OrderStatus == 'Pending'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+        })
+      }
+
              const ref = firestore().collection('orders').doc(this.props.route.params.orders.OrderId);
     ref.update({ 
         OrderStatus : "Cancelled",

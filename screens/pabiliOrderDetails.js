@@ -487,12 +487,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
          <View style={{flex: 3,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
           <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: 18}}>Item</Text>
           </View>
-          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
-          <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: 17}}>Quantity</Text>
-          </View> 
-          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
-          <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: 18}}>Unit</Text>
-          </View>
+         
        </View>}
        
       {this.state.ItemList.length == 0?
@@ -503,12 +498,17 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
           ({item,index}) => 
           {
             return(
-              <View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginVertical: 1}}>
-               <Text style={{color: 'black', marginTop: 30}}>{index+1}.</Text>
-              <Input  value={item.name} style={{flex: 3, borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-              <Input   value={`${item.qty}`} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-              <Input  value={item.unit} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}/>
-           </View> 
+
+              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+              <Left style={{left: 10}}>
+              <Text style={{color: 'black',}}>{index+1}.</Text>
+              </Left>
+              <Body>
+              <Input  value={item.name} />
+              
+  </Body>
+            </ListItem>
+            
             )
           }
         }
@@ -836,7 +836,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
 </View>
 
 <CardItem  style={{top: -90, flexDirection: 'column'}}>
-<Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>PHP {this.props.route.params.orders.total.toString()}</Text>
+<Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.currency} {this.props.route.params.orders.total.toString()}</Text>
 <View style={{flexDirection: 'row'}}>
 <Body >
  <TouchableOpacity onPress={()=>this.onCall()} style={{flexDirection: 'row', width: '95%', borderRadius: 5, borderWidth: 2, borderColor: '#019fe8', padding: 10, marginRight: 30}}>
@@ -916,7 +916,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
  </TouchableOpacity>
   </Body>
   <Body>
-  <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>PHP {this.props.route.params.orders.total.toString()}</Text>
+  <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.currency} {this.props.route.params.orders.total.toString()}</Text>
  
   </Body>
   </View>

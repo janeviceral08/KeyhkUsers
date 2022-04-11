@@ -216,7 +216,7 @@ export default class Pabili extends Component {
             }
           ]
         },
-        listModal: true,
+        listModal: false,
    avoildingViewList:false,
    ItemList:[],
     paymentMethods:[],
@@ -225,6 +225,7 @@ export default class Pabili extends Component {
     ListValue: [],
     pabiliList: [],
     history:[],
+    estCost:'0'
       
   };
   this.getLocation();
@@ -1447,9 +1448,9 @@ const copyToClipboard = () => {
                 <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares</Title>
           </Left>
           
-          <Right style={{flex:1}}>
+         { /*<Right style={{flex:1}}>
             <FontAwesome5 name="clipboard-list" size={25} color="white" onPress={()=> this.setState({listModal:true})}/>
-          </Right>
+    </Right>*/}
         </Header>
           <Loader loading={this.state.loading} trans={trans}/>     
             <Modal
@@ -1467,12 +1468,7 @@ const copyToClipboard = () => {
          <View style={{flex: 3,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
           <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: SCREEN_HEIGHT< 767?15:18}}>Item</Text>
           </View>
-          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
-          <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: SCREEN_HEIGHT< 767?15: 17}}>Quantity</Text>
-          </View> 
-          <View style={{flex: 1,flexDirection: 'row',justifyContent:'center', alignContent:'center', backgroundColor:'grey', padding:5}}>
-          <Text style={{textAlign:'center', fontWeight: 'bold', fontSize: SCREEN_HEIGHT< 767?15:18}}>Unit</Text>
-          </View>
+     
        </View>}
        
       {this.state.pabiliList.length == 0?
@@ -1484,19 +1480,23 @@ const copyToClipboard = () => {
           ({item,index}) => 
           {
             return(
-              <View style={{flexDirection:'row', justifyContent:'space-between', marginHorizontal: 10, marginVertical: 1}}>
-              <Text style={{color: 'black', marginTop: 30}}>{index+1}.</Text>
-              <Input onSubmitEditing={(e)=> this.onNameUpdate(item, e.nativeEvent.text)} placeholder={item.name} style={{flex: 3, borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}}   onFocus={() =>this.setState({keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})}/>
-              <Input keyboardType={'number-pad'}   onSubmitEditing={(e)=> { isNaN(e.nativeEvent.text)? null: this.onQtyUpdate(item, e.nativeEvent.text)}} placeholder={`${item.qty}`} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}} onFocus={() =>this.setState({keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})}/>
-              <Input  onSubmitEditing={(e)=> this.onUnitUpdate(item, e.nativeEvent.text)} placeholder={item.unit} style={{borderWidth: 1, marginHorizontal: 0.5, borderRadius: 10, borderColor:'#d3d3d3'}} onFocus={() =>this.setState({keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})}/>
-           </View> 
+              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+              <Left style={{left: 10}}>
+              <Text style={{color: 'black',}}>{index+1}.</Text>
+              </Left>
+              <Body>
+              <Input onSubmitEditing={(e)=> this.onNameUpdate(item, e.nativeEvent.text)} placeholder={item.name}  onFocus={() =>this.setState({keyboard: true,}) }  onBlur={()=>this.setState({keyboard: false})}/>
+            
+  </Body>
+            </ListItem>
+         
             )
           }
         }
         keyExtractor={(item) => item.id}
         ListFooterComponent={() => <View style={{flex: 1, justifyContent:'center', alignItems:'center', marginTop: 10}}><Button onPress={()=> this.addList()} success bordered rounded style={{alignSelf:'center', backgroundColor:'#FFFFFF', width: '80%', alignContent: 'center'}}><Text style={{color: 'lime', width: '100%', textAlign: 'center'}}>+</Text></Button></View>}
       />}
-<Button  style={{alignSelf:'center', backgroundColor:'#019fe8', width: '100%', alignContent: 'center'}}  onPress={()=>this.setState({listModal:false})}>
+<Button  style={{alignSelf:'center', backgroundColor:'#019fe8', width: '100%', alignContent: 'center'}}  onPress={()=>this.setState({listModal:false, VisibleAddInfo: true})}>
             <Text style={{color: 'white', width: '100%', textAlign: 'center'}}>Proceed</Text>
       </Button>
     </View>
@@ -2312,7 +2312,8 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "OK", onPress: () =>this.setState({VisibleAddInfo: true}) }
+        { text: "Proceed with List", onPress: () =>this.setState({listModal: true}) },
+        { text: "Proceed without List", onPress: () =>this.setState({VisibleAddInfo: true}) }
       ]
     )}}>
 								<Text style={{color: '#ffffff'}}>{this.state.uid == null?'Log in to Continue':'Book Now  '+ this.props.route.params.currency+ ' '+Math.round((actualAmountPay*10)/10)}</Text>
@@ -2357,7 +2358,12 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
   ))        }
                     </Picker>
             </Item>
+            <Text style={{marginTop: 15, fontSize: 10}}>Estimated Cost</Text>
+                    <Item>
+                   
+                    <Input onChangeText={(text) => {isNaN(text)? null:this.setState({estCost: text})}} keyboardType={'number-pad'} value={this.state.estCost}/>
             
+            </Item>
            </View>   
     
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
@@ -2503,6 +2509,7 @@ extraKmCharge:0,
 subtotal:0,
     ProductType: 'Foods',
     SubProductType: 'Pabili',
+    estCost: this.state.estCost
     
     }
 
@@ -2517,7 +2524,7 @@ subtotal:0,
       this.setState({
         loading: false
       }),
-      this.props.navigation.navigate('pabiliOrderDetails',{ 'orders' : DatasValue })
+      this.props.navigation.navigate('pabiliOrderDetails',{ 'orders' : DatasValue,'currency': this.props.route.params.currency })
     )  .catch((error)=>     Alert.alert(
         'Try Again',
         '',

@@ -278,16 +278,16 @@ messaging().getToken().then(token => {
             </View>
 
             <TouchableOpacity  onPress={() => this.props.navigation.navigate('ForgotPass')}>
-                <Text style={{color: '#019fe8', marginTop:15, justifyContent: "center", alignSelf: "center"}}>Forgot password?</Text>
+                <Text style={{color: '#ee4e4e', marginTop:15, justifyContent: "center", alignSelf: "center"}}>Forgot password?</Text>
             </TouchableOpacity>
             <View style={styles.button}>
             <TouchableOpacity   style={[styles.signIn, {
-                        borderColor: '#019fe8',
+                        borderColor: '#ee4e4e',
                         borderWidth: 1,
                         marginTop: 15,
                     }]} onPress={()=> this.userLogin()}>
                 <LinearGradient
-                    colors={['#019fe8','#183c57']}
+                    colors={['#ee4e4e','#ee1f1f']}
                     style={styles.signIn}
                 >
                     <Text style={[styles.textSign, {
@@ -308,17 +308,17 @@ messaging().getToken().then(token => {
                 <TouchableOpacity
                     onPress={() => this.props.navigation.navigate('Signup')}
                     style={[styles.signIn, {
-                        borderColor: '#019fe8',
+                        borderColor: '#ee4e4e',
                         borderWidth: 1,
                         marginTop: 15
                     }]}
                 >
                     <Text style={[styles.textSign, {
-                        color: '#019fe8'
+                        color: '#ee4e4e'
                     }]}>Sign Up</Text>
                 </TouchableOpacity>
                 <TouchableOpacity  onPress={() => this.props.navigation.navigate('Gateway1')}>
-                <Text style={{color: '#019fe8', marginTop:15, justifyContent: "center", alignSelf: "center"}}>Entrepreneur Registration</Text>
+                <Text style={{color: '#ee4e4e', marginTop:15, justifyContent: "center", alignSelf: "center"}}>Entrepreneur Registration</Text>
             </TouchableOpacity>
             </View>
         </Card>
@@ -332,7 +332,7 @@ messaging().getToken().then(token => {
 const styles = StyleSheet.create({
     container: {
       flex: 1, 
-      backgroundColor: '#183c57'
+      backgroundColor: '#ee4e4e'
     },
     header: {
         justifyContent: 'flex-end',

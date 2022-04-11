@@ -48,7 +48,7 @@ class SplashScreen extends React.Component {
     const data = await this.performTimeConsumingTask();
     const isLoggedIn= await AsyncStorage.getItem('uid');
     
-   if (data !== null) {
+  if (data !== null) {
     setTimeout(() => {    this.props.navigation.reset({
       index: 0,
       routes: [{ name: isLoggedIn? 'Home' : 'Home2'}],
@@ -132,7 +132,7 @@ class SplashScreen extends React.Component {
       <View style={styles.viewStyles}>
    <Header androidStatusBarColor="#ee4e4e"  style={{display: 'none'}}/>
    <Animated.Image 
-   style={[{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2, resizeMode:'contain', transform: [
+   style={[{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2.5, resizeMode:'contain', transform: [
     {
       translateY: this.startValue,
     },
@@ -143,7 +143,7 @@ class SplashScreen extends React.Component {
    style={[{ width: this.startValueWidth, height: this.startValueHeight, resizeMode:'contain',  opacity:this.Rotatevalue }]}  
    source={require('../assets/bs.png')}/>
  <Animated.Image 
-   style={[{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2, resizeMode:'contain',transform: [
+   style={[{ width: SCREEN_WIDTH/2, height: SCREEN_HEIGHT/2.5, resizeMode:'contain',transform: [
     {
       translateY: this.startValueShares,
     },

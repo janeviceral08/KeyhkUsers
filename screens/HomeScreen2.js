@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Animated, Dimensions, StyleSheet, FlatList, Image, TouchableOpacity,Text,View,ScrollView,PermissionsAndroid, Alert, Platform, ImageBackground} from 'react-native';
+import {Animated,TouchableWithoutFeedback, Dimensions, StyleSheet, FlatList, Image, TouchableOpacity,Text,View,ScrollView,PermissionsAndroid, Alert, Platform, ImageBackground} from 'react-native';
 import { Container, Content, Button, Left, Right,  Card, CardItem, Header,Toast, Root,Item,Input } from 'native-base';
 var {height, width } = Dimensions.get('window');
 import Swiper from 'react-native-swiper'
@@ -35,6 +35,7 @@ import auth from '@react-native-firebase/auth';
 import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
 import Draggable from 'react-native-draggable';
 import Icon from 'react-native-vector-icons/AntDesign';
+import { FlatGrid } from 'react-native-super-grid';
 
 
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
@@ -159,6 +160,17 @@ export default class HomeScreen2 extends Component {
       CountryNow:[{labelRider: '', currency: '', currencyPabili:''}],
       asyncselectedCity:null,
       orders:0,
+      transportSelected: 0,
+      vInfos:{
+        imageArray: [],
+        name:'',
+        address:'',
+        DetailedAddress: '',
+        description: '',
+        ameneties: '',
+        slatitude:'',
+        slongitude:'',
+      },
     }
     this.arrayholder = [];
     this.FetchProfile();
@@ -703,6 +715,76 @@ let Address ='';
   }
   
  
+  rowRendererVrentals = (data) => {
+    console.log('data: ', data)
+    const { name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
+    const newData = imageArray.filter(items => {
+        const itemData = items;
+        const textData = 'AddImage';
+       
+        return itemData.indexOf(textData) == -1
+      });
+    return (
+      <Card transparent style={{flex: 1, justifyContent: "center", alignContent: "center"  }}>
+  <CardItem style={{paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:1 ,width:SCREEN_WIDTH/2-5}}>
+  <TouchableOpacity style={{width:SCREEN_WIDTH/2-5, flex: 1}} onPress={()=>this.setState({vInfos: data, VisibleAddInfo: true,MonthlyPrice: data.MonthlyPrice.toString(),
+    DayPrice: data.DayPrice.toString(),
+    HourPrice: data.HourPrice.toString(),
+    WeeklyPrice: data.WeeklyPrice.toString(),})}>
+
+<FastImage style={styles.productPhoto} source={{ uri: newData[0], headers: { Authorization: 'someAuthToken' },
+              priority: FastImage.priority.normal, }} 
+              resizeMode={FastImage.resizeMode.cover}
+  >
+ 
+{!StatHourPrice?null:
+<View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Hour</Text>
+</View>
+}
+    
+    {!StatDayPrice?null:
+    <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Day</Text>
+</View>  }
+ {!StatWeeklyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Week</Text>
+</View>
+}
+ {!StatMonthlyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Month</Text>
+</View>
+}
+         
+         
+  </FastImage>
+           
+  <View style={{height:20,flexShrink: 1}}>
+    <Text  numberOfLines={1} style={styles.categoriesStoreName}>{MBrand} {VModel} </Text>
+  </View>  
+ <View style={{flexDirection: 'row'}}>
+ <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Color : {ColorMotor}</Text>
+
+ 
+ 
+</View>
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Type :{name}</Text>
+
+
+</TouchableOpacity>
+</CardItem>
+</Card>
+    )
+  }
+
+
+
   StartImageRotationFunction(){
     this.Rotatevalue.setValue(0);
     Animated.timing(this.Rotatevalue,{
@@ -949,7 +1031,7 @@ followUserMode={'normal'}
         <View transparent style={{width: SCREEN_WIDTH-30, alignSelf: 'center',  borderRadius: 10, backgroundColor: '#a3b6c9', marginTop: 10, flexDirection: 'row'}}>
       
     { /*   <SegmentedControlTab
-          values={["Stores","Rentals", "Ride", "Services"]}
+          values={["Stores","Rentals", "Transportation", "Services"]}
           selectedIndex={this.state.selectedIndex}
           onTabPress={this.handleIndexChange}
           borderRadius ={10}
@@ -960,7 +1042,7 @@ followUserMode={'normal'}
     />*/}
       {/*  <FlatList
          horizontal
-data={[{label: "Stores", icon: 'MaterialIcons', iconName: 'storefront'},{label: "Rentals", icon: 'Ionicons', iconName: 'md-key-outline'},{label: "Ride", icon: 'MaterialCommunityIcons', iconName: 'car-multiple'}, {label: "Services", icon: 'MaterialCommunityIcons', iconName: 'account-hard-hat'}]}
+data={[{label: "Stores", icon: 'MaterialIcons', iconName: 'storefront'},{label: "Rentals", icon: 'Ionicons', iconName: 'md-key-outline'},{label: "Transportation", icon: 'MaterialCommunityIcons', iconName: 'car-multiple'}, {label: "Services", icon: 'MaterialCommunityIcons', iconName: 'account-hard-hat'}]}
 renderItem={({ item }) => 
 (
   <TouchableOpacity style={{width: SCREEN_WIDTH/4.5}}>
@@ -991,7 +1073,7 @@ shadowOffset: {
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
 elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 1})}>
-       <Ionicons name={'md-key-outline'} size={this.state.selectedIndex == 1? 30:30} color={this.state.selectedIndex == 1?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 1?'#396ba0':'white',borderRadius: 15, padding: 5}}/>
+       <Ionicons name={'md-key-outline'} size={this.state.selectedIndex == 1? 30:30} color={this.state.selectedIndex == 1?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 1?'#1c9fef':'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
     <TouchableOpacity style={{shadowColor: "#000",
@@ -1006,15 +1088,8 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
     
 
     </TouchableOpacity>
-    <TouchableOpacity style={{shadowColor: "#000",
-shadowOffset: {
-	width: 0,
-	height: 12,
-},
-shadowOpacity: 0.58,
-shadowRadius: 16.00,
-elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 3})}>
-<MaterialCommunityIcons name={'account-hard-hat'}  size={this.state.selectedIndex == 3? 30:30} color={this.state.selectedIndex == 3?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 3?'#fd7823':'white',borderRadius: 15, padding: 5}}/>
+    <TouchableOpacity style={{width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex: 3})}>
+<MaterialCommunityIcons name={'account-hard-hat'}  size={this.state.selectedIndex == 3? 30:30} color={this.state.selectedIndex == 3?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 3?'#f6a60d':'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
     <TouchableOpacity style={{shadowColor: "#000",
@@ -1048,10 +1123,39 @@ elevation: 24, width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedInde
    :this.state.selectedIndex ==1 ?<View style={{flexDirection: 'row', marginLeft: 30, marginBottom: 2}}>
        <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Rentals</Text></View>
    :this.state.selectedIndex ==2 ?<View style={{flexDirection: 'row', marginLeft: 30}}>
-       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Ride</Text></View>
+       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Transportation</Text></View>
    :<View style={{flexDirection: 'row', marginLeft: 30}}>
       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Services</Text></View>
   }
+
+{this.state.selectedIndex == 2?
+               <View style={{flexDirection: 'row',marginLeft: 30 }}>
+               <TouchableOpacity style={{shadowColor: "#000",
+               shadowOffset: {
+                 width: 0,
+                 height: 12,
+               },
+               shadowOpacity: 0.58,
+               shadowRadius: 16.00,
+               elevation: 24,width: (SCREEN_WIDTH-55)/2,backgroundColor: this.state.transportSelected ==0 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({transportSelected: 0})}>
+                        <MaterialIcons name={'local-taxi'} size={15} color={'#28ae07'} />
+                   <Text style={{color:'black', fontWeight: 'bold'}}> Hire a Car</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity style={{shadowColor: "#000",
+               shadowOffset: {
+                 width: 0,
+                 height: 12,
+               },
+               shadowOpacity: 0.58,
+               shadowRadius: 16.00,
+               elevation: 24,width: (SCREEN_WIDTH-55)/2, backgroundColor:this.state.transportSelected ==1 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({transportSelected: 1})}>
+                      <MaterialIcons name={'car-rental'} size={15} color={'#28ae07'}/>
+                      <Text style={{color: 'black', fontWeight: 'bold'}}> Rent a car</Text>
+                   </TouchableOpacity>
+               
+                   </View>
+                   
+                  :null}
         <Loader loading={this.state.loading} trans={trans} />
     {this.state.selectedIndex ==0 ? <View style={{flex: 1,}}>
   {/*    <SegmentedControlTab
@@ -1159,16 +1263,40 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
      </View>:
      this.state.selectedIndex == 1?<View style={{ flex: 1 }}><HomeScreenRentals navigation={this.props.navigation}  typeOfRate={this.state.typeOfRate} selectedCityUser={this.state.asyncselectedCity == null?this.state.selectedCityUser:this.state.asyncselectedCity} cLat={this.state.x.latitude} cLong={this.state.x.longitude} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/></View>:
      this.state.selectedIndex == 2?
-     <FlatList
-          data={this.state.carsAvailable}
-          ItemSeparatorComponent={this.ListViewItemSeparator}
-          renderItem={({ item }) => this.rowRenderer(item.datas)}
-          enableEmptySections={true}
-          style={{ marginTop: -5 }}
-          numColumns={2}
-          columnWrapperStyle={{justifyContent:'space-between'}}
-          keyExtractor={(item, index) => index.toString()}
-          />:
+     <View>
+ 
+     { this.state.transportSelected == 0?    <FlatList
+               data={this.state.carsAvailable}
+               ItemSeparatorComponent={this.ListViewItemSeparator}
+               renderItem={({ item }) => this.rowRenderer(item.datas)}
+               enableEmptySections={true}
+               style={{ marginTop: 0 , marginBottom: 315}}
+               numColumns={2}
+               columnWrapperStyle={{justifyContent:'space-between'}}
+               keyExtractor={(item, index) => index.toString()}
+               refreshing={this.state.loading}
+                       onRefresh={this.getData}
+               />
+             :
+             <FlatList
+             key={'_'}
+             data={this.state.Vrentals}
+             ItemSeparatorComponent={this.ListViewItemSeparator}
+             renderItem={({ item }) => this.rowRendererVrentals(item)}
+             enableEmptySections={true}
+             style={{ marginTop: 0 , marginBottom: 315}}
+             numColumns={2}
+             columnWrapperStyle={{justifyContent:'space-between'}}
+             keyExtractor={(item, index) => index.toString()}
+             refreshing={this.state.loading}
+             onRefresh={this.getData}
+             />
+             
+             }
+               
+               
+               
+               </View>:
 <HomeScreenService navigation={this.props.navigation} selectedCityUser={this.state.asyncselectedCity == null?this.state.selectedCityUser:this.state.asyncselectedCity} typeOfRate={this.state.typeOfRate} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/>
     }
 
@@ -1185,6 +1313,68 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
     
       </View>
   } isCircle /> : null*/}
+
+<Modal
+      isVisible={this.state.VisibleAddInfo}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      onBackButtonPress={() => this.setState({ VisibleAddInfo: false })}
+      onBackdropPress={() => this.setState({VisibleAddInfo: false})} transparent={true}>
+     <Card style={{ backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+       
+        <ScrollView>
+        <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Detailed Information</Text>
+              </View>
+        <Text>Photos</Text>
+        <FlatGrid
+      itemDimension={120}
+      data={this.state.vInfos.imageArray.filter(items => {
+        const itemData = items;
+        const textData = 'AddImage';
+       
+        return itemData.indexOf(textData) == -1
+      })}
+      // staticDimension={300} 
+      // fixed
+      spacing={10}
+      renderItem={({ item }) => (
+               <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:item})}>
+                <Image style={{  width: 160, height: 160, resizeMode: 'contain',margin: 10}} source={{uri: item}} />
+</TouchableWithoutFeedback>
+              
+       
+      )}
+    />
+           
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.rentalType == 'Equipment'?this.state.vInfos.name: this.state.vInfos.MBrand+' '+this.state.vInfos.VModel} </Text></Text>
+         
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Location: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.address}</Text></Text>
+        
+        <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Detailed Address: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.DetailedAddress}</Text></Text>
+         
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.description}</Text> </Text>
+     
+        
+                      
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.ameneties}</Text></Text>
+        
+
+           </ScrollView>   
+    
+      <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
+        onPress={() => {this.setState({VisibleAddInfo: false}); this.state.selectedIndexRentals ==2 || this.state.selectedIndexRentals ==3?this.props.navigation.navigate('CheckoutScreenEquipment',{'datas': this.state.vInfos, 'typeOfRate':this.props.typeOfRate, 'cLat': this.state.vInfos.slatitude, 'cLong': this.state.vInfos.slongitude , 'currency':this.props.currency}):this.props.navigation.navigate('CheckoutScreenRentals',{'datas': this.state.vInfos, 'typeOfRate':this.props.typeOfRate, 'cLat': this.state.vInfos.slatitude, 'cLong': this.state.vInfos.slongitude, 'currency':this.props.currency })}}
+      >
+       <Text style={{color:'white'}}>Proceed</Text>
+      </Button>
+    </Card>
+    </Modal>
    </Container>
     );
   }

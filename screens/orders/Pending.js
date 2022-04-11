@@ -153,7 +153,7 @@ export default class Pending extends Component {
           /></View>
                             
                             <View  style={{width: SCREEN_WIDTH/1.2}}>
-                            <Text note style={{color:'black', fontSize: 14, textAlign: 'center'}}>{item.datas.SubProductType == 'Pabili'?'Book a Rider':item.datas.ProductType == 'Foods' && item.datas.Mode == 'Pick-up' ?'Pick-up (Long Press to View Details)':item.datas.ProductType == 'Foods' && item.datas.Mode == 'Delivery'?'Delivery':item.datas.ProductType == 'Transport'?'Ride': item.datas.ProductType}</Text>
+                            <Text note style={{color:'black', fontSize: 14, textAlign: 'center'}}>{item.datas.SubProductType == 'Pabili'?'Book a Rider':item.datas.ProductType == 'Foods' && item.datas.Mode == 'Pick-up' ?'Pick-up (Long Press to View Details)':item.datas.ProductType == 'Foods' && item.datas.Mode == 'Delivery'?'Delivery':item.datas.ProductType == 'Transport'?'Transportation': item.datas.ProductType}</Text>
                             </View>
                             { item.datas.SubProductType == 'Pabili'?null:<View style={{flexDirection: 'row'}}>
                        <Ionicons name={'ios-location-sharp'} style={{ marginRight: 10}} color={'green'}/> 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet,View, ScrollView, Alert, Share,Dimensions, FlatList, PermissionsAndroid, BackHandler, TouchableOpacity, Image} from 'react-native'
+import {NativeModules, StyleSheet,View, ScrollView, Alert, Share,Dimensions, FlatList, PermissionsAndroid, BackHandler, TouchableOpacity, Image} from 'react-native'
 import { Container, Header, Button, ListItem, Text, Icon, Left, Body, Right, Switch, CardItem, Item,Input  } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -9,6 +9,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card, Title, Paragraph, Avatar,Caption } from 'react-native-paper';
+import moment from "moment";
 
 import firestore from '@react-native-firebase/firestore';
 import CustomHeader from './Header';
@@ -17,6 +18,7 @@ import Modal from 'react-native-modal';
 import axios from 'axios'
 import Province  from './Province.json';
 import Geolocation from 'react-native-geolocation-service';
+var DirectSms = NativeModules.DirectSms;
 var {height, width } = Dimensions.get('window');
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -109,7 +111,16 @@ export default class ProfileScreen extends Component {
       processing: 0,
       delivered:0,
       asyncselectedCity:null,
-      asyncselectedCountry:null
+      asyncselectedCountry:null,
+      coords:null,
+      str:null,
+      res_data:[],
+      RiderIDS:[],
+      NumberAmbulance:[],
+      NumberFireman:[],
+      NumberPolice:[],
+      cityOriginal:{},
+      SOSMOdal: false,
       };
       this.FetchProfile();
   }
@@ -138,6 +149,7 @@ export default class ProfileScreen extends Component {
                         wallet: data.wallet,
                         selectedCity: data.selectedCity,
                         selectedCountryUser: data.selectedCountry,
+                        RiderIDS: data.RiderIDS == undefined? []:data.RiderIDS,
                       });
                     });
                 
@@ -269,9 +281,17 @@ const newarrLenghtCountry= arr.length-1
 const UserLocationCountry = arr[newarrLenghtCountry]
 console.log("UserLocationCountry ", UserLocationCountry)
 
+const  result = res.data.features[0].context.find((user) => user.id.includes("region."));
+console.log("result ", result)
 
           this.setState({
+            cityOriginal: result,
+            coords,
+            str,
+            res_data: res.data.features[0].context,
             UserLocationCountry: UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(),
+originalCountry:  UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(),
+            
         })
         this.getAllCity()
     }).catch(err => {
@@ -327,9 +347,143 @@ console.log("UserLocationCountry ", UserLocationCountry)
     };
 
     setSOS(){
+this.setState({SOSMOdal : true})
+     /*  Alert.alert(
+          'Confirmation',
+          'Which one do you need?',
+          [
+        
+            { text: 'Police', onPress: () => this.SOSPolice() },
+            { text: 'Fireman', onPress: () => this.SOSFireman() },
+            { text: 'Ambulance', onPress: () => this.SOSAmbulance() },
+          ],
+          { cancelable: false }
+        );*/
       console.log('long press')
-      Alert.alert('S.O.S is sent to all riders')
+  
     }
+    async sendDirectSms (NumberData, callFor) {
+      try {
+          const granted = await PermissionsAndroid.request(
+              PermissionsAndroid.PERMISSIONS.SEND_SMS,
+              {
+                  title: 'Tadiwanashe App Sms Permission',
+                  message:
+                      'Tadiwanashe App needs access to your inbox ' +
+                      'so you can send messages in background.',
+                  buttonNeutral: 'Ask Me Later',
+                  buttonNegative: 'Cancel',
+                  buttonPositive: 'OK',
+              },
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            var loopData = ''
+            var i ;
+            var message = this.state.name+' needs '+callFor+'. Last location at '+this.state.str+'. Lat: '+this.state.coords.latitude+'. Long: '+ this.state.coords.longitude;
+            for(i=0; i < NumberData.length; i++){
+              loopData += 
+              DirectSms.sendDirectSms(NumberData[i], message);
+              console.log('NumberData[i]', NumberData[i]);
+          }
+             
+          } else {
+              console.log('SMS permission denied');
+          }
+      } catch (err) {
+          console.warn(err);
+      }
+  }
+
+
+    SOSAmbulance(){
+      if(this.state.res_data.length < 1){
+        Alert.alert('Cant Get your current location')
+       }
+       this.sendDirectSms(this.state.NumberAmbulance, 'Ambulance');
+        const newDocumentID = firestore().collection('SOS').doc().id;
+          firestore().collection('SOS').doc(newDocumentID).set({
+            RiderIDS:this.state.RiderIDS,
+            photo: this.state.photo,
+            userId: this.state.key,
+            name: this.state.name,
+            email: this.state.email,
+            mobile: this.state.mobile,
+            coords:this.state.coords,
+            str:this.state.str,
+            context: this.state.res_data,
+            CountryWikiData: this.state.res_data[this.state.res_data.length-1].wikidata,
+            CityWikiData: this.state.res_data[this.state.res_data.length-2].wikidata,
+            UserLocationCountry: this.state.UserLocationCountry,
+            DatePressed: moment().unix(),
+            callFor: 'Ambulance',
+            id:newDocumentID,
+          }).then(()=>{
+            this.setState({SOSMOdal: false});
+            Alert.alert('S.O.S is sent to all')
+          }
+          )
+    }
+
+
+    SOSPolice(){
+      if(this.state.res_data.length < 1){
+        Alert.alert('Cant Get your current location')
+       }
+       this.sendDirectSms(this.state.NumberPolice, 'Police');
+        const newDocumentID = firestore().collection('SOS').doc().id;
+          firestore().collection('SOS').doc(newDocumentID).set({
+            RiderIDS:this.state.RiderIDS,
+            photo: this.state.photo,
+            userId: this.state.key,
+            name: this.state.name,
+            email: this.state.email,
+            mobile: this.state.mobile,
+            coords:this.state.coords,
+            str:this.state.str,
+            context: this.state.res_data,
+            CountryWikiData: this.state.res_data[this.state.res_data.length-1].wikidata,
+            CityWikiData: this.state.res_data[this.state.res_data.length-2].wikidata,
+            UserLocationCountry: this.state.UserLocationCountry,
+            DatePressed: moment().unix(),
+            callFor: 'Police',
+            id:newDocumentID,
+          }).then(()=>{
+            this.setState({SOSMOdal: false});
+            Alert.alert('S.O.S is sent to all')
+          }
+          )
+    }
+
+
+    SOSFireman(){
+      if(this.state.res_data.length < 1){
+        Alert.alert('Cant Get your current location')
+       }
+      this.sendDirectSms(this.state.NumberFireman, 'Fireman');
+        const newDocumentID = firestore().collection('SOS').doc().id;
+          firestore().collection('SOS').doc(newDocumentID).set({
+            RiderIDS:this.state.RiderIDS,
+            photo: this.state.photo,
+            userId: this.state.key,
+            name: this.state.name,
+            email: this.state.email,
+            mobile: this.state.mobile,
+            coords:this.state.coords,
+            str:this.state.str,
+            context: this.state.res_data,
+            CountryWikiData: this.state.res_data[this.state.res_data.length-1].wikidata,
+            CityWikiData: this.state.res_data[this.state.res_data.length-2].wikidata,
+            UserLocationCountry: this.state.UserLocationCountry,
+            DatePressed: moment().unix(),
+            callFor: 'Fireman',
+            id:newDocumentID,
+          }).then(()=>{
+          this.setState({SOSMOdal: false});
+          Alert.alert('S.O.S is sent to all')
+        }
+          )
+    }
+
     _bootstrapAsync =async(selected,item, typeOfRate, city) =>{
    //   const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
     console.log('selectedCity: ',this.state.selectedCity)
@@ -343,6 +497,34 @@ console.log("UserLocationCountry ", UserLocationCountry)
     }
     async getAllCity() {
       this.setState({loading: true})
+
+      const SosCity = [];
+      const Soscollect= this.state.originalCountry.trim() =='Philippines'?'city':this.state.originalCountry.toString()+'.city';
+      console.log('collect: ', Soscollect)
+          console.log('originalCountry: ', this.state.originalCountry)
+     await  firestore().collection(Soscollect).where('country', '==', this.state.originalCountry.trim())
+       .onSnapshot(querySnapshot => {
+         querySnapshot.docs.forEach(doc => {
+          SosCity.push(doc.data());
+         console.log('SosCity: ', doc.data())
+       });
+     }); 
+
+     await  firestore().collection(Soscollect).where('arrayofCity', 'array-contains-any', [this.state.cityOriginal.text.trim()])
+       .onSnapshot(querySnapshot => {
+         querySnapshot.docs.forEach(doc => {
+          console.log('NumberAmbulance: ', doc.data().NumberAmbulance)
+          console.log('NumberFireman: ', doc.data().NumberFireman)
+          console.log('NumberPolice: ', doc.data().NumberPolice)
+            this.setState({
+              NumberAmbulance:doc.data().NumberAmbulance,
+              NumberFireman:doc.data().NumberFireman,
+              NumberPolice:doc.data().NumberPolice,
+            })
+       });
+     }); 
+
+
           const city = [];
           const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.toString()+'.city';
            console.log('collect: ', collect)
@@ -451,7 +633,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
 
 changeCity (item){
     const userId =  auth().currentUser.uid;
-  firestore().collection('users').doc(userId).update({  selectedCity: this.state.currentLocation.trim() == item.label? 'none':item.label,})
+  firestore().collection('users').doc(userId).update({  selectedCity: this.state.currentLocation.trim() == item.label? 'none':item.label, cityLat:this.state.currentLocation.trim() == item.label? 'none':item.cLat, cityLong:this.state.currentLocation.trim() == item.label? 'none':item.cLong })
   this._bootstrapAsync(true, item.label, item.typeOfRate, this.state.cities);
   this.setState({modalSelectedCity: false,newCity:[], searchcity:''})
 }
@@ -508,7 +690,76 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
     return (
       <Container>
       <CustomHeader title="Account Settings" isHome={true} Cartoff={true} navigation={this.props.navigation}/>
+      <Modal
+              isVisible={this.state.SOSMOdal}
+              animationInTiming={500}
+              animationIn='slideInUp'
+              animationOut='slideOutDown'
+              animationOutTiming={500}
+              useNativeDriver={true}
+              onBackButtonPress={() => this.setState({SOSMOdal: false})} transparent={true}>
+            <View style={styles.contents}>
+              <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
+              <Text style={{color:'tomato', fontWeight:'bold'}}>Confirmation</Text>
+              <Text style={{color:'black', fontWeight:'bold'}}>Which one do you need?</Text>
+              </View>
+         <View>
+              <TouchableOpacity onPress={()=> this.SOSPolice()} style={{flexDirection: 'row', alignSelf: 'flex-end', marginBottom: 5}}>
+            <View style={{justifyContent: 'flex-end'}}>
+              <View style={{ backgroundColor: "#FFFFFF" , height: 27,  shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    shadowRadius: 5,
+    shadowOpacity: 1.0,
+    elevation: 3, borderRadius: 5, padding: 2, bottom: 5 }}>
+              <MaterialCommunityIcons name="police-badge-outline" size={25} color="gray" style={{top:0}} />
+              </View>
+            </View>
+            <View>
+              <Text> Police</Text>
+            </View>
+          </TouchableOpacity>
 
+
+          <TouchableOpacity onPress={()=> this.SOSFireman()} style={{flexDirection: 'row', alignSelf: 'flex-end', marginBottom: 5}}>
+            <View style={{justifyContent: 'flex-end'}}>
+              <View style={{ backgroundColor: "#FFFFFF" , height: 27,  shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    shadowRadius: 5,
+    shadowOpacity: 1.0,
+    elevation: 3, borderRadius: 5, padding: 2, bottom: 5 }}>
+              <MaterialCommunityIcons name="fire-truck" size={25} color="gray" />
+              </View>
+            </View>
+            <View>
+              <Text > Fireman</Text>
+            </View>
+          </TouchableOpacity>
+     
+
+          <TouchableOpacity onPress={()=> this.SOSAmbulance()} style={{flexDirection: 'row', alignSelf: 'flex-end'}}>
+            <View style={{justifyContent: 'flex-end'}}>
+              <View style={{ backgroundColor: "#FFFFFF" , height: 27,  shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    shadowRadius: 5,
+    shadowOpacity: 1.0,
+    elevation: 3, borderRadius: 5, padding: 2, bottom: 5 }}>
+              <MaterialCommunityIcons name="ambulance" size={25} color="gray" style={{top:0}} />
+              </View>
+            </View>
+            <View>
+              <Text> Ambulance</Text>
+            </View>
+          </TouchableOpacity>
+         
+          </View>
+            </View>
+            </Modal>
       <Modal
                   useNativeDriver={true}
                   isVisible={this.state.modalSelectedCity}
@@ -951,7 +1202,7 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
         console.log('this.backCount: ',this.backCount);
         if (this.backCount == 5) {
             clearTimeout(this.backTimer)
-           Alert.alert('Coming Soon', 'This feature is not yet available')
+         this.setSOS()
         } else {
             this.backTimer = setTimeout(() => {
             this.backCount = 0
@@ -1082,5 +1333,10 @@ container: {
   alignItems: 'center', 
   justifyContent: 'center'
 },
-
+contents: {
+  backgroundColor: 'white',
+  padding: 22,
+  borderRadius: 4,
+  borderColor: 'rgba(0, 0, 0, 0.1)',
+},
 })

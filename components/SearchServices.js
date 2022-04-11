@@ -462,12 +462,12 @@ export default class SearchServices extends Component {
 			let productChunk = [];
 			
 			snapshot.docChanges().forEach(function(change) {
-				if (change.type === "added") {
+				if (change.type === "added" && change.doc.data().admin_control) {
 					/* Add more items to the screen...   const itemData = items.ProductType;
         const textData = 'Transport';*/
           if(change.doc.data().ProductType != 'Transport'){
 					productChunk.push({ ...change.doc.data(), pid: change.doc.id })}
-				} else if (change.type === "modified") {
+				} else if (change.type === "modified" && change.doc.data().admin_control) {
 					/* If there is a change in realtime... */
 					/* Apply the modification to the item directly without changing the current item index. */
 					self.setState({
@@ -915,7 +915,7 @@ export default class SearchServices extends Component {
        <CustomHeader title={'Search from '+this.state.store_name} fromPlace={this.props.route.params.fromPlace} navigation={this.props.navigation} currency={this.props.route.params.currency}/>
         <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
-                <Fontisto name="search" size={20} color={"#000000"}/>
+                <Fontisto name="search" size={20} color={"#000000"} onPress={()=> this.loadProducts()}/>
                 <Input placeholder="Search..."
                 onChangeText={(text) => this.setState({searchText: text})}
                 onSubmitEditing={()=> this.loadProducts()}

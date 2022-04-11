@@ -4,6 +4,10 @@ import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Car
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import Foundation from 'react-native-vector-icons/Foundation'
+import Fontisto from 'react-native-vector-icons/Fontisto'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 // Our custom files and classes import
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -26,6 +30,7 @@ import * as ImagePicker from "react-native-image-picker"
 import {imgDefault} from './images';
 import { FlatGrid } from 'react-native-super-grid';
 import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
+import QRCode from 'react-native-qrcode-svg';
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
 Logger.setLogCallback(log => {
@@ -144,6 +149,7 @@ export default class OrderDetailsRentals extends Component {
       warningText: '',
       warningModal: false,
       ModalHelp: false,
+      showCancelled: false,
   };
 
   }
@@ -676,6 +682,17 @@ return;
 
 ReasonOfCancel(){
 
+  
+  if(this.props.route.params.orders.OrderStatus != 'Pending' ){
+    const update_StoreTransaction = firestore().collection('stores').doc(this.props.route.params.orders.RentStoreId);
+    update_StoreTransaction.update({ 
+      userTransactionCancelled: firestore.FieldValue.increment(1),
+      TransactionCancelled: firestore.FieldValue.increment(1),
+      Transactionprocessing: this.props.route.params.orders.OrderStatus == 'Processing'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+      TransactionPending: this.props.route.params.orders.OrderStatus == 'Pending'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+    })
+  }
+
     const ref = firestore().collection('orders').doc(this.props.route.params.orders.OrderId);
     ref.update({ 
         OrderStatus : "Cancelled",
@@ -824,114 +841,109 @@ console.log('out: ', out);
          </View>
          <View>
                
-               <ScrollView >
-         <Card>
-                <CardItem button  onPress={()=> this.setState({VisibleAddInfo: true})}>
-                    <Text style={{fontWeight: 'bold'}}>Address: </Text>
-                    {!this.state.loading &&
-                    <View style={{flex: 1, flexDirection: 'column', paddingHorizontal: 10}}>
-                              <Text style={{fontSize: 14}}>{this.state.datas.address} ({this.state.datas.DetailedAddress})</Text>
-                    </View>}
-                </CardItem>
-               {this.state.datas.rentalType !='Property'?null: <CardItem button  onPress={()=> this.setState({VisibleAddInfo: true})}>
-            <Body style={{flexDirection: 'column'}}>
-                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Property:  </Text>
-                        <Text style={{fontSize: 12, marginLeft: 20}}>{this.state.datas.name}</Text> 
-                            {this.props.route.params.orders.OrderStatus=='Cancelled'?         <View style={{flexDirection: 'column'}}>
-                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Cancelled Reason:  </Text>
-                        {this.props.route.params.orders.RiderCancel.map((items)=>
-                       <Text style={{fontSize: 12}}>{items.CancelledReason}</Text> )}
-                         </View>:
-         <View style={{flexDirection: 'column'}}>
-                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Processed By:  </Text>
-                        <Text style={{fontSize: 12}}>{this.state.datas.adminname}</Text>
-                         </View>
-                         }
-                    </Body>
-                    
-                   <Body>
-                        <Text style={{fontWeight: 'bold'}}>Description:</Text>
-                        <Text>{this.state.datas.description}</Text>
-                    </Body>
-                   <Right>
-                  
-                   <Text style={{fontWeight: 'bold'}}>Ameneties:</Text>
-                    <Text>{this.state.datas.ameneties}</Text>
-                    </Right>
-                </CardItem>}
-                {this.state.datas.rentalType !='Vehicle'?null: 
-                <CardItem button  onPress={()=> this.setState({VisibleAddInfo: true})}>
+           
+         <Card style={{height: SCREEN_HEIGHT/1.8, borderTopLeftRadius: 50, borderTopRightRadius: 50, top: SCREEN_HEIGHT/16}}>
+               
+         <View style={{marginTop: 20, marginLeft: 20}}>
+                <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.state.datas.rentalType =='Equipment'?this.state.datas.name:this.state.datas.rentalType !='Vehicle'?this.state.datas.name:this.state.datas.ColorMotor+' '+this.state.datas.MBrand+' '+this.state.datas.VModel}</Text>
+                </View>
+              <Card style={{height: 60, width: 60, justifyContent: 'center', alignItems: 'center', position: 'absolute', right: 50, top: -35}}>
+              <QRCode
+      value={this.state.datas.refNo}
+      size={50}
+    />
+                </Card>
+
+
+                <View style={{marginTop: 10,marginLeft: 20, flexDirection: 'row'}}>
+                <View style={{margin: 0, flexDirection: 'row', width: SCREEN_WIDTH/ 1.6}}>
+                  <MaterialIcons name={'location-pin'} size={16}/>
+                <Text style={{fontSize: 14, fontWeight: 'bold'}}>{this.state.datas.address} ({this.state.datas.DetailedAddress})</Text>
+                </View>
+                <View style={{margin: 0, right: 20, flexDirection: 'row', position: 'absolute'}}>
+<TouchableOpacity  style={{flexDirection: 'row'}} onPress={()=>{this.props.route.params.orders.OrderStatus=='Cancelled'?this.setState({showCancelled: true}):null }}>
+               {this.state.datas.OrderStatus == 'Pending'? <MaterialCommunityIcons name={'calendar-clock'} size={16}/>:
+                <MaterialCommunityIcons name={'calendar-check'} size={16}/>}
+                <Text style={{fontSize: 14,color: 'gray'}}>{this.state.datas.OrderStatus}</Text>
+                </TouchableOpacity>
+                </View>
+                </View>
+               
+
+
+                <Card  style={{borderRadius: 20, top: 10,width: SCREEN_WIDTH-40,padding: 10,left: 20, backgroundColor: '#f7f8fa'}}>
+                   <TouchableOpacity onPress={()=> this.setState({VisibleAddInfo: true})} >
+                    <Text style={{fontWeight: 'bold', fontSize: 10, marginBottom: 10}}>{this.state.datas.rentalType =='Equipment'?'Equipment':this.state.datas.rentalType !='Vehicle'?'Property':'Vehicle'} Details </Text>
+                   <View style={{flexDirection: 'row'}}>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                    <Foundation name={'dollar-bill'} size={20} style={{bottom: 3}} />
+                              <Text style={{fontSize: 12}}> {this.state.datas.currency}{this.state.datas.SelectedPricing=='3Hour'?parseFloat(this.state.datas.HourPrice3).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='6Hour'?parseFloat(this.state.datas.HourPrice6).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='12Hour'?parseFloat(this.state.datas.HourPrice12).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Weekly'?parseFloat(this.state.datas.WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Monthly'?parseFloat(this.state.datas.MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Hour'?parseFloat(this.state.datas.HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):parseFloat(this.state.datas.DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} /{this.state.datas.SelectedPricing}</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                    {this.state.datas.rentalType =='Property'?<FontAwesome5 name={'building'} size={18}/>
+                    :this.state.datas.rentalType =='Vehicle'?<MaterialCommunityIcons name={'car-cog'} size={18}/>
+                    :<FontAwesome5 name={'tools'} size={18}/>}
+                              <Text style={{fontSize: 12}}> {this.state.datas.RentStoreName}</Text>
+                    </View>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                   {this.state.datas.rentalType =='Equipment'?<MaterialCommunityIcons name={'text-box'} size={20} style={{bottom: 3}} />:this.state.datas.rentalType =='Vehicle' ?<MaterialCommunityIcons name={'car-info'} size={15} style={{bottom: 3}} />:<MaterialIcons name={'house'} size={15} style={{bottom: 3}} />}
+                              <Text style={{fontSize: 12}}> {this.state.datas.description}</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                    <MaterialIcons name={'library-add-check'} size={18}/>
+                              <Text style={{fontSize: 12}}> {this.state.datas.ameneties}</Text>
+                    </View>
+                    </View>
+                    </TouchableOpacity>
+                </Card>
+
+                <Card  style={{borderRadius: 20, top: 10,width: SCREEN_WIDTH-40,padding: 10,left: 20, backgroundColor: '#f7f8fa'}}>
+                    <Text style={{fontWeight: 'bold', fontSize: 10, marginBottom: 10}}>{this.state.datas.rentalType =='Vehicle'?'Customer Details':this.state.datas.rentalType =='Equipment'?'Customer Details':'Guest Details'} </Text>
+                   <View style={{flexDirection: 'row'}}>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                    <Fontisto name={'person'} size={16} style={{bottom: 3}} />
+                              <Text style={{fontSize: 12}}> {this.state.datas.AccountInfo.name}</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                    <FontAwesome name={'calendar-check-o'} size={16}/>
+                              <Text style={{fontSize: 12}}> {moment(this.state.datas.startDate * 1000).format('MMM D, YYYY hh:mm a')}</Text>
+                    </View>
+                    </View>
+
+
+                    <View style={{flexDirection: 'row', marginTop: 5}}>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                    <Fontisto name={'persons'} size={16} style={{bottom: 3}} />
+                              <Text style={{fontSize: 12}}> {this.state.datas.passenger }</Text>
+                    </View>
+                    <View style={{flexDirection: 'row', width: (SCREEN_WIDTH-20)/2}}>
+                    <MaterialCommunityIcons name={'calendar-range-outline'} size={18}/>
+                              <Text style={{fontSize: 12}}> {this.state.datas.SelectedPricing =='Weekly'?moment(this.state.datas.startDate * 1000).add(7*parseInt(this.state.datas.Duration), 'days').format('MMM D, YYYY hh:mm a'): this.state.datas.SelectedPricing =='Monthly'?moment(this.state.datas.startDate*1000).add(30*parseInt(this.state.datas.Duration), 'days').format('MMM D, YYYY hh:mm a'):moment(this.state.datas.Dateend * 1000).format('MMM D, YYYY hh:mm a')}</Text>
+                    </View>
+                    </View>
+
+                </Card>
+               
+              
+                <Card  style={{borderRadius: 20, top: 10,width: SCREEN_WIDTH-40,padding: 10,left: 20, backgroundColor: '#f7f8fa'}}>
                    
-                    <Body style={{flexDirection: 'column'}}>
-                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Vehicle:  </Text>
-                        <Text style={{fontSize: 12, marginLeft: 20}}>{this.state.datas.name}</Text> 
-                          <View style={{flexDirection: 'column'}}>
-                     <Text style={{fontWeight: 'bold', fontSize: 12}}>Processed By:  </Text>
-                        <Text style={{fontSize: 12}}>{this.state.datas.adminname}</Text>
-                         </View>
-                    </Body>
-                 <Body>
-                        <Text style={{fontWeight: 'bold',fontSize: 12}}>Brand & Model:</Text>
-                        <Text style={{fontSize: 12}}>{this.state.datas.MBrand} {this.state.datas.VModel}</Text>
-                    </Body>
-                   <Right>
-                  
-                   <Text style={{fontWeight: 'bold',fontSize: 12}}>Ameneties:</Text>
-                    <Text style={{fontSize: 12}}>{this.state.datas.ameneties}</Text>
-                    </Right>
-                </CardItem>
-            } 
-     <CardItem button  onPress={()=> this.setState({VisibleAddInfo: true})}>
-     {this.state.datas.rentalType == 'Equipment'?
-     <Body>
-                    <Text style={{fontWeight: 'bold', fontSize: 12}}>Equipment:  </Text>
-                    
-                        <Text style={{fontSize: 12}}>{this.state.datas.name}</Text>
-                         
-                    </Body>
-                    
-                    :
-                    <Body>
-                    <Text style={{fontWeight: 'bold', fontSize: 12}}>People:  </Text>
-                    
-                        <Text style={{fontSize: 12}}>{this.state.datas.passenger}</Text>
-                         
-                    </Body>
-  }
-
-    
-                 <Body>
-                        <Text style={{fontWeight: 'bold',fontSize: 12}}>Date Start:</Text>
-                        <Text style={{fontSize: 12}}>{moment(this.state.datas.startDate * 1000).format('MMM D, YYYY hh:mm a')}</Text>
-                    </Body>
-                   <Right>
-                  
-                   <Text style={{fontWeight: 'bold',fontSize: 12}}>Date End:</Text>
-                    <Text style={{fontSize: 12}}>{this.state.datas.SelectedPricing =='Weekly'?moment(this.state.datas.startDate * 1000).add(7*parseInt(this.state.datas.Duration), 'days').format('MMM D, YYYY hh:mm a'): this.state.datas.SelectedPricing =='Monthly'?moment(this.state.datas.startDate*1000).add(30*parseInt(this.state.datas.Duration), 'days').format('MMM D, YYYY hh:mm a'):moment(this.state.datas.Dateend * 1000).format('MMM D, YYYY hh:mm a')}</Text>
-                    </Right>
-                </CardItem>
-
-                 <CardItem button  onPress={()=> this.setState({visibleAddressModalTo: true})}>
-                    <Text style={{fontWeight: 'bold', fontSize: 12}}>Rate:  </Text>
-                    <Left>
-                       <Text style={{fontSize: 12}}>{this.state.datas.currency}{this.state.datas.SelectedPricing=='Weekly'?parseFloat(this.state.datas.WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Monthly'?parseFloat(this.state.datas.MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):this.state.datas.SelectedPricing=='Hour'?parseFloat(this.state.datas.HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'):parseFloat(this.state.datas.DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-                    </Left>
-                 <Body>
-                        <Text style={{fontWeight: 'bold',fontSize: 12}}>Mode:</Text>
-                        <Text style={{fontSize: 12}}>{this.state.datas.SelectedPricing}</Text>
-                    </Body>
-                   <Right>
-                  
-                   <Text style={{fontWeight: 'bold',fontSize: 12}}>Amount To Pay:</Text>
-                   <Text style={{fontSize: 13, fontWeight: 'bold',}}>{this.state.datas.currency}{parseFloat(pricetoPayAmount).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-                   <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.PaymentMethod}</Text>
-                    </Right>
-                </CardItem>
+                   <View style={{flexDirection: 'row'}}>
+                    <View style={{flexDirection: 'row',alignItems: 'center', width: (SCREEN_WIDTH-20)/2}}>
+                              <Text style={{fontSize: 14,textAlign: 'center'}}> Your Total </Text>
+                    </View>
+                    <View style={{flexDirection: 'column', width: (SCREEN_WIDTH-20)/2}}>
+                              <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.state.datas.currency}{parseFloat(pricetoPayAmount).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                              <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.PaymentMethod}</Text>
+                    </View>
+                    </View>
+                </Card>
+               
             </Card> 
            
            
                
-               </ScrollView >
                </View>
 
                        <Modal
@@ -1049,113 +1061,32 @@ console.log('out: ', out);
             </View>
             </Modal>
                
-                <Modal
-              isVisible={this.state.visibleModal}
-              animationInTiming={500}
-              animationIn='slideInUp'
-              animationOut='slideOutDown'
-              animationOutTiming={500}
-              useNativeDriver={true}
-              onBackdropPress={() => this.OrderSuccess()} transparent={true}>
-            <View style={styles.content}>
-              <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Thank you for using Kusinahanglan!</Text>
-              </View>
-              <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 20}}>
-              <Image
-                  style={{ height: 150, width: 150}}
-                  source={require('../assets/check.png')}
-                />
-              </View>
-              <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'black', fontWeight:'bold'}}>Your Order is Queued!</Text>
-              <Text style={{color:'black', fontWeight:'600', textAlign: "center"}}>We will communicate with you to verify your order.Please wait patiently.</Text>
-              </View>
-            <Button block style={{ height: 30, backgroundColor: "salmon"}}
-             onPress={()=> this.OrderSuccess()} >
-              <Text style={{color: 'white'}}>Ok</Text>
-              </Button>
-            </View>
-            </Modal>
-
             <Modal
-              isVisible={this.state.FinalCheckout}
-              animationInTiming={500}
-              animationIn='slideInUp'
-              animationOut='slideOutDown'
-              animationOutTiming={500}
-              useNativeDriver={true}
-              onBackdropPress={() => this.state.FinalCheckout} transparent={true}>
-            <View style={styles.content}>
-            <TearLines  ref="top"/>
-            <ScrollView style={styles.invoice}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#1aad57'}}>Billing Receipt</Text>
+      isVisible={this.state.showCancelled}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      onBackdropPress={() => this.setState({showCancelled: false})} transparent={true}>
+     <Card style={{ backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+       
+        <ScrollView>
+      <View style={{flexDirection: 'column'}}>
+ <Text style={{fontWeight: 'bold', fontSize: 12}}>Cancelled Reason:  </Text>
+    {this.props.route.params.orders.RiderCancel == undefined? null:this.props.route.params.orders.RiderCancel.map((items)=>
+   <Text style={{fontSize: 12}}>{items.CancelledReason}</Text> )}
+     </View>
+     
+     </ScrollView>   
+  
+    </Card>
+    </Modal>
 
-                    <List>
-                    <View style={{paddingVertical: 15}}>
-                                
-                                      <View style={{flexDirection: 'row'}}>
-                                      <Body style={{flex:1,justifyContent: 'flex-start', alignItems: 'flex-start' }}>
-                                      <Text style={{fontSize: 13, fontWeight: 'bold'}}>
-                                          {this.state.datas.name}
-                                        </Text>
-                                        <Text note style={{fontSize: 13}}>
-                                          {this.state.passenger} Person/s 
-                                          
-                                        </Text>
-                                        <Text note style={{fontSize: 13}}>Address: {this.state.datas.address}</Text>
-                                        <Text note style={{fontSize: 13}}>by {this.state.datas.store_name}</Text>
-                                      </Body>
-                                      <Right style={{textAlign: 'right'}}>
-                                      
-                                          <Text style={{fontSize: 13, fontWeight: 'bold', marginBottom: 10}}>{this.state.datas.currency}{Math.round(parseFloat(pricetoPayAmount)*10)/10}</Text>
-                                        
-                                      </Right>
-                                      </View> 
-                               </View>
-                    </List>
-
-                    <View>
-                     
-                        <Grid style={{padding: 8}}>
-                            <Col>
-                                <Text style={{fontSize: 13,  color:'green'}}>Sub Total</Text>
-                            </Col>
-                            <Col>
-                            <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={Math.round(parseFloat(pricetoPayAmount)*10)/10} displayType={'text'} thousandSeparator={true} prefix={this.state.datas.currency} />
-              
-                            </Col>
-                        </Grid>
-                        <Grid  style={{padding: 8}}>
-                            <Col>
-                                <Text style={{fontSize: 13,  color:'green'}}>Duration ({this.state.SelectedPricing})</Text>
-                            </Col>
-                            <Col>
-                           
-                              <NumberFormat  renderText={text => <Text style={{textAlign: 'right',fontSize: 13,  color:'green'}}>{text}</Text>} value={this.state.SelectedPricing=='Day'?Math.round(parseFloat(this.state.numberofhours/24)*10)/10:this.state.SelectedPricing=='Hour'?Math.round(parseFloat(this.state.numberofhours)*10)/10: this.state.SelectedPricing=='Weekly'?Math.round(parseFloat(this.state.Duration)*10)/10:Math.round(parseFloat(this.state.Duration)*10)/10} displayType={'text'} thousandSeparator={true} />
-                            
-                            </Col>
-                        </Grid>
-                        
-                      
-                        <View style={styles.line} />
-                        <Grid  style={{padding: 8}}>
-                            <Col>
-                                <Text style={{fontSize: 13,  color:'green'}}>Total</Text>
-                            </Col>
-                            <Col>                        
-                                 <Text style={{textAlign: 'right', fontSize: 15 ,color: 'green'}}>{this.state.datas.currency}{(Math.round(this.state.total*10)/10) - this.state.discount}</Text>             
-                            </Col>
-                        </Grid>
-                        </View>
-                    </ScrollView>  
-                    <View style={{ height: 40, alignItems: 'center', marginBottom: 10}}>
-							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: 'salmon', width: SCREEN_WIDTH - 50, height: 40, borderRadius: 5, padding: 10}]} onPress={() => this.checkOut()}>
-								<Text style={{color: '#ffffff'}}>Book Now</Text>
-							</TouchableOpacity>
-            </View>
-            </View>
-            </Modal>
+           
              
           </Container>
           </Root>

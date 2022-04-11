@@ -378,7 +378,7 @@ export default class HomeScreenService extends Component {
 <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Weekly Rate : {this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
      }
      {!StatMonthlyPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Montly Rate : {this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
      }
               {ratemode =='Others'?
 <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20, paddingBottom: 5}}>{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}/{newratemode}</Text>
@@ -486,13 +486,13 @@ export default class HomeScreenService extends Component {
       )}
     />
              
-         <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'normal'}}>{this.state.vInfo.name}</Text></Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 13, fontWeight: 'normal'}}>{this.state.vInfo.name}</Text></Text>
         
      
-         <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'normal'}}>{this.state.vInfo.description}</Text></Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Description: <Text style={{marginTop: 15, fontSize: 13, fontWeight: 'normal'}}>{this.state.vInfo.description}</Text></Text>
          
        
-         <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 10, fontWeight: 'normal'}}>{this.state.vInfo.ameneties}</Text></Text>
+         <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Ameneties: <Text style={{marginTop: 15, fontSize: 13, fontWeight: 'normal'}}>{this.state.vInfo.ameneties}</Text></Text>
          
        
 

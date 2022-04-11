@@ -178,6 +178,22 @@ else if (doc.data().OrderStatus == 'Delivered'){
 
 
 ReasonOfCancel(){
+  if(this.props.route.params.orders.OrderStatus != 'Pending' ){
+    const update_StoreTransaction = firestore().collection('stores').doc(this.props.route.params.orders.Products[0].storeId);
+    update_StoreTransaction.update({ 
+      userTransactionCancelled: firestore.FieldValue.increment(1),
+      TransactionCancelled: firestore.FieldValue.increment(1),
+      Transactionprocessing: firestore.FieldValue.increment(-1)
+    })
+    const update_RiderTransaction = firestore().collection('riders').doc(this.props.route.params.orders.DeliveredBy.id);
+    update_RiderTransaction.update({ 
+      userTransactionCancelled: firestore.FieldValue.increment(1),
+      TransactionCancelled: firestore.FieldValue.increment(1),
+      Transactionprocessing: this.props.route.params.orders.OrderStatus == 'Processing'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+      TransactionPending: this.props.route.params.orders.OrderStatus == 'Pending'? firestore.FieldValue.increment(-1): firestore.FieldValue.increment(0),
+    })
+
+  }
 
     const ref = firestore().collection('orders').doc(this.props.route.params.orders.OrderId);
     ref.update({ 

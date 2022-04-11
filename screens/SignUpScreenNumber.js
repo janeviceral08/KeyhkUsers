@@ -363,13 +363,13 @@ console.log('region: ', region)
     
             {this.state.hasError?<Text style={{color: "#c0392b", textAlign: 'center', marginTop: 10}}>{this.state.errorText}</Text>:null}
             <View style={{alignItems: 'center'}}>
-              <Button onPress={() => this.signup()} style={{backgroundColor: '#019fe8', marginVertical: 20,width: '100%',
+              <Button onPress={() => this.signup()} style={{backgroundColor: '#ee4e4e', marginVertical: 20,width: '100%',
                                                                                       height: 50,
                                                                                       justifyContent: 'center',
                                                                                       alignItems: 'center',
-                                                                                      borderRadius: 10, borderWidth: 1, borderColor: '#019fe8'}}>
+                                                                                      borderRadius: 10, borderWidth: 1, borderColor: '#ee4e4e'}}>
                 <LinearGradient
-                    colors={['#019fe8', '#183c57']}
+                    colors={['#ee4e4e','#ee1f1f']}
                     style={styles.signIn}
                 >
                     <Text style={[styles.textSign, {
@@ -379,13 +379,13 @@ console.log('region: ', region)
               </Button>
             </View>
             <View style={{alignItems: 'center'}}>
-              <Button onPress={() => this.props.navigation.navigate('Login')} style={{backgroundColor: '#019fe8', marginVertical: 20,width: '100%',
+              <Button onPress={() => this.props.navigation.navigate('Login')} style={{backgroundColor: '#ee4e4e', marginVertical: 20,width: '100%',
                                                                                       height: 50,
                                                                                       justifyContent: 'center',
                                                                                       alignItems: 'center',
-                                                                                      borderRadius: 10, borderWidth: 1, borderColor: '#019fe8'}}>
+                                                                                      borderRadius: 10, borderWidth: 1, borderColor: '#ee4e4e'}}>
                  <LinearGradient
-                    colors={['#019fe8', '#183c57']}
+                    colors={['#ee4e4e','#ee1f1f']}
                     style={styles.signIn}
                 >
                     <Text style={[styles.textSign, {

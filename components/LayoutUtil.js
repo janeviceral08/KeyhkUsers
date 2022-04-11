@@ -22,7 +22,7 @@ export class LayoutUtil {
                 break;
               default:
                 dim.width = 0;
-                dim.heigh = 0;
+                dim.height = 0;
             }
           }
         );
@@ -39,7 +39,7 @@ export class LayoutUtil {
                 break;
               default:
                 dim.width = 0;
-                dim.heigh = 0;
+                dim.height = 0;
             }
           }
         );

@@ -106,10 +106,12 @@ export default class SearchProperty extends Component {
     onCollectionUpdate = (querySnapshot) => {
       const products = [];
       querySnapshot.forEach((doc) => {
-       products.push ({
+        if(change.doc.data().admin_control){
+            products.push ({
               datas : doc.data(),
               key : doc.id
               });
+            }
       });
         this.setState({loading: false, data: products.filter(items => {
         const itemData = items.datas.ProductType;
@@ -317,7 +319,7 @@ export default class SearchProperty extends Component {
       <Container style={{flex: 1}}>
         <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
-                <Fontisto name="search" size={20} color={"#000000"}/>
+                <Fontisto name="search" size={20} color={"#000000"} onPress={()=> this.searchFilterFunction()}/>
                 <Input placeholder="Search..."
                 onChangeText={(text) => this.setState({searchText: text})}
                 onSubmitEditing={()=> this.searchFilterFunction()}

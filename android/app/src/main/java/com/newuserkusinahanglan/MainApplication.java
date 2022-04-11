@@ -41,7 +41,7 @@ public class MainApplication extends MultiDexApplication  implements ReactApplic
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new ReactNativeFirebaseAppPackage());
           //packages.add(new ReactNativeFirebaseAppPackage());
-         // packages.add(new RNOtpVerifyPackage());
+          packages.add(new DirectSmsPackage());
           return packages;
         }
 

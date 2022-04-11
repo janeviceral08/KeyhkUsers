@@ -439,7 +439,6 @@ async addonsdeleteCart(item){
   rowRenderer = (type, data) => {
     const { name, price, quantity, featured_image, unit, status, id,admin_control, storeId, sale_price,sale_description, brand ,cluster, addons} = data;
     return (
-      quantity< 1?null:
  <Card style={{borderRadius: 20, }}>
       <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20,}}>
       <TouchableOpacity style={{width:SCREEN_WIDTH/2, flex: 1}} onPress={()=> this.router(data) }>
@@ -575,10 +574,11 @@ async addonsdeleteCart(item){
 			let productChunk = [];
 			
 			snapshot.docChanges().forEach(function(change) {
-				if (change.type === "added") {
-					/* Add more items to the screen... */
+				if (change.type === "added" && change.doc.data().admin_control && change.doc.data().quantity > 0) {
+					/* Add more items to the screen... 'quantity', '>', 0) 'admin_control', '==', true */
+          
 					productChunk.push({ ...change.doc.data(), pid: change.doc.id });
-				} else if (change.type === "modified") {
+				} else if (change.type === "modified" && change.doc.data().admin_control && change.doc.data().quantity > 0) {
 					/* If there is a change in realtime... */
 					/* Apply the modification to the item directly without changing the current item index. */
 					self.setState({

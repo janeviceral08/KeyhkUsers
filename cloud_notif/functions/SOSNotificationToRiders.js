@@ -27,24 +27,15 @@ const RiderTokens = snapshot.data().RiderIDS;
 const ifPresent = RiderTokens.includes(documentSnapshot.data().userId);
 functions.logger.log('ifPresent: ', ifPresent)
             if(ifPresent == false){
-
-              db.collection('SOS')
-.doc(snapshot.data().id)
-.update({
- NotifiedRider: admin.firestore.FieldValue.arrayUnion(documentSnapshot.data().userId),
-})
-
             admin.messaging().sendMulticast(
               {
-                data:{name:'SOS',  mobile:snapshot.data().mobile, 
-                customername:snapshot.data().name, 
+                data:{name:'SOS', 
+                mobile:snapshot.data().mobile, 
+                name:snapshot.data().name, 
                 photo:snapshot.data().photo, 
                 str:snapshot.data().str,
-                callFor:snapshot.data().callFor,
-                email:snapshot.data().email,
-                DatePressed:snapshot.data().DatePressed.toString(),
-                latitude:snapshot.data().coords.latitude.toString(),
-                longitude:snapshot.data().coords.longitude.toString(), 
+                latitude:snapshot.data().coords.latitude,
+                longitude:snapshot.data().coords.longitude,
               },
                 tokens: documentSnapshot.data().token,
                 notification:{
@@ -58,11 +49,7 @@ functions.logger.log('ifPresent: ', ifPresent)
             {
               console.log('function err!: ', err)
             }
-            )
-          
-          
-          
-          }
+            )}
             });      
 
             });

@@ -4,6 +4,9 @@ import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Car
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import Fontisto from 'react-native-vector-icons/Fontisto'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 // Our custom files and classes import
@@ -170,7 +173,12 @@ export default class CheckoutScreenRentals extends Component {
         },
         admin_token:[],
         modeOfPayment:[],
-        PaymentMethod: 'Over the counter'
+        PaymentMethod: 'Over the counter',
+        AlwaysOpen :true,
+        admin_control : true,
+        Storestatus :true,
+        StoreendDate : null,
+        StorestartDate : null,
    
   };
 
@@ -390,6 +398,11 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
           notification_token : doc.data().notification_token,
          storewallet : doc.data().wallet,
           modeOfPayment : doc.data().modeOfPayment == undefined? []:doc.data().modeOfPayment,
+          AlwaysOpen : doc.data().AlwaysOpen,
+          admin_control : doc.data().admin_control,
+          Storestatus : doc.data().status,
+          StoreendDate : doc.data().endDate == undefined? null:doc.data().endDate,
+          StorestartDate : doc.data().startDate == undefined? null: doc.data().startDate,
        });
       })
     })
@@ -734,6 +747,72 @@ return;
       useNativeDriver: true, // Add this line
     }).start(()=>this.StartImageRotationFunction());
   }
+
+
+  ReferenceNo1(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * 
+ charactersLength));
+   }
+   return result;
+}
+ReferenceNo2(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo3(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo4(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo5(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo6(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+
+
+
+
   render() {
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
    //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
@@ -762,6 +841,41 @@ let StatMonthlyPrice = this.state.datas.StatMonthlyPrice == true?'Monthly':null;
 let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add(7*parseInt(this.state.Duration), 'days').unix(): this.state.SelectedPricing =='Monthly'?moment(this.state.startDate).add(30*parseInt(this.state.Duration), 'days').unix():moment(this.state.Dateend).unix();
 //console.log('out: ', out);
 //console.log('imageArray ', this.state.datas.imageArray)
+
+
+
+console.log('this.state.startDate: ', this.state.startDate);
+let Closing = false;
+
+
+if(this.state.StorestartDate!= null){
+  console.log('this.props.product.startDate.seconds: ', moment(this.state.StorestartDate.seconds*1000).format('H:mm:ss'))
+    console.log('this.props.product.endDate.seconds: ', moment(this.state.StoreendDate.seconds*1000).format('H:mm:ss'))
+var startTime =  moment(this.state.StorestartDate.seconds*1000).format('H:mm:ss');
+var endTime =  moment(this.state.StoreendDate.seconds*1000).format('H:mm:ss');
+var selectedDate = moment(this.state.newstartDate*1000).format('YYYY-MM-D H:mm:ss');
+currentDate = new Date()   
+var currentDateselectedDate = this.state.startDate == undefined? new Date():this.state.startDate ;   
+console.log('selectedDate: ', selectedDate)
+console.log('currentDate: ', currentDate)
+
+startDate = new Date(currentDateselectedDate.getTime());
+
+startDate.setHours(startTime.split(":")[0]);
+startDate.setMinutes(startTime.split(":")[1]);
+startDate.setSeconds(startTime.split(":")[2]);
+
+endDate = new Date(currentDateselectedDate.getTime());
+endDate.setHours(endTime.split(":")[0]);
+endDate.setMinutes(endTime.split(":")[1]);
+endDate.setSeconds(endTime.split(":")[2]);
+console.log('startDate: ', startDate)
+console.log('endDate: ', endDate)
+console.log('currentDateselectedDate: ', currentDateselectedDate)
+Closing =valid = startDate < currentDateselectedDate && endDate > currentDateselectedDate;
+console.log('res: ', valid = startDate < currentDateselectedDate && endDate > currentDateselectedDate)
+}
+
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -861,6 +975,8 @@ let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add
                     <Left style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start'}}>
                     <Text style={{fontWeight: 'bold', fontSize: 15}}>Property:</Text>
                         <Text>{this.state.datas.name}</Text>
+                        <Text style={{fontSize: 14}}>{!this.state.AlwaysOpen && this.state.startDate != null? '('+moment(this.state.StorestartDate.seconds*1000).format('h:mm a')+'-'+moment(this.state.StoreendDate.seconds*1000).format('h:mm a')+')':null}</Text>
+              
                     </Left>
                    <Body>
                         <Text style={{fontWeight: 'bold'}}>Description:</Text>
@@ -923,20 +1039,43 @@ let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add
         <ScrollView>
        
      
-                    <Text style={{marginTop: 15, fontSize: 10}}>Price</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.SelectedPricing==undefined?'Select Mode of Pricing':pricetoPay.toString()} placeholderTextColor="#687373" />
-         </Item>  
-                        <Text style={{marginTop: 15, fontSize: 10}}>Number of Person</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null:parseFloat(text)<this.state.datas.minGuest?
+                    <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Price</Text>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome5 name={'money-bill'} size={20} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input value={this.state.SelectedPricing==undefined?'Select Mode of Pricing':parseFloat(pricetoPay).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').toString()+'/'+this.state.SelectedPricing} placeholderTextColor="#687373" />
+            </Body>
+          </ListItem>
+              
+                       
+                        <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Number of Person</Text>
+                        <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <Fontisto name={'persons'} size={25} size={20} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null:parseFloat(text)<this.state.datas.minGuest?
              Alert.alert('Invalid Input', 'Minimum Guest is '+this.state.datas.minGuest,)
             :parseFloat(text)>this.state.datas.maxGuest?  Alert.alert('Invalid Input', 'Maximum Guest is '+this.state.datas.maxGuest,): this.setState({passenger: text})}} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Start Date of Rental</Text>
-                    <Item regular style={{marginTop: 7, padding: 10}}>
-                       <TouchableOpacity onPress={this.showDatePicker} style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).format('MMM D, YYYY h:mm a')}</Text>
+         </Body>
+          </ListItem>
+                    
+         <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Start Date of Rental</Text>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <MaterialCommunityIcons name={'calendar-clock'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <TouchableOpacity onPress={this.showDatePicker} style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).format('MMM D, YYYY h:mm a')}</Text>
 </TouchableOpacity>
 
 <DateTimePickerModal
@@ -945,48 +1084,99 @@ let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add
         onConfirm={this.handleConfirm}
         onCancel={this.hideDatePicker}
       />
-                    </Item>
-
-                    {this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?<Text style={{marginTop: 15, fontSize: 10}}>No of {this.state.SelectedPricing =='Weekly'? 'Week': this.state.SelectedPricing =='Monthly'? 'Month':null}</Text>: null}
-             {   this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?        <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.Duration}  value={this.state.Duration} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: this.setState({Duration: text})}} placeholderTextColor="#687373" />
-         </Item>:null}
+       </Body>
+          </ListItem>
          
-
-                   {<Text style={{marginTop: 15, fontSize: 10}}>End Date of Rental</Text>}
-                    {this.state.SelectedPricing =='Weekly'?<Item><TouchableOpacity style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(7*parseInt(this.state.Duration), 'days').format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity></Item>: this.state.SelectedPricing =='Monthly' ?<Item><TouchableOpacity style={{width: '60%'}}>
+                    {this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?<Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>No of {this.state.SelectedPricing =='Weekly'? 'Week': this.state.SelectedPricing =='Monthly'? 'Month':null}</Text>: null}
+             {   this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?   
+                <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                <Left style={{left: 10}}>
+                  <Button style={{ backgroundColor: "#FFFFFF" }}>
+                  <MaterialCommunityIcons name={'calendar-week'} size={25} color="#b5b5b5" />
+                  </Button>
+                </Left>
+                <Body>
+                <Input placeholder={this.state.Duration}  value={this.state.Duration} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: this.setState({Duration: text})}} placeholderTextColor="#687373" />
+         </Body>
+              </ListItem>    
+              :null}
+         
+         <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>End Date of Rental</Text>
+         {this.state.SelectedPricing =='Weekly'?
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+          <Left style={{left: 10}}>
+            <Button style={{ backgroundColor: "#FFFFFF" }}>
+            <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+            </Button>
+          </Left>
+          <Body>
+          <TouchableOpacity style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(7*parseInt(this.state.Duration), 'days').format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity></Body>
+        </ListItem>
+             
+              : this.state.SelectedPricing =='Monthly' ?
+              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+              <Left style={{left: 10}}>
+                <Button style={{ backgroundColor: "#FFFFFF" }}>
+                <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+                </Button>
+              </Left>
+              <Body>
+              <TouchableOpacity style={{width: '60%'}}>
 <Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(30*parseInt(this.state.Duration), 'days').format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity></Item>:<Item regular style={{marginTop: 7, padding: 10}}>
-                       <TouchableOpacity onPress={this.showDatePickerend} style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.Dateend).format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity>  </Body>
+            </ListItem>
+:
+ <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+ <Left style={{left: 10}}>
+   <Button style={{ backgroundColor: "#FFFFFF" }}>
+   <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+   </Button>
+ </Left>
+ <Body>
+ <TouchableOpacity onPress={this.showDatePickerend} style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.Dateend).format('MMM D, YYYY h:mm a')}</Text>
 </TouchableOpacity>
 
 <DateTimePickerModal
-        isVisible={this.state.isDatePickerVisibleend}
-        mode="datetime"
-        onConfirm={this.handleConfirmend}
-        onCancel={this.hideDatePickerend}
-      />
-                    </Item>}
-                    <Text style={{marginTop: 15, fontSize: 10}}>Phone Number</Text>
-                    <Item>
-                   
-                   <Picker
+  isVisible={this.state.isDatePickerVisibleend}
+  mode="datetime"
+  onConfirm={this.handleConfirmend}
+  onCancel={this.hideDatePickerend}
+/></Body>
+</ListItem>
+
+}
+                    <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Picker
                          selectedValue={this.state.phone}
                          onValueChange={(itemValue, itemIndex) => this.setState({phone: itemValue}) }>         
                             <Picker.Item label = {this.state.phone}  value={this.state.phone}  />
                               {this.state.address_list.map((user, index) => (
      <Picker.Item label={user.phone} value={user.phone} key={index}/>
   ))        }
-                    </Picker>
-            </Item>
-
-                 <Text style={{marginTop: 15, fontSize: 10}}>Mode of payment</Text>
-                    <Item>
+                    </Picker></Body>
+          </ListItem>
+                    
                    
-                   <Picker
+
+                 <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Mode of payment</Text>
+                 <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome name={'cc-mastercard'} size={20} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Picker
                          selectedValue={this.state.PaymentMethod}
                          onValueChange={(itemValue, itemIndex) => this.setState({PaymentMethod: itemValue}) }>         
                             <Picker.Item label = {this.state.PaymentMethod}  value={this.state.PaymentMethod}  />
@@ -997,7 +1187,10 @@ let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add
      :null
   ))        }
                     </Picker>
-            </Item>
+                     </Body>
+          </ListItem>
+                
+                   
             {this.state.PaymentMethod != 'Over the counter'?
             this.state.modeOfPayment.map((user, index) => (
               user.label == this.state.PaymentMethod?
@@ -1016,16 +1209,33 @@ let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add
   :null))      
            
             :null}
-                    <Text style={{marginTop: 15, fontSize: 10}}>Note</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input  value={this.state.note} onChangeText={(text) => {this.setState({note: text})}} placeholderTextColor="#687373" />
-         </Item>
+                    <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Note</Text>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name={'book'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input placeholder={this.state.note==''?'Note':this.state.note} value={this.state.note} onChangeText={(text) => {this.setState({note: text})}} placeholderTextColor="#687373" />
+       </Body>
+          </ListItem>
+            
+                       
           
 
-           <Text style={{marginTop: 15, fontSize: 10}}>Description</Text>
-         <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.datas.description} placeholderTextColor="#687373" />
-         </Item>
+           <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Description</Text>
+           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <MaterialIcons name={'description'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input value={this.state.datas.description} placeholderTextColor="#687373" />
+             </Body>
+          </ListItem>
+          
          <FlatGrid
       itemDimension={120}
       data={this.state.datas.imageArray.filter(items => {
@@ -1046,9 +1256,9 @@ let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add
     />
      </ScrollView>   
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
-        onPress={() =>{this.state.uid == null?null:this.state.storewallet < 1? null: this.FinalCheckouts()}}
+        onPress={() =>{this.state.uid == null?null:this.state.storewallet < 1? null: this.state.Storestatus && !this.state.AlwaysOpen && Closing == true ?this.FinalCheckouts(): this.state.AlwaysOpen?this.FinalCheckouts():null}}
       >
-       <Text style={{color:'white'}}>{this.state.uid == null?'Log in to Continue':this.state.storewallet < 1? 'Unavailable':'Continue Booking'}</Text>
+       <Text style={{color:'white'}}>{this.state.uid == null?'Log in to Continue':this.state.storewallet < 1? 'Unavailable':this.state.Storestatus && !this.state.AlwaysOpen && Closing == true ?'Continue Booking': this.state.AlwaysOpen? 'Continue Booking':'Unavailable'}</Text>
       </Button>
     </Card>
     </Modal>
@@ -1134,9 +1344,9 @@ let out = this.state.SelectedPricing =='Weekly'?moment(this.state.startDate).add
                 />
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'black', fontWeight:'bold'}}>Your Transaction is Queued!</Text>
-              <Text style={{color:'black', fontWeight:'600', textAlign: "center"}}>Please wait patiently.</Text>
-              </View>
+              <Text style={{color:'black', fontWeight:'bold'}}>Your booking is on process</Text>
+              <Text style={{color:'black', fontWeight:'600', textAlign: "center"}}>Please wait for confirmation</Text>
+            </View>
             <Button block style={{ height: 30, backgroundColor: "#019fe8"}}
              onPress={()=> this.OrderSuccess()} >
               <Text style={{color: 'white'}}>Ok</Text>
@@ -1305,8 +1515,12 @@ let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D H
 const a =moment(in_check_extension.toString());  
 const b = moment(out_check_extension.toString());  
 const diff = b.diff(a, 'hours'); 
-
+const update_StoreTransaction = firestore().collection('stores').doc(this.state.datas.storeId);
+update_StoreTransaction.update({ 
+  TransactionPending: firestore.FieldValue.increment(1),
+})
     const dataNow={
+      refNo: this.ReferenceNo1(1)+this.ReferenceNo2(1)+this.ReferenceNo3(1)+this.ReferenceNo4(1)+this.ReferenceNo5(1)+this.ReferenceNo6(1),
       accname:newData.length>0? newData[0].accname:'',
       accno:newData.length>0? newData[0].accno:'',
       bankNote:newData.length>0? newData[0].bankNote:'',
@@ -1430,6 +1644,27 @@ const diff = b.diff(a, 'hours');
 
 
 const styles = {
+  inputContainer: {
+    marginTop: 5,
+    marginBottom: 10,
+    width: '100%',
+    height: SCREEN_HEIGHT / 15,
+    borderColor: '#ccc',
+    borderRadius: 3,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  iconStyle: {
+    padding: 10,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightColor: '#ccc',
+    borderRightWidth: 1,
+    width: 50,
+  },
   line: {
     width: '100%',
     height: 1,

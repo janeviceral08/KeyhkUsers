@@ -7,6 +7,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import Fontisto from 'react-native-vector-icons/Fontisto'
 // Our custom files and classes import
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -156,14 +157,14 @@ export default class CheckoutTransport extends Component {
       voucherCode: '',
       loading: false,
       address_list:[],
-      visibleAddressModal: false,
+      visibleAddressModal: this.props.route.params.cityLong != 'none'?true:false,
       //subtotal: subtotal,
       minimum: 0,
       selectedIndex: 0,
       selectedIndices: [0],  
       customStyleIndex: 0,
       isready:0,
-      visibleAddressModalTo: true,
+      visibleAddressModalTo: this.props.route.params.cityLong != 'none'?false:true,
       passenger: '1',
       note: '',
       AlwaysOpen: true,
@@ -174,11 +175,11 @@ export default class CheckoutTransport extends Component {
       SMetro: 0,
       phone:'Select Phone Number',
       warningModal: false,
-      fromPlace: this.props.route.params.fromPlace,
-      flat:this.props.route.params.cLat,
-      flong:this.props.route.params.cLong,
-       region:{ latitude:this.props.route.params.cLat,
-      longitude:this.props.route.params.cLong,
+      fromPlace:this.props.route.params.cityLong != 'none'?'': this.props.route.params.fromPlace,
+      flat:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLat:this.props.route.params.cLat,
+      flong:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLong:this.props.route.params.cLong,
+       region:{ latitude:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLong:this.props.route.params.cLat,
+      longitude:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLat:this.props.route.params.cLong,
       // latitudeDelta: 0.0005,
   //longitudeDelta: 0.05
             latitudeDelta: 0.01,
@@ -1511,7 +1512,9 @@ if(this.state.fromPlace!=''){
   console.log('amountpayCity: ', amountpayCity);
 console.log('typeOfRate: ', typeOfRate);
 //console.log('summary: ', summary);
-console.log('region: ', this.state.region);
+console.log('cityLong: ', this.props.route.params.cityLong);
+console.log('cityLat: ', this.props.route.params.cityLat);
+console.log('cLat: ', this.props.route.params.cLat);
 console.log('this.state.RushHour: ', this.state.RushHour)
     return(
         <Root>
@@ -1559,7 +1562,7 @@ console.log('this.state.RushHour: ', this.state.RushHour)
   centerCoordinate={[this.state.flong, this.state.flat]} 
   zoomLevel={15}
   followUserMode={'normal'}
-            followUserLocation
+            
   />
   <MapboxGL.ShapeSource id='shapeSource' shape={this.state.routeForMap}>
               <MapboxGL.LineLayer id='lineLayer' style={{lineWidth: 5, lineJoin: 'bevel', lineColor: '#ff0000'}} />
@@ -1906,99 +1909,188 @@ Base fare:
       borderRadius: 4,
       borderColor: 'rgba(0, 0, 0, 0.1)',}}>
         <View  style={{ alignSelf: 'flex-end', position: 'absolute', top: 10, right:10, flex: 5}}>
-                        <AntDesign name="closecircle" color="gray" size={25} onPress={() => this.setState({VisibleAddInfo: false})}/>
+                        <AntDesign name="closecircle" color="#b5b5b5" size={25} onPress={() => this.setState({VisibleAddInfo: false})}/>
                         </View>
         <View>
-                        <Text style={{marginTop: 15, fontSize: 10}}>Number of Passengers</Text>
-                         <Item regular style={{marginTop: 7, padding: 10}}> 
-                             <View style={{flexDirection: 'column'}}>
+
+
+                        <Text style={{marginTop: 15, fontSize: 13, fontWeight: 'bold'}}>Number of Passengers</Text>
+  
+          <ListItem icon style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <Fontisto name={'persons'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <View style={{flexDirection: 'column',padding: 10}}>
+            <Text style={{paddingLeft: 10, paddingRight: 10}}>Adult</Text>
                              <View style={{flexDirection: 'row'}}>
-                 <AntDesign name="minuscircle" onPress={()=> {this.state.adult > 1 ?this.setState({adult: this.state.adult-1}):null}} size={20}/> 
+                 <AntDesign name="minuscircle" color={'#b5b5b5'} onPress={()=> {this.state.adult > 1 ?this.setState({adult: this.state.adult-1}):null}} size={20}/> 
                 
                  <Text style={{paddingLeft: 10, paddingRight: 10}}>{this.state.adult}</Text>
                  
-                 <AntDesign name="pluscircle" onPress={()=> this.setState({adult: this.state.adult+1})} size={20}/> 
+                 <AntDesign name="pluscircle" color={'#b5b5b5'} onPress={()=> this.setState({adult: this.state.adult+1})} size={20}/> 
                  
-                <Text style={{paddingLeft: 10, paddingRight: 10}}>Adult</Text>
+        
                  </View>
 
+                      
+                 </View>
+            </Body>
+
+            <Body>
+            <View style={{flexDirection: 'column',padding: 10}}>
+                  
+            <Text style={{paddingLeft: 10, paddingRight: 10}}>Child</Text>
                        <View style={{flexDirection: 'row'}}>
-                 <AntDesign name="minuscircle" onPress={()=> {this.state.children > 0 ?this.setState({children: this.state.children-1}):null}} size={20}/> 
+                 <AntDesign name="minuscircle" color={'#b5b5b5'} onPress={()=> {this.state.children > 0 ?this.setState({children: this.state.children-1}):null}} size={20}/> 
                 
                  <Text style={{paddingLeft: 10, paddingRight: 10}}>{this.state.children}</Text>
                  
-                 <AntDesign name="pluscircle" onPress={()=> this.setState({children: this.state.children+1})} size={20}/> 
+                 <AntDesign name="pluscircle" color={'#b5b5b5'} onPress={()=> this.setState({children: this.state.children+1})} size={20}/> 
                  
-                <Text style={{paddingLeft: 10, paddingRight: 10}}>Children</Text>
-                 </View>
-                 </View>
-              </Item>
              
-         <Text style={{marginTop: 15, fontSize: 10}}>Pickup Time</Text>
-                    <Item regular style={{marginTop: 7, padding: 10}}>
-                       <TouchableOpacity onPress={this.showDatePicker} style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).format('h:mm a')}</Text>
-</TouchableOpacity>
-{this.state.AlwaysOpen==false?
-  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({AlwaysOpen: true})}><Text style={{fontSize: 15}}>Asap</Text></MaterialCommunityIcons>
-  :
- <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({AlwaysOpen: false})}><Text style={{fontSize: 15}}>Asap</Text></MaterialCommunityIcons>
- 
- 
-}
+                 </View>
+                 </View>
+            </Body>
+            <Right>
+            <View style={{flexDirection: 'column',padding: 10}}>
+                  
+            <Text style={{paddingLeft: 10, paddingRight: 10, color: 'black'}}>{this.state.children + this.state.adult}</Text>
+               
+                 </View>
+            </Right>
+          </ListItem>
+                        
+          <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Pickup Time</Text>
+
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name={'dashboard'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <TouchableOpacity onPress={this.showDatePicker} style={{width: '60%'}}>
+            <Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).format('h:mm a')}</Text>
+            </TouchableOpacity>
+            </Body>
+            <Right>       
+            {this.state.AlwaysOpen==false?
+                <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({AlwaysOpen: true})}><Text style={{fontSize: 15, color: 'black'}}>Asap</Text></MaterialCommunityIcons>
+                :
+              <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({AlwaysOpen: false})}><Text style={{fontSize: 15, color: 'black'}}>Asap</Text></MaterialCommunityIcons>
+              
+              
+              } 
+            </Right>
+          </ListItem>
+
+       
+
 <DateTimePickerModal
         isVisible={this.state.isDatePickerVisible}
         mode="time"
         onConfirm={this.handleConfirm}
         onCancel={this.hideDatePicker}
       />
-                    </Item>
-                    <Item>
-                  {this.state.ExtraBaggage==false?
-  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({ExtraBaggage: true})}><Text style={{fontSize: 15}}>Extra Baggage</Text></MaterialCommunityIcons>
+                     
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, marginTop:10, left: -25, }}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <MaterialCommunityIcons name={'bag-checked'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            {this.state.ExtraBaggage==false?
+  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({ExtraBaggage: true})}><Text style={{fontSize: 15, padding: 10}}>Extra Baggage</Text></MaterialCommunityIcons>
   :
- <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({ExtraBaggage: false})}><Text style={{fontSize: 15}}>Extra Baggage</Text></MaterialCommunityIcons>
+ <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({ExtraBaggage: false})}><Text style={{fontSize: 15, padding: 10}}>Extra Baggage</Text></MaterialCommunityIcons>
  
  
 }
 
+            </Body>
+            <Right>
+
 {this.state.willingtopay==false?
-  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({willingtopay: true})}><Text style={{fontSize: 15}}>Willing to pay</Text></MaterialCommunityIcons>
+  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({willingtopay: true})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
   :
- <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({willingtopay: false})}><Text style={{fontSize: 15}}>Willing to pay</Text></MaterialCommunityIcons>
+ <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({willingtopay: false})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
  
  
 }
-
-            </Item>
-            <Item>
-            
-{this.state.willingtopay==false?
+            </Right>
+          </ListItem>
+                        
+ 
+  
+         {this.state.willingtopay==false?
  null  :
-  <Input placeholder={'Tip Amount'}  value={this.state.tip} onChangeText={(text) => {isNaN(text)? null:this.setState({tip: text})}} placeholderTextColor="#687373" keyboardType={'number-pad'}/>
-        
+ <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,marginTop: 15}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <MaterialCommunityIcons name={'cash-plus'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+              <Input placeholder={'Tip Amount'}  value={this.state.tip} onChangeText={(text) => {isNaN(text)? null:this.setState({tip: text})}} placeholderTextColor="#687373" keyboardType={'number-pad'}/>
+            </Body>
+          </ListItem>
+
+   
 }
-            </Item>
-                    <Text style={{marginTop: 15, fontSize: 10}}>Phone Number</Text>
-                    <Item>
+
+          
+                    <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
+
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Picker
+                  
+                  selectedValue={this.state.phone}
+                  onValueChange={(itemValue, itemIndex) => this.setState({phone: itemValue}) }>     
+                     <Picker.Item label = {this.state.phone}  value={this.state.phone}  />
+                       {this.state.address_list.map((user, index) => (
+<Picker.Item label={user.phone} value={user.phone} key={index}/>
+))        }
+             </Picker>
+            </Body>
+          </ListItem>
                    
-                   <Picker
-                         selectedValue={this.state.phone}
-                         onValueChange={(itemValue, itemIndex) => this.setState({phone: itemValue}) }>     
-                            <Picker.Item label = {this.state.phone}  value={this.state.phone}  />
-                              {this.state.address_list.map((user, index) => (
-     <Picker.Item label={user.phone} value={user.phone} key={index}/>
-  ))        }
-                    </Picker>
-            </Item>
-              <Text style={{marginTop: 15, fontSize: 10}}>Passenger Description</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.PassengerDescription}  value={this.state.PassengerDescription} onChangeText={(text) => {this.setState({PassengerDescription: text})}} placeholderTextColor="#687373" />
-        </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Mode of payment</Text>
-                    <Item>
                    
-                   <Picker
+              <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Passenger Description</Text>
+              
+  
+              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <Fontisto name={'person'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input placeholder={this.state.PassengerDescription==""? 'Passenger Description':this.state.PassengerDescription}  value={this.state.PassengerDescription} onChangeText={(text) => {this.setState({PassengerDescription: text})}} placeholderTextColor="#687373" />
+            </Body>
+          </ListItem>
+
+           
+         <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Mode of payment</Text>
+
+           
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome name={'cc-mastercard'} size={20} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Picker
                          selectedValue={this.state.PaymentMethod}
                          onValueChange={(itemValue, itemIndex) => this.setState({paymentMethod: itemValue}) }>         
                             <Picker.Item label = {this.state.paymentMethod}  value={this.state.paymentMethod}  />
@@ -2009,11 +2101,24 @@ Base fare:
     
   ))        }
                     </Picker>
-            </Item>
-                    <Text style={{marginTop: 15, fontSize: 10}}>Note to Rider</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.note}  value={this.state.note} onChangeText={(text) => {this.setState({note: text})}} placeholderTextColor="#687373" />
-         </Item>
+            </Body>
+          </ListItem>
+  
+                    
+                    <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Note</Text>
+                      
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name={'book'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input placeholder={this.state.note== ''? 'Note':this.state.note}  value={this.state.note} onChangeText={(text) => {this.setState({note: text})}} placeholderTextColor="#687373" />
+            </Body>
+          </ListItem>
+                 
+                      
            </View>   
     
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
@@ -2646,6 +2751,27 @@ console.log('datavalue: ',datavalue)
 
 
 const styles = {
+  inputContainer: {
+    marginTop: 5,
+    marginBottom: 10,
+    width: '100%',
+    height: SCREEN_HEIGHT / 15,
+    borderColor: '#ccc',
+    borderRadius: 3,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  iconStyle: {
+    padding: 10,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightColor: '#ccc',
+    borderRightWidth: 1,
+    width: 50,
+  },
   line: {
     width: '100%',
     height: 1,

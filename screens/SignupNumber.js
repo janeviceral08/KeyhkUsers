@@ -265,12 +265,12 @@ export default class SignupNumber extends Component  {
 
             <View style={styles.button}>
             <TouchableOpacity   style={[styles.signIn, {
-                        borderColor: '#019fe8',
+                        borderColor: '#ee4e4e',
                         borderWidth: 1,
                         marginTop: 15,
                     }]} onPress={()=>this.SignInWithPhoneNumbers(this.state.email)}>
                 <LinearGradient
-                    colors={['#019fe8', '#183c57']}
+                    colors={['#ee4e4e','#ee1f1f']}
                     style={styles.signIn}
                 >
                     <Text style={[styles.textSign, {
@@ -350,7 +350,7 @@ export default class SignupNumber extends Component  {
                 onFinish={() => this.setState({enableResend: false})}
                 size={15}
                 digitStyle={{backgroundColor: '#FFF', marginTop: -10}}
-                digitTxtStyle={{color: '#019fe8'}}
+                digitTxtStyle={{color: '#ee4e4e'}}
                 timeToShow={['M', 'S']}
                 timeLabels={{m: null, s: null}}
                 separatorStyle={{marginTop: -11}}
@@ -362,7 +362,7 @@ export default class SignupNumber extends Component  {
 
                     </View>
                     <OTPTextInput 
-                            tintColor={'#019fe8'}
+                            tintColor={'#ee4e4e'}
                             //value={this.state.setCode}
                             inputCount={6} 
                             handleTextChange={(e)=>{ console.log('e: ',e); this.setState({setCode: e})}} 
@@ -382,7 +382,7 @@ export default class SignupNumber extends Component  {
                     justifyContent: 'center',
                     alignItems: 'center',
                     borderRadius: 5,
-                        borderColor: this.state.enableResend == true?'gray':'#019fe8',
+                        borderColor: this.state.enableResend == true?'gray':'#ee4e4e',
                         borderWidth: 1,
                         marginTop: 15,
                         marginRight: '2.5%'
@@ -390,7 +390,7 @@ export default class SignupNumber extends Component  {
                     disabled={this.state.enableResend}
                 >
                     <Text style={[styles.textSign, {
-                        color: this.state.enableResend == true?'gray':'#019fe8',
+                        color: this.state.enableResend == true?'gray':'#ee4e4e',
                     }]}>Resend OTP</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -400,14 +400,14 @@ export default class SignupNumber extends Component  {
                     justifyContent: 'center',
                     alignItems: 'center',
                     borderRadius: 5,
-                        borderColor: '#019fe8',
+                        borderColor: '#ee4e4e',
                         borderWidth: 1,
                         marginTop: 15,
                         marginLeft: '2.5%'
                     }}
                 >
                     <Text style={[styles.textSign, {
-                        color: '#019fe8'
+                        color: '#ee4e4e'
                     }]}>Confirm</Text>
                 </TouchableOpacity>
                                 </View>

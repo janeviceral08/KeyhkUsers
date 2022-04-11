@@ -4,36 +4,26 @@ admin.initializeApp();
 const db = admin.firestore();
 
 
-exports.SOSNotificationToRiders = functions.firestore
+exports.SOSNotificationToAdmin = functions.firestore
     .document('SOS/{ordersId}')
     .onCreate(async(snapshot, context) => {
 
 const CityWikiData = snapshot.data().CityWikiData.trim();
 functions.logger.log('CityWikiData: ', CityWikiData)
 
-            db.collection('riders')
+            db.collection('charges')
             .where('arrayofCity', 'array-contains-any',[CityWikiData])
             .get()
             .then(querySnapshot => {
-            functions.logger.log('riders querySnapshot function: ')
+            functions.logger.log('querySnapshot function: ')
             querySnapshot.forEach(documentSnapshot => {
 
-
-
-              functions.logger.log('riders documentSnapshot function: ')
-          functions.logger.log('riders documentSnapshot: ', documentSnapshot.data())
-const RiderTokens = snapshot.data().RiderIDS;
-
-const ifPresent = RiderTokens.includes(documentSnapshot.data().userId);
-functions.logger.log('ifPresent: ', ifPresent)
-            if(ifPresent == false){
-
-              db.collection('SOS')
-.doc(snapshot.data().id)
-.update({
- NotifiedRider: admin.firestore.FieldValue.arrayUnion(documentSnapshot.data().userId),
-})
-
+            functions.logger.log('documentSnapshot: ', documentSnapshot.data())
+            db.collection('SOS')
+               .doc(snapshot.data().id)
+               .update({
+                NotifiedAdmin: admin.firestore.FieldValue.arrayUnion(documentSnapshot.data().id),
+               })
             admin.messaging().sendMulticast(
               {
                 data:{name:'SOS',  mobile:snapshot.data().mobile, 
@@ -44,8 +34,7 @@ functions.logger.log('ifPresent: ', ifPresent)
                 email:snapshot.data().email,
                 DatePressed:snapshot.data().DatePressed.toString(),
                 latitude:snapshot.data().coords.latitude.toString(),
-                longitude:snapshot.data().coords.longitude.toString(), 
-              },
+                longitude:snapshot.data().coords.longitude.toString(), },
                 tokens: documentSnapshot.data().token,
                 notification:{
                   title: 'Somebody needs '+snapshot.data().callFor+'!',
@@ -53,16 +42,14 @@ functions.logger.log('ifPresent: ', ifPresent)
                 }
               }
             ).then((msg)=>{
+              
               console.log('success!: ', msg)
             }).catch((err)=>
             {
               console.log('function err!: ', err)
             }
             )
-          
-          
-          
-          }
+
             });      
 
             });

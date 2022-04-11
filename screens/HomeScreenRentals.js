@@ -600,7 +600,7 @@ console.log('backPress')
           tabTextStyle={{color: 'black'}}
           activeTabStyle={{backgroundColor: 'gray'}}
   />*/}
-                <View style={{flexDirection: 'row', }}>
+                <View style={{flexDirection: 'row',marginLeft: 30  }}>
 <TouchableOpacity style={{shadowColor: "#000",
 shadowOffset: {
 	width: 0,
@@ -608,9 +608,9 @@ shadowOffset: {
 },
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
-elevation: 24,width: SCREEN_WIDTH/4,backgroundColor: this.state.selectedIndexRentals ==0 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 0})}>
-         <FontAwesome5 name={'hotel'} size={15} color={this.state.selectedIndexRentals ==0 ?'white':'#525252'} />
-    <Text style={{color: this.state.selectedIndexRentals ==0 ?'white':'#525252', fontSize: 13}}> Hotels etc.</Text>
+elevation: 24,width: SCREEN_WIDTH/3.5,backgroundColor: this.state.selectedIndexRentals ==0 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 0})}>
+         <FontAwesome5 name={'hotel'} size={15} color={'#5580ad'} />
+    <Text style={{color:'black', fontSize: 13, fontWeight: 'bold'}}> Hotels etc.</Text>
     </TouchableOpacity>
     <TouchableOpacity style={{shadowColor: "#000",
 shadowOffset: {
@@ -619,22 +619,11 @@ shadowOffset: {
 },
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
-elevation: 24,width: SCREEN_WIDTH/4, backgroundColor:this.state.selectedIndexRentals ==1 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 5, marginRight: 5}} onPress={()=>this.setState({selectedIndexRentals: 1})}>
-       <MaterialIcons name={'house'} size={15} color={this.state.selectedIndexRentals ==1 ?'white':'#525252'}/>
-       <Text style={{color: this.state.selectedIndexRentals ==1 ?'white':'#525252', fontSize: 13}}>  Property</Text>
+elevation: 24,width: SCREEN_WIDTH/3.5, backgroundColor:this.state.selectedIndexRentals ==1 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 5, marginRight: 5}} onPress={()=>this.setState({selectedIndexRentals: 1})}>
+       <MaterialIcons name={'house'} size={15} color={'#5580ad'}/>
+       <Text style={{color: 'black', fontSize: 13, fontWeight: 'bold'}}>  Property</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={{shadowColor: "#000",
-shadowOffset: {
-	width: 0,
-	height: 12,
-},
-shadowOpacity: 0.58,
-shadowRadius: 16.00,
-elevation: 24,width:SCREEN_WIDTH/5, backgroundColor:this.state.selectedIndexRentals ==2 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginRight: 5}} onPress={()=>this.setState({selectedIndexRentals: 2})}>
-<MaterialIcons name={'car-rental'}  size={15} color={this.state.selectedIndexRentals ==2 ?'white':'#525252'} />
-<Text style={{color: this.state.selectedIndexRentals ==2 ?'white':'#525252', fontSize: 13}}>  Vehicle</Text>
 
-    </TouchableOpacity>
     <TouchableOpacity style={{shadowColor: "#000",
 shadowOffset: {
 	width: 0,
@@ -642,9 +631,9 @@ shadowOffset: {
 },
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
-elevation: 24,width:SCREEN_WIDTH/4, backgroundColor:this.state.selectedIndexRentals ==3 ?'#5580ad':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 3})}>
-<FontAwesome5 name={'tools'}  size={15} color={this.state.selectedIndexRentals ==3 ?'white':'#525252'} />
-<Text style={{color: this.state.selectedIndexRentals ==3 ?'white':'#525252', fontSize: 13}}> Equipment</Text>
+elevation: 24,width:SCREEN_WIDTH/3.5, backgroundColor:this.state.selectedIndexRentals ==3 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 3})}>
+<FontAwesome5 name={'tools'}  size={15} color={'#5580ad'} />
+<Text style={{color: 'black', fontSize: 13, fontWeight: 'bold'}}> Equipment</Text>
 
     </TouchableOpacity>
     </View>

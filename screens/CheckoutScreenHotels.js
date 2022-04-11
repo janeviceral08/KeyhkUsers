@@ -3,7 +3,11 @@ import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image,Toucha
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Card, CardItem, Body,Item, Input,List,Picker, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
+import Octicons from 'react-native-vector-icons/Octicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import Fontisto from 'react-native-vector-icons/Fontisto'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 // Our custom files and classes import
@@ -170,6 +174,13 @@ export default class CheckoutScreenHotels extends Component {
           ]
         },
         admin_token:[],
+        isGuest: true,
+        guestName:'',
+        AlwaysOpen :true,
+        admin_control : true,
+        Storestatus :true,
+        StoreendDate : null,
+        StorestartDate : null,
    
   };
 
@@ -386,6 +397,11 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
          storewallet : doc.data().bank,
          bank:doc.data().bank,
          gcash:doc.data().gcash ,
+         AlwaysOpen : doc.data().AlwaysOpen,
+         admin_control : doc.data().admin_control,
+         Storestatus : doc.data().status,
+         StoreendDate : doc.data().endDate == undefined? null:doc.data().endDate,
+         StorestartDate : doc.data().startDate == undefined? null: doc.data().startDate,
 
        });
       })
@@ -687,9 +703,14 @@ const a =moment(in_check_extension.toString());
 const b = moment(out_check_extension.toString());  
 const diff = b.diff(a, 'hours');  
 console.log('diff',diff)
-
+console.log('in_check_extension',in_check_extension)
+console.log('out_check_extension',out_check_extension)
 const total = this.state.SelectedPricing =='3Hour'?this.state.datas.HourPrice3:this.state.SelectedPricing =='6Hour'?this.state.datas.HourPrice6:this.state.SelectedPricing =='12Hour'?this.state.datas.HourPrice12:this.state.SelectedPricing=='Day'?(Math.round((diff/24)*10)/10)*(Math.round((this.state.datas.DayPrice)*10)/10):this.state.SelectedPricing=='Hour'?(Math.round((diff)*10)/10)*(Math.round((this.state.datas.HourPrice)*10)/10): this.state.SelectedPricing=='Weekly'?(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.WeeklyPrice)*10)/10):(Math.round((this.state.Duration)*10)/10)*(Math.round((this.state.datas.MonthlyPrice)*10)/10);
 
+if(this.state.isGuest == false && this.state.guestName  == ''){
+  this.setState({warningText: 'Enter Guest Name', warningModal: true})
+  return;
+      }
     if(this.state.SelectedPricing == undefined){
 this.setState({warningText: 'Choose Rate', warningModal: true})
 return;
@@ -730,6 +751,73 @@ return;
       useNativeDriver: true, // Add this line
     }).start(()=>this.StartImageRotationFunction());
   }
+
+
+  ReferenceNo1(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * 
+ charactersLength));
+   }
+   return result;
+}
+ReferenceNo2(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo3(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo4(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo5(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+ReferenceNo6(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+
+
+
+
+
   render() {
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
    //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
@@ -765,6 +853,38 @@ let modesp =['Over the Counter']
 //this.state.datas.gcash.length > 1?modesp.push('Gcash'):null;
 console.log('modesp: ', this.state.datas);
 
+
+
+console.log('this.state.startDate: ', this.state.startDate);
+let Closing = false;
+
+if(this.state.StorestartDate!= null){
+  console.log('this.props.product.startDate.seconds: ', moment(this.state.StorestartDate.seconds*1000).format('H:mm:ss'))
+    console.log('this.props.product.endDate.seconds: ', moment(this.state.StoreendDate.seconds*1000).format('H:mm:ss'))
+var startTime =  moment(this.state.StorestartDate.seconds*1000).format('H:mm:ss');
+var endTime =  moment(this.state.StoreendDate.seconds*1000).format('H:mm:ss');
+var selectedDate = moment(this.state.newstartDate*1000).format('YYYY-MM-D H:mm:ss');
+currentDate = new Date()   
+var currentDateselectedDate = this.state.startDate == undefined? new Date():this.state.startDate ;   
+console.log('selectedDate: ', selectedDate)
+console.log('currentDate: ', currentDate)
+
+startDate = new Date(currentDateselectedDate.getTime());
+
+startDate.setHours(startTime.split(":")[0]);
+startDate.setMinutes(startTime.split(":")[1]);
+startDate.setSeconds(startTime.split(":")[2]);
+
+endDate = new Date(currentDateselectedDate.getTime());
+endDate.setHours(endTime.split(":")[0]);
+endDate.setMinutes(endTime.split(":")[1]);
+endDate.setSeconds(endTime.split(":")[2]);
+console.log('startDate: ', startDate)
+console.log('endDate: ', endDate)
+console.log('currentDateselectedDate: ', currentDateselectedDate)
+Closing =valid = startDate < currentDateselectedDate && endDate > currentDateselectedDate;
+console.log('res: ', valid = startDate < currentDateselectedDate && endDate > currentDateselectedDate)
+}
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -773,7 +893,7 @@ console.log('modesp: ', this.state.datas);
           <Button transparent onPress={()=> this.props.navigation.goBack()}>
                  <MaterialIcons name="arrow-back" size={25} color="white" />
                 </Button> 
-                <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares</Title>
+                <Title style={{color:'white', marginTop: 7, marginLeft: 10}}>Booking Shares </Title>
           </Left>
           
         
@@ -857,6 +977,7 @@ console.log('modesp: ', this.state.datas);
       animationOut='slideOutDown'
       animationOutTiming={700}
       useNativeDriver={true}
+      style={{ margin: 0 }}
       onBackdropPress={() => this.setState({VisibleAddInfo: false})} transparent={true}>
      <Card style={{ backgroundColor: 'white',
       padding: 22,
@@ -865,23 +986,104 @@ console.log('modesp: ', this.state.datas);
        <View  style={{ alignSelf: 'flex-end', position: 'absolute', top: 10, right:10, flex: 5}}>
                         <AntDesign name="closecircle" color="gray" size={25} onPress={() => this.setState({VisibleAddInfo: false})}/>
                         </View>
-        <ScrollView>
+        <ScrollView style={{top: 10, marginBottom:10}}>
+        <View style={styles.inputContainer}>
+                        <TouchableOpacity style={{    padding: 10,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightColor: '#ccc',
+    borderRightWidth: 1,
+    width: SCREEN_WIDTH/2.5,flexDirection: 'row'}} onPress={()=> this.setState({isGuest: !this.state.isGuest})}>
+      {this.state.isGuest?  <MaterialCommunityIcons name={'heart-circle'} size={25} color="#33c37d" />
+      :
+      <MaterialCommunityIcons name={'heart-circle-outline'} size={25} color="#666" />}
+                           
+                            <Text>I'm the guest</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{    padding: 10,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: SCREEN_WIDTH/2.5,flexDirection: 'row'}} onPress={()=> this.setState({isGuest: !this.state.isGuest})}>
+      {!this.state.isGuest?  <MaterialCommunityIcons name={'heart-circle'} size={25} color="#33c37d" />
+      :
+      <MaterialCommunityIcons name={'heart-circle-outline'} size={25} color="#666" />}
+                            <Text style={{marginTop: -10}}>I'm booking for other guest</Text>
+                        </TouchableOpacity>
+                        </View>
+                  
+                        {this.state.isGuest?null:  <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Guest Fullname</Text>}
+                {this.state.isGuest?null: 
+                <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                <Left style={{left: 10}}>
+                  <Button style={{ backgroundColor: "#FFFFFF" }}>
+                  <Fontisto name={'person'} size={25} color="#b5b5b5" />
+                  </Button>
+                </Left>
+                <Body>
+                <Input  value={this.state.guestName} onChangeText={(text) => {this.setState({guestName: text})}} placeholderTextColor="#687373" />
        
-     
-                    <Text style={{marginTop: 15, fontSize: 10}}>Price</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.SelectedPricing==undefined?'Select Mode of Pricing':pricetoPay.toString()+'/'+this.state.SelectedPricing} placeholderTextColor="#687373" />
-         </Item>  
-                        <Text style={{marginTop: 15, fontSize: 10}}>Number of Person</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: parseFloat(text)<this.state.datas.minGuest?
+                </Body>
+                </ListItem>
+                
+              }
+    {!this.state.AlwaysOpen && this.state.startDate != null? <View> 
+      <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Booking time</Text>
+
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<Left style={{left: 10}}>
+<Button style={{ backgroundColor: "#FFFFFF" }}>
+<FontAwesome5 name={'user-clock'} size={20} color="#b5b5b5" />
+</Button>
+</Left>
+<Body>
+<Input value={moment(this.state.StorestartDate.seconds*1000).format('h:mm a')+'-'+moment(this.state.StoreendDate.seconds*1000).format('h:mm a')} placeholderTextColor="#687373" />
+</Body>
+</ListItem>
+</View>
+:null
+}
+                    <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Price</Text>
+
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome5 name={'money-bill'} size={20} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input value={this.state.SelectedPricing==undefined?'Select Mode of Pricing':parseFloat(pricetoPay).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').toString()+'/'+this.state.SelectedPricing} placeholderTextColor="#687373" />
+            </Body>
+          </ListItem>
+            
+                  
+                        <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Number of Person</Text>
+                        <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <Fontisto name={'persons'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input value={this.state.passenger} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: parseFloat(text)<this.state.datas.minGuest?
              Alert.alert('Invalid Input', 'Minimum Guest is '+this.state.datas.minGuest,)
             :parseFloat(text)>this.state.datas.maxGuest?  Alert.alert('Invalid Input', 'Maximum Guest is '+this.state.datas.maxGuest,): this.setState({passenger: text})}} placeholderTextColor="#687373" />
-         </Item>
-         <Text style={{marginTop: 15, fontSize: 10}}>Start Date of Rental</Text>
-                    <Item regular style={{marginTop: 7, padding: 10}}>
-                       <TouchableOpacity onPress={this.showDatePicker} style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).format('MMM D, YYYY h:mm a')}</Text>
+         </Body>
+          </ListItem>
+                      
+
+                        
+         <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Start Date of Rental</Text>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <MaterialCommunityIcons name={'calendar-clock'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <TouchableOpacity onPress={this.showDatePicker} style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).format('MMM D, YYYY h:mm a')}</Text>
 </TouchableOpacity>
 
 <DateTimePickerModal
@@ -889,46 +1091,132 @@ console.log('modesp: ', this.state.datas);
         mode="datetime"
         onConfirm={this.handleConfirm}
         onCancel={this.hideDatePicker}
-      />
-                    </Item>
+      /></Body>
+          </ListItem>
+        
+                  
 
-                    {this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?<Text style={{marginTop: 15, fontSize: 10}}>No of {this.state.SelectedPricing =='Weekly'? 'Week': this.state.SelectedPricing =='Monthly'? 'Month':null}</Text>: null}
-             {   this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?        <Item regular style={{marginTop: 7}}>
-             <Input placeholder={this.state.Duration}  value={this.state.Duration} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: this.setState({Duration: text})}} placeholderTextColor="#687373" />
-         </Item>:null}
+                    {this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?<Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>No of {this.state.SelectedPricing =='Weekly'? 'Week': this.state.SelectedPricing =='Monthly'? 'Month':null}</Text>: null}
+        
+             {   this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?    
+                       <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                       <Left style={{left: 10}}>
+                         <Button style={{ backgroundColor: "#FFFFFF" }}>
+                         <MaterialCommunityIcons name={'calendar-week'} size={25} color="#b5b5b5" />
+                         </Button>
+                       </Left>
+                       <Body>
+                       <Input placeholder={this.state.Duration}  value={this.state.Duration} keyboardType={'number-pad'}  onChangeText={(text) => {isNaN(text)? null: this.setState({Duration: text})}} placeholderTextColor="#687373" />
+        </Body>
+                     </ListItem>  
+                
+             
+            :null}
          
-                   {<Text style={{marginTop: 15, fontSize: 10}}>End Date of Rental</Text>}
-                    {this.state.SelectedPricing =='Weekly'?<Item regular style={{marginTop: 7, padding: 10}}><TouchableOpacity style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(7*parseInt(this.state.Duration), 'days').format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity></Item>: this.state.SelectedPricing =='Monthly' ?<Item regular style={{marginTop: 7, padding: 10}}><TouchableOpacity style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(30*parseInt(this.state.Duration), 'days').format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity></Item>:
-this.state.SelectedPricing == '3Hour'?
-<Item regular style={{marginTop: 7, padding: 10}}><TouchableOpacity style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(3, 'hours').format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity></Item>:
-this.state.SelectedPricing == '6Hour'?
-<Item regular style={{marginTop: 7, padding: 10}}><TouchableOpacity style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(6, 'hours').format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity></Item>:
-this.state.SelectedPricing == '12Hour'?
-<Item regular style={{marginTop: 7, padding: 10}}><TouchableOpacity style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(12, 'hours').format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity></Item>
-:<Item regular style={{marginTop: 7, padding: 10}}>
-                       <TouchableOpacity onPress={this.showDatePickerend} style={{width: '60%'}}>
-<Text>{this.state.startDate===""?'Start Date/Time':moment(this.state.Dateend).format('MMM D, YYYY h:mm a')}</Text>
-</TouchableOpacity>
+                   {<Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>End Date of Rental</Text>}
+                    {this.state.SelectedPricing =='Weekly'?
+                              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                              <Left style={{left: 10}}>
+                                <Button style={{ backgroundColor: "#FFFFFF" }}>
+                                <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+                                </Button>
+                              </Left>
+                              <Body>
+                              <TouchableOpacity style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(7*parseInt(this.state.Duration), 'days').format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity></Body>
+                            </ListItem>
+                  
 
+                   : this.state.SelectedPricing =='Monthly' ?
+                   <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                   <Left style={{left: 10}}>
+                     <Button style={{ backgroundColor: "#FFFFFF" }}>
+                     <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+                     </Button>
+                   </Left>
+                   <Body>
+                   <TouchableOpacity style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(30*parseInt(this.state.Duration), 'days').format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity></Body>
+                 </ListItem>
+   
+
+:
+this.state.SelectedPricing == '3Hour'?
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<Left style={{left: 10}}>
+  <Button style={{ backgroundColor: "#FFFFFF" }}>
+  <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+  </Button>
+</Left>
+<Body>
+<TouchableOpacity style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(3, 'hours').format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity></Body>
+</ListItem>
+
+:
+this.state.SelectedPricing == '6Hour'?
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<Left style={{left: 10}}>
+  <Button style={{ backgroundColor: "#FFFFFF" }}>
+  <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+  </Button>
+</Left>
+<Body>
+<TouchableOpacity style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(6, 'hours').format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity></Body>
+</ListItem>
+
+:
+this.state.SelectedPricing == '12Hour'?
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<Left style={{left: 10}}>
+  <Button style={{ backgroundColor: "#FFFFFF" }}>
+  <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+  </Button>
+</Left>
+<Body>
+<TouchableOpacity style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.startDate).add(12, 'hours').format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity></Body>
+</ListItem>
+
+
+:
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<Left style={{left: 10}}>
+  <Button style={{ backgroundColor: "#FFFFFF" }}>
+  <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
+  </Button>
+</Left>
+<Body>
+<TouchableOpacity onPress={this.showDatePickerend} style={{width: '90%'}}>
+<Text style={{width: '90%'}}>{this.state.startDate===""?'Start Date/Time':moment(this.state.Dateend).format('MMM D, YYYY h:mm a')}</Text>
+</TouchableOpacity>
 <DateTimePickerModal
         isVisible={this.state.isDatePickerVisibleend}
         mode="datetime"
         onConfirm={this.handleConfirmend}
         onCancel={this.hideDatePickerend}
-      />
-                    </Item>}
-                    <Text style={{marginTop: 15, fontSize: 10}}>Mode of Payment</Text>
-                    <Picker
+      />  
+</Body>
+</ListItem>
+          
+
+
+}
+                <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Mode of Payment</Text>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome name={'cc-mastercard'} size={20} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Picker
                          selectedValue={this.state.SelectedMode}
                          onValueChange={(itemValue, itemIndex) => 
                           this.setState({SelectedMode:itemValue})             
@@ -937,7 +1225,9 @@ this.state.SelectedPricing == '12Hour'?
                                           <Picker.Item label={'Over the Counter'} value={'Over the Counter'} />
                                                         {this.state.bank!=undefined && this.state.bank.bankAvail == true? <Picker.Item label={'Bank Transfer'} value={'Bank Transfer'} />:null  }
                                                         {this.state.gcash!=undefined && this.state.gcash.gcashavail == true? <Picker.Item label={'Gcash'} value={'Gcash'} />:null  }
-                    </Picker>
+                    </Picker></Body>
+          </ListItem>
+                   
                     {this.state.SelectedMode =='Bank Transfer'?
                     <Card style={{padding: 20, borderRadius: 20}}>
                       <CardItem bordered style={{flexDirection: 'column'}}>
@@ -958,10 +1248,15 @@ this.state.SelectedPricing == '12Hour'?
                         </Card>
                         :null
                   }
-                  <Text style={{marginTop: 15, fontSize: 10}}>Phone Number</Text>
-                    <Item>
-                   
-                   <Picker
+                  <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
+                  <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Picker
                          selectedValue={this.state.phone}
                          onValueChange={(itemValue, itemIndex) => this.setState({phone: itemValue}) }>        
                             <Picker.Item label = {this.state.phone}  value={this.state.phone}  />
@@ -969,23 +1264,36 @@ this.state.SelectedPricing == '12Hour'?
      <Picker.Item label={user.phone} value={user.phone} key={index}/>
   ))        }
                     </Picker>
-            </Item>
-                    <Text style={{marginTop: 15, fontSize: 10}}>Note</Text>
-                        <Item regular style={{marginTop: 7}}>
-             <Input  value={this.state.note} onChangeText={(text) => {this.setState({note: text})}} placeholderTextColor="#687373" />
-         </Item>
+            </Body>
+          </ListItem>
+                  
+                 
+          
+                    <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Note</Text>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name={'book'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            <Input placeholder={this.state.note == ''? 'Note':this.state.note} value={this.state.note} onChangeText={(text) => {this.setState({note: text})}} placeholderTextColor="#687373" />
+            </Body>
+          </ListItem>
+                
+                     
           
 
-         {/* <Text style={{marginTop: 15, fontSize: 10}}>Description</Text>
+         {/* <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Description</Text>
          <Item regular style={{marginTop: 7}}>
              <Input value={this.state.datas.description} placeholderTextColor="#687373" />
          </Item>*/}
         
      </ScrollView>   
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
-        onPress={() =>{this.state.uid == null?null:this.state.storewallet < 1? null: this.FinalCheckouts()}}
+        onPress={() =>{this.state.uid == null?null:this.state.storewallet < 1? null:this.state.Storestatus && !this.state.AlwaysOpen && Closing == true ?this.FinalCheckouts(): this.state.AlwaysOpen?this.FinalCheckouts():null}}
       >
-       <Text style={{color:'white'}}>{this.state.uid == null?'Log in to Continue':this.state.storewallet < 1? 'Unavailable':'Continue Booking'}</Text>
+       <Text style={{color:'white'}}>{this.state.uid == null?'Log in to Continue':this.state.storewallet < 1? 'Unavailable':this.state.Storestatus && !this.state.AlwaysOpen && Closing == true ?'Continue Booking': this.state.AlwaysOpen? 'Continue Booking':'Unavailable'}</Text>
       </Button>
     </Card>
     </Modal>
@@ -1071,8 +1379,8 @@ this.state.SelectedPricing == '12Hour'?
                 />
               </View>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'black', fontWeight:'bold'}}>Your Transaction is Queued!</Text>
-              <Text style={{color:'black', fontWeight:'600', textAlign: "center"}}>Please wait patiently.</Text>
+              <Text style={{color:'black', fontWeight:'bold'}}>Your booking is on process</Text>
+              <Text style={{color:'black', fontWeight:'600', textAlign: "center"}}>Please wait for confirmation</Text>
               </View>
             <Button block style={{ height: 30, backgroundColor: "#019fe8"}}
              onPress={()=> this.OrderSuccess()} >
@@ -1234,8 +1542,14 @@ let out_check_extension = moment(this.state.newDateend*1000).format('YYYY-MM-D H
 const a =moment(in_check_extension.toString());  
 const b = moment(out_check_extension.toString());  
 const diff = b.diff(a, 'hours'); 
-
+const update_StoreTransaction = firestore().collection('stores').doc(this.state.datas.storeId);
+update_StoreTransaction.update({ 
+  TransactionPending: firestore.FieldValue.increment(1),
+})
     const dataNow={
+      refNo: this.ReferenceNo1(1)+this.ReferenceNo2(1)+this.ReferenceNo3(1)+this.ReferenceNo4(1)+this.ReferenceNo5(1)+this.ReferenceNo6(1),
+      guestName:this.state.guestName,
+      isGuest:this.state.isGuest,
       currency:this.props.route.params.currency,
       admin_token:this.state.admin_token.concat(this.state.notification_token).filter((a)=>a),
       city:this.state.datas.city.trim(),
@@ -1361,6 +1675,27 @@ const diff = b.diff(a, 'hours');
 
 
 const styles = {
+  inputContainer: {
+    marginTop: 5,
+    marginBottom: 10,
+    width: '100%',
+    height: SCREEN_HEIGHT / 15,
+    borderColor: '#ccc',
+    borderRadius: 3,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  iconStyle: {
+    padding: 10,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRightColor: '#ccc',
+    borderRightWidth: 1,
+    width: 50,
+  },
   line: {
     width: '100%',
     height: 1,
