@@ -17,6 +17,7 @@ export default class FastFoods extends Component{
     const slatitude = this.props.route.params.slatitude;
     const slongitude = this.props.route.params.slongitude;
     this.state = {
+      StoreCountry: this.props.route.params.store.Country,
       defaultIndex: 0,
       category : store.subcategory,
       name: store.name,
@@ -36,7 +37,7 @@ export default class FastFoods extends Component{
         key={item["key"]}
         style={{ backgroundColor: '#ffffff', flex: 1}}
       >
-        <FFCard title={item["title"]} store={this.state.name} currency={this.props.route.params.currency} fromPlace={this.props.route.params.fromPlace} storeId={this.state.store_id} token={this.state.token} slatitude={this.state.slatitude} slongitude={this.state.slongitude} navigation={this.props.navigation}/>
+        <FFCard title={item["title"]} store={this.state.name} StoreCountry={this.state.StoreCountry} currency={this.props.route.params.currency} fromPlace={this.props.route.params.fromPlace} storeId={this.state.store_id} token={this.state.token} slatitude={this.state.slatitude} slongitude={this.state.slongitude} navigation={this.props.navigation}/>
       </View>
     );
   };

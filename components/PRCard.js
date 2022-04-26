@@ -123,6 +123,8 @@ export default class PRCard extends Component {
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
+                 {this.state.customerInfo == undefined? null:this.state.customerInfo.RentalPropFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.RentalPropFav.includes(data.id)?<AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
       <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
   bottom:0, width: '100%', height:50}}>
    <Text  numberOfLines={1} style={{ fontSize: 15,
@@ -176,7 +178,20 @@ export default class PRCard extends Component {
 
   async componentDidMount(){  
     this.StartImageRotationFunction()
-    const userId= await AsyncStorage.getItem('uid');
+    const userId =  auth().currentUser.uid;
+    firestore().collection('users').where('userId', '==', userId).onSnapshot(
+                 querySnapshot => {
+                   
+                     querySnapshot.forEach(doc => {
+                          this.setState({   customerInfo : doc.data() })
+                         console.log('customerInfo ',doc.data())    
+                     });
+                
+                    
+                 },
+                 error => {
+                  //   console.log(error)
+                 })
     this.setState({ loading: true });   
     
 
@@ -299,6 +314,39 @@ export default class PRCard extends Component {
       useNativeDriver: true, // Add this line
     }).start(()=>this.StartImageRotationFunction());
   }
+  
+  addToFav(id){
+    const uid =  auth().currentUser.uid;
+   this.setState({loading:true})
+    const updateRef = firestore().collection('users').doc(uid);
+    updateRef.update({
+      RentalPropFav: firestore.FieldValue.arrayUnion(id),
+          
+      }).then((docRef) => {   
+        this.setState({loading:false})
+        this.loadProducts()
+      }).catch((err)=> {
+        this.setState({loading:false,})
+        console.log('err: ', err)})
+  }
+
+
+  removeFav(id){
+    const uid =  auth().currentUser.uid;
+   this.setState({loading:true})
+    const updateRef = firestore().collection('users').doc(uid);
+    updateRef.update({
+      RentalPropFav: firestore.FieldValue.arrayRemove(id),
+          
+      }).then((docRef) => {   
+        this.setState({loading:false})
+        this.loadProducts()
+      }).catch((err)=> {
+        this.setState({loading:false,})
+        console.log('err: ', err)})
+  }
+
+
   render() {
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
    //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)

@@ -173,6 +173,8 @@ console.log('city.length: ',city.length)
           const userId =  this.props.route.params.uid;
           AsyncStorage.setItem('uid', userId);
           this.ref.collection('users').doc(userId).set({
+            cityLong: 'none',
+cityLat:'none',
             selectedCountry: '',
             selectedCity:'none',
             photo:'',

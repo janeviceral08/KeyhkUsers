@@ -4,6 +4,7 @@ import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Car
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import Octicons from 'react-native-vector-icons/Octicons'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
@@ -34,6 +35,7 @@ import {imgDefault} from './images';
 import { FlatGrid } from 'react-native-super-grid';
 import { SliderBox } from "react-native-image-slider-box";
 import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
+import PhotoGrid from '../components/PhotoGrid';
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
 Logger.setLogCallback(log => {
@@ -181,8 +183,11 @@ export default class CheckoutScreenHotels extends Component {
         Storestatus :true,
         StoreendDate : null,
         StorestartDate : null,
-   
-  };
+        Nearby:[],
+        showNearby: false,
+        CommonFacilities:[],
+        showCommonFacilities:false,
+        };
 
   }
 
@@ -402,6 +407,8 @@ firestore().collection('stores').where('id', '==', this.props.route.params.datas
          Storestatus : doc.data().status,
          StoreendDate : doc.data().endDate == undefined? null:doc.data().endDate,
          StorestartDate : doc.data().startDate == undefined? null: doc.data().startDate,
+         Nearby: doc.data().Nearby== undefined? []: doc.data().Nearby,
+         CommonFacilities: doc.data().CommonFacilities== undefined? []: doc.data().CommonFacilities,
 
        });
       })
@@ -887,7 +894,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 }
     return(
         <Root>
-          <Container style={{backgroundColor: '#CCCCCC'}}>   
+          <Container style={{backgroundColor: 'white'}}>   
           <Header androidStatusBarColor="#2c3e50" style={{display:'none'}} style={{backgroundColor: '#183c57'}}>
           <Left style={{flex:3, flexDirection: 'row'}}>
           <Button transparent onPress={()=> this.props.navigation.goBack()}>
@@ -898,77 +905,233 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
           
         
         </Header>
-          <Loader loading={this.state.loading} trans={trans}/>     
-     
-                      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <View style={{position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,}}>
-      
-      <FlatGrid
-      data={this.state.datas.imageArray.filter(items => {
-        const itemData = items;
-        const textData = 'AddImage';
-       
-        return itemData.indexOf(textData) == -1
-      })}
+          <Loader loading={this.state.loading} trans={trans}/>   
+   
+    <FlatList
+              ListHeaderComponent={        
+              
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        
+         <View> 
+<Text style={{fontSize: 18, fontWeight: 'bold', margin: 10}}>{this.state.datas.name.toUpperCase()} <Text style={{fontSize: 14, }}>{this.state.SelectedPricing==undefined?'Select Mode of Pricing':parseFloat(pricetoPay).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,').toString()}</Text><Text style={{fontSize: 14,}}> Per {this.state.SelectedPricing}</Text></Text>
+<View style={{flexDirection: 'row',borderBottomWidth: 0.5, borderBottomColor: 'gray', marginBottom: this.state.Nearby.length >0?10:30 }}>
+<Ionicons name="people" color="gray" size={25} style={{alignSelf: 'center', marginLeft: 5}} onPress={() => this.setState({VisibleAddInfo: false})}/>
+                        
+<View style={{justifyContent: 'space-between', marginLeft: 20, width: SCREEN_WIDTH/2.7}}>
+<Text style={{fontSize: 14,}}>Good for {this.state.datas.maxGuest} person</Text>
+</View>
+
+</View>
+{this.state.CommonFacilities.length >0?
+<View style={{flexDirection: 'row',borderBottomWidth: 0.5, borderBottomColor: 'gray', marginBottom: this.state.Nearby.length >0?10:30 }}>
+
+<View>
+<FlatList 
+      data={this.state.CommonFacilities}
       // staticDimension={300} 
       // fixed
-      spacing={10}
-      renderItem={({ item }) => (
+      numColumns={2}
+      renderItem={({ item, index }) => (index < 2?
+      
+        <TouchableOpacity style={{flexDirection: 'row',width: SCREEN_WIDTH/2}}  onPress={()=> this.setState({showCommonFacilities:true})}>
+          {item.CommonFacilities[0].icon == 'MaterialIcons'?
+          <MaterialIcons name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :item.CommonFacilities[0].icon == 'Ionicons'?
+          <Ionicons name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :item.CommonFacilities[0].icon == 'MaterialCommunityIcons'?
+          <MaterialCommunityIcons name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :
+          <FontAwesome5 name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
 
-              <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:item})}>
-              <Image style={{  width: SCREEN_WIDTH/2.2, height: 200}} resizeMethod={'resize'} source={{uri: item}} />
-       </TouchableWithoutFeedback>
-              
-      )}
+          }
+
+                        
+<View style={{justifyContent: 'space-between', marginLeft: 5}}>
+<Text style={{fontSize: 14, }}>{item.CommonFacilities[0].label}</Text>
+
+</View>
+</TouchableOpacity>
+    
+         :null    )
+      }
     />
+     {this.state.Nearby.length >2? <TouchableOpacity onPress={()=> this.setState({showCommonFacilities:true})}>
+<Text style={{fontSize: 14, textAlign: 'center', color:'#019fe8'}}>Show All</Text></TouchableOpacity>:null}
+  </View>
+</View>
+:null
+}
 
+{this.state.Nearby.length >0? <View style={{flexDirection: 'row',borderBottomWidth: 0.5, borderBottomColor: 'gray', marginBottom: 30 }}>
+                 
+<View style={{justifyContent: 'space-between',}}>
+<Text style={{fontSize: 14, textAlign: 'left', fontWeight: 'bold', marginLeft:10}}>Nearby Places</Text>
+<FlatList 
+      data={this.state.Nearby}
+      // staticDimension={300} 
+      // fixed
+      renderItem={({ item, index }) => (index < 2?
+      
+        <TouchableOpacity style={{flexDirection: 'row',width: SCREEN_WIDTH}}  onPress={()=> this.setState({showNearby:true})} >
+          {item.category[0].icon == 'MaterialIcons'?
+          <MaterialIcons name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :item.category[0].icon == 'Ionicons'?
+          <Ionicons name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :item.category[0].icon == 'MaterialCommunityIcons'?
+          <MaterialCommunityIcons name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :
+          <FontAwesome5 name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
 
-   {/* <MapView
-      provider={PROVIDER_GOOGLE}
-      zoomEnabled={true}
-        showsUserLocation={true}
-        scrollEnabled={true}
-                pitchEnabled={true}
-        style={{ position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0}}
-          region={{
-            latitude: this.state.cLong,
-            longitude:this.state.cLat,
-           latitudeDelta: 0.01,
-              longitudeDelta: 0.005
-          }}
-          >
+          }
+
+                        
+<View style={{justifyContent: 'space-between', marginLeft: 20}}>
+<Text style={{fontSize: 14, }}>{item.name}</Text>
+<Text style={{fontSize: 12, color:'gray'}}>{item.category[0].label}</Text>
+
+</View>
+<Text style={{fontSize: 12,alignSelf: 'center', position: 'absolute', right: 10}}>{item.distance} {item.unit}</Text>
+</TouchableOpacity>
+    
+         :null    )
+      }
+    />
+   {this.state.Nearby.length >2? <TouchableOpacity onPress={()=> this.setState({showNearby:true})}>
+<Text style={{fontSize: 14, textAlign: 'center', color:'#019fe8'}}>Show All</Text></TouchableOpacity>:null}
+</View>
+</View>: null}
+
+</View>
+</View>
+}
+
+data={['item']}
+renderItem={(item)=>(
+
+      <PhotoGrid source={this.state.datas.imageArray.filter(items => {
+        const itemData = items;
+        const textData = 'AddImage';
         
-          <MapView.Marker
-             coordinate={{latitude: this.state.cLong, longitude: this.state.cLat}}
-             title={"Location"}
-             description={'Location Here'}
-             image={Rider_img}
-          />
-          </MapView>*/}
-        </View>
-         </View>
+        return itemData.indexOf(textData) == -1
+      })} onPressImage={uri => this.setState({showURL: true, SelectedURL:uri})} />
+)}
+      
+
+
+   ListFooterComponent={
+      
          <View>
                
            
-          <View style={{ height: 40, alignItems: 'center', marginBottom: 10}}>
+          <View style={{ height: 40, alignItems: 'center', marginBottom: 10,}}>
 							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: '#019fe8', width: SCREEN_WIDTH - 10, height: 40, borderRadius: 5, padding: 10}]} onPress={() => this.setState({VisibleAddInfo: true})}>
 								<Text style={{color: '#ffffff'}}>Book Now</Text>
 							</TouchableOpacity>
             </View>
                
                </View>
+   }
+   />
+               <Modal
+      isVisible={this.state.showNearby}
+      onBackButtonPress={() => this.setState({ showNearby: false })}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      style={{ margin: 0 }}
+      onBackdropPress={() => this.setState({showNearby: false})} transparent={true}>
+     <Card style={{ backgroundColor: 'white',
+      padding: 22,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+        <Text style={{fontSize: 15, textAlign: 'center', fontWeight: 'bold'}}>Nearby Places</Text>
+  <FlatList 
+      data={this.state.Nearby}
+      // staticDimension={300} 
+      // fixed
+      renderItem={({ item, index }) => ( 
+        <Card>
+        <CardItem>
+        <TouchableOpacity style={{flexDirection: 'row',width: SCREEN_WIDTH/1.2}}  onPress={()=> this.setState({showNearby: false})}>
+          {item.category[0].icon == 'MaterialIcons'?
+          <MaterialIcons name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :item.category[0].icon == 'Ionicons'?
+          <Ionicons name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :item.category[0].icon == 'MaterialCommunityIcons'?
+          <MaterialCommunityIcons name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
+          :
+          <FontAwesome5 name={item.category[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: 5}} />
 
-               
+          }
+
+                        
+<View style={{justifyContent: 'space-between', marginLeft: 20}}>
+<Text style={{fontSize: 12, }}>{item.name}</Text>
+<Text style={{fontSize: 10, color:'gray'}}>{item.category[0].label}</Text>
+
+</View>
+<Text style={{fontSize: 12,alignSelf: 'center', position: 'absolute', right: 50}}>{item.distance} {item.unit}</Text>
+</TouchableOpacity>
+    
+        </CardItem>
+        </Card>
+             )
+      }
+    />
+        </Card>
+        </Modal>
+
+        <Modal
+      isVisible={this.state.showCommonFacilities}
+      onBackButtonPress={() => this.setState({ showCommonFacilities: false })}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      style={{ margin: 0 }}
+      onBackdropPress={() => this.setState({showCommonFacilities: false})} transparent={true}>
+     <Card style={{ backgroundColor: 'white',
+      padding: 2,
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',}}>
+        <Text style={{fontSize: 15, textAlign: 'center', fontWeight: 'bold'}}>Common Facilities</Text>
+  <FlatList 
+      data={this.state.CommonFacilities}
+      // staticDimension={300} 
+      // fixed
+      numColumns={2}
+      renderItem={({ item, index }) => ( 
+        <Card>
+        <CardItem>
+        <TouchableOpacity style={{flexDirection: 'row',width: SCREEN_WIDTH/2.5}}  onPress={()=> this.setState({showCommonFacilities: false})}>
+          {item.CommonFacilities[0].icon == 'MaterialIcons'?
+          <MaterialIcons name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: -5}} />
+          :item.CommonFacilities[0].icon == 'Ionicons'?
+          <Ionicons name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: -5}} />
+          :item.CommonFacilities[0].icon == 'MaterialCommunityIcons'?
+          <MaterialCommunityIcons name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: -5}} />
+          :
+          <FontAwesome5 name={item.CommonFacilities[0].iconName} color="gray" size={15} style={{alignSelf: 'center', marginLeft: -5}} />
+
+          }
+
+                        
+<View style={{justifyContent: 'space-between', marginLeft: 5}}>
+<Text style={{fontSize: 12, }}>{item.CommonFacilities[0].label}</Text>
+
+</View>
+</TouchableOpacity>
+    
+        </CardItem>
+        </Card>
+             )
+      }
+    />
+        </Card>
+        </Modal>
             <Modal
       isVisible={this.state.VisibleAddInfo}
       onBackButtonPress={() => this.setState({ VisibleAddInfo: false })}
@@ -1015,7 +1178,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                   
                         {this.state.isGuest?null:  <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Guest Fullname</Text>}
                 {this.state.isGuest?null: 
-                <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,}}>
                 <Left style={{left: 10}}>
                   <Button style={{ backgroundColor: "#FFFFFF" }}>
                   <Fontisto name={'person'} size={25} color="#b5b5b5" />
@@ -1031,7 +1194,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
     {!this.state.AlwaysOpen && this.state.startDate != null? <View> 
       <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Booking time</Text>
 
-<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
 <Left style={{left: 10}}>
 <Button style={{ backgroundColor: "#FFFFFF" }}>
 <FontAwesome5 name={'user-clock'} size={20} color="#b5b5b5" />
@@ -1046,7 +1209,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 }
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Price</Text>
 
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome5 name={'money-bill'} size={20} color="#b5b5b5" />
@@ -1059,7 +1222,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
             
                   
                         <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Number of Person</Text>
-                        <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                        <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <Fontisto name={'persons'} size={25} color="#b5b5b5" />
@@ -1075,7 +1238,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 
                         
          <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Start Date of Rental</Text>
-         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialCommunityIcons name={'calendar-clock'} size={25} color="#b5b5b5" />
@@ -1099,7 +1262,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                     {this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?<Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>No of {this.state.SelectedPricing =='Weekly'? 'Week': this.state.SelectedPricing =='Monthly'? 'Month':null}</Text>: null}
         
              {   this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?    
-                       <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                       <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
                        <Left style={{left: 10}}>
                          <Button style={{ backgroundColor: "#FFFFFF" }}>
                          <MaterialCommunityIcons name={'calendar-week'} size={25} color="#b5b5b5" />
@@ -1115,7 +1278,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
          
                    {<Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>End Date of Rental</Text>}
                     {this.state.SelectedPricing =='Weekly'?
-                              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
                               <Left style={{left: 10}}>
                                 <Button style={{ backgroundColor: "#FFFFFF" }}>
                                 <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1129,7 +1292,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                   
 
                    : this.state.SelectedPricing =='Monthly' ?
-                   <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                   <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
                    <Left style={{left: 10}}>
                      <Button style={{ backgroundColor: "#FFFFFF" }}>
                      <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1144,7 +1307,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 
 :
 this.state.SelectedPricing == '3Hour'?
-<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
 <Left style={{left: 10}}>
   <Button style={{ backgroundColor: "#FFFFFF" }}>
   <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1158,7 +1321,7 @@ this.state.SelectedPricing == '3Hour'?
 
 :
 this.state.SelectedPricing == '6Hour'?
-<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
 <Left style={{left: 10}}>
   <Button style={{ backgroundColor: "#FFFFFF" }}>
   <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1172,7 +1335,7 @@ this.state.SelectedPricing == '6Hour'?
 
 :
 this.state.SelectedPricing == '12Hour'?
-<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
 <Left style={{left: 10}}>
   <Button style={{ backgroundColor: "#FFFFFF" }}>
   <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1186,7 +1349,7 @@ this.state.SelectedPricing == '12Hour'?
 
 
 :
-<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
 <Left style={{left: 10}}>
   <Button style={{ backgroundColor: "#FFFFFF" }}>
   <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1209,7 +1372,7 @@ this.state.SelectedPricing == '12Hour'?
 
 }
                 <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Mode of Payment</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome name={'cc-mastercard'} size={20} color="#b5b5b5" />
@@ -1249,7 +1412,7 @@ this.state.SelectedPricing == '12Hour'?
                         :null
                   }
                   <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
-                  <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                  <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
@@ -1270,7 +1433,7 @@ this.state.SelectedPricing == '12Hour'?
                  
           
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Note</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.06}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'book'} size={25} color="#b5b5b5" />

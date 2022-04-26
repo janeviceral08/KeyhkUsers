@@ -460,6 +460,10 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
     this.setState({ItemList: NewListItem})
     
     }
+
+
+    const NewTotal = parseFloat(this.props.route.params.orders.total)+parseFloat(this.props.route.params.orders.tip);
+
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -836,7 +840,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
 </View>
 
 <CardItem  style={{top: -90, flexDirection: 'column'}}>
-<Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.currency} {this.props.route.params.orders.total.toString()}</Text>
+<Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.currency} {NewTotal}</Text>
 <View style={{flexDirection: 'row'}}>
 <Body >
  <TouchableOpacity onPress={()=>this.onCall()} style={{flexDirection: 'row', width: '95%', borderRadius: 5, borderWidth: 2, borderColor: '#019fe8', padding: 10, marginRight: 30}}>
@@ -916,7 +920,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
  </TouchableOpacity>
   </Body>
   <Body>
-  <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.currency} {this.props.route.params.orders.total.toString()}</Text>
+  <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.currency} {NewTotal}</Text>
  
   </Body>
   </View>

@@ -406,6 +406,20 @@ export default class SearchServices extends Component {
     this.StartImageRotationFunction()
     this.setState({loading: true})
      const userId= auth().currentUser.uid;
+     firestore().collection('users').where('userId', '==', userId).onSnapshot(
+                  querySnapshot => {
+                    
+                      querySnapshot.forEach(doc => {
+                           this.setState({   customerInfo : doc.data() })
+                          console.log('customerInfo ',doc.data())    
+                      });
+                 
+                     
+                  },
+                  error => {
+                   //   console.log(error)
+                  }
+              );
      //firestore().collection('products').where('city', '==', this.state.City.trim()).where('admin_control', '==', true).where('status', '==', true).onSnapshot(this.onCollectionUpdate);
      this.loadProducts(false, true);
 
@@ -523,7 +537,7 @@ export default class SearchServices extends Component {
         const itemData = items.datas.ProductType;
         const textData = 'Transport';
         return itemData.indexOf(textData) == -1
-      }) , loading: false}); 
+      }).sort((a, b) => Number(b.datas.arrange) - Number(a.datas.arrange)) , loading: false}); 
         
           });
   
@@ -587,6 +601,39 @@ export default class SearchServices extends Component {
     }
 }
 
+
+   
+addToFav(id){
+  const uid =  auth().currentUser.uid;
+ this.setState({loading:true})
+  const updateRef = firestore().collection('users').doc(uid);
+  updateRef.update({
+    ServiceFav: firestore.FieldValue.arrayUnion(id),
+        
+    }).then((docRef) => {   
+      this.setState({loading:false})
+      this.loadProducts();
+       }).catch((err)=> {
+      this.setState({loading:false,})
+      console.log('err: ', err)})
+}
+
+
+removeFav(id){
+  const uid =  auth().currentUser.uid;
+ this.setState({loading:true})
+  const updateRef = firestore().collection('users').doc(uid);
+  updateRef.update({
+    ServiceFav: firestore.FieldValue.arrayRemove(id),
+        
+    }).then((docRef) => {   
+      this.setState({loading:false})
+      this.loadProducts();
+    }).catch((err)=> {
+      this.setState({loading:false,})
+      console.log('err: ', err)})
+}
+
     rowRenderer = (type, data)  => {
         const {
           DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,address, ameneties, ColorMotor,imageArray,MBrand, VModel, name, price, quantity, ProductType, rentalType, featured_image, unit, status, id,admin_control, storeId, sale_price,sale_description, brand, store_name} = data;
@@ -611,6 +658,9 @@ export default class SearchServices extends Component {
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
+        {this.state.customerInfo == undefined? null:this.state.customerInfo.ServiceFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.6, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.ServiceFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.6, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{backgroundColor: "white", width: 32, marginLeft: SCREEN_WIDTH/2.6, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
+  
       <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, }}>

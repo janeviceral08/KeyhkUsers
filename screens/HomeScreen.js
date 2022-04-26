@@ -36,7 +36,7 @@ import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
 import Draggable from 'react-native-draggable';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { FlatGrid } from 'react-native-super-grid';
-
+import PhotoGrid from '../components/PhotoGrid';
 
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
@@ -425,7 +425,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
         Prentals.push(doc.data())
       });
       this.setState({
-        Prentals: Prentals,
+        Prentals: Prentals.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
 
@@ -435,7 +435,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
         Vrentals.push(doc.data())
       });
       this.setState({
-        Vrentals: Vrentals,
+        Vrentals: Vrentals.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
     onCollectionProducts  = (querySnapshot) => {
@@ -485,9 +485,9 @@ console.log("UserLocationCountry ", UserLocationCountry)
     this.setState({selectedCityUser: item, typeOfRate: NewValueofCityUser.typeOfRate})
     this.ref.where('city','==',NewCityItem).onSnapshot(this.onCollectionUpdate);
   const userId= await AsyncStorage.getItem('uid');
-   const newUserLocationCountry = this.state.UserLocationCountry.trim() =='Philippines'?'vehicles':this.state.UserLocationCountry.trim()+'.vehicles';
+   const newUserLocationCountry = this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.trim()+'.city';
    console.log('newUserLocationCountry: ',newUserLocationCountry)
-   firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
+   firestore().collection(newUserLocationCountry).doc(NewCityItem).collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
     this.cityRef.collection('products').where('rentalType','==', 'Property').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onPrentals)
     this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onVrentals)
      
@@ -498,7 +498,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
           });
         console.log('Stores: ',city )
         this.setState({
-          dataSource: city,//.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
+          dataSource: city.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
           loading: false
         }) 
       });
@@ -750,10 +750,41 @@ let Address ='';
   }
   
 
+  addToFav(id){
+    const uid =  auth().currentUser.uid;
+   this.setState({loading:true})
+    const updateRef = firestore().collection('users').doc(uid);
+    updateRef.update({
+      RentalCarFav: firestore.FieldValue.arrayUnion(id),
+          
+      }).then((docRef) => {   
+        this.setState({loading:false})
+        this.loadProducts()
+      }).catch((err)=> {
+        this.setState({loading:false,})
+        console.log('err: ', err)})
+  }
+
+
+  removeFav(id){
+    const uid =  auth().currentUser.uid;
+   this.setState({loading:true})
+    const updateRef = firestore().collection('users').doc(uid);
+    updateRef.update({
+      RentalCarFav: firestore.FieldValue.arrayRemove(id),
+          
+      }).then((docRef) => {   
+        this.setState({loading:false})
+        this.loadProducts()
+      }).catch((err)=> {
+        this.setState({loading:false,})
+        console.log('err: ', err)})
+  }
+
 
   rowRendererVrentals = (data) => {
     console.log('data: ', data)
-    const { name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
+    const { admin_control,name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
     const newData = imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
@@ -772,28 +803,29 @@ let Address ='';
               priority: FastImage.priority.normal, }} 
               resizeMode={FastImage.resizeMode.cover}
   >
- 
+          {this.state.customerInfo == undefined? null:this.state.customerInfo.RentalCarFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.RentalCarFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: 10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
 {!StatHourPrice?null:
 <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
-<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.state.CountryNow[0].currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
 <Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Hour</Text>
 </View>
 }
     
     {!StatDayPrice?null:
     <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
-<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.state.CountryNow[0].currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
 <Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Day</Text>
 </View>  }
  {!StatWeeklyPrice?null:
    <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
-<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.state.CountryNow[0].currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
 <Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Week</Text>
 </View>
 }
  {!StatMonthlyPrice?null:
    <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
-<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.state.CountryNow[0].currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
 <Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Month</Text>
 </View>
 }
@@ -1126,7 +1158,8 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
 <MaterialCommunityIcons name={'account-hard-hat'}  size={this.state.selectedIndex == 3? 30:30} color={this.state.selectedIndex == 3?'white':'#525252'} style={{alignSelf: 'center', backgroundColor: this.state.selectedIndex == 3?'#f6a60d':'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
-    <TouchableOpacity style={{width: SCREEN_WIDTH/6}} onPress={()=> this.props.navigation.navigate('Account')}>
+
+    <TouchableOpacity style={{width: SCREEN_WIDTH/6}} onPress={()=> this.props.navigation.navigate('Profile',{ 'cLat': this.state.x.latitude, 'cLong': this.state.x.longitude, 'typeOfRate':this.state.typeOfRate, 'selectedCityUser': this.state.selectedCityUser, 'fromPlace': this.state.fromPlace,'UserLocationCountry': this.state.UserLocationCountry,'currency':this.state.CountryNow[0].currency, 'code':this.state.CountryNow[0].code,'cityLat': this.state.customerInfo.cityLat,'cityLong': this.state.customerInfo.cityLong})}>
 <MaterialCommunityIcons name={'menu'}  size={this.state.selectedIndex == 4? 35:30} color={this.state.selectedIndex == 4?'#396ba0':'#525252'} style={{alignSelf: 'center', backgroundColor: 'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
@@ -1148,7 +1181,7 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Services</Text></View>
   }
        {this.state.selectedIndex == 2?
-               <View style={{flexDirection: 'row',marginLeft: 30 }}>
+               <View style={{flexDirection: 'row',marginLeft: 30, marginBottom:5 }}>
                <TouchableOpacity style={{shadowColor: "#000",
                shadowOffset: {
                  width: 0,
@@ -1336,6 +1369,7 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
       animationIn='slideInUp'
       animationOut='slideOutDown'
       animationOutTiming={700}
+      style={{ margin: 0 }}
       useNativeDriver={true}
       onBackButtonPress={() => this.setState({ VisibleAddInfo: false })}
       onBackdropPress={() => this.setState({VisibleAddInfo: false})} transparent={true}>
@@ -1343,31 +1377,23 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
       padding: 22,
       borderRadius: 4,
       borderColor: 'rgba(0, 0, 0, 0.1)',}}>
-       
+       <View  style={{ alignSelf: 'flex-end', position: 'absolute', top: 10, right:10, flex: 5}}>
+                        <AntDesign name="closecircle" color="gray" size={25} onPress={() => this.setState({VisibleAddInfo: false})}/>
+                        </View>
         <ScrollView>
         <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
               <Text style={{color:'tomato', fontWeight:'bold'}}>Detailed Information</Text>
               </View>
         <Text>Photos</Text>
-        <FlatGrid
-      itemDimension={120}
-      data={this.state.vInfos.imageArray.filter(items => {
+        <PhotoGrid source={this.state.vInfos.imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
-       
+        
         return itemData.indexOf(textData) == -1
       })}
-      // staticDimension={300} 
-      // fixed
-      spacing={10}
-      renderItem={({ item }) => (
-               <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:item})}>
-                <Image style={{  width: 160, height: 160, resizeMode: 'contain',margin: 10}} source={{uri: item}} />
-</TouchableWithoutFeedback>
-              
-       
-      )}
-    />
+      style={{width: SCREEN_WIDTH/1.7}}
+      onPressImage={uri => this.setState({showURL: true, SelectedURL:uri})} />
+      
            
          <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'normal'}}>{this.state.vInfos.rentalType == 'Equipment'?this.state.vInfos.name: this.state.vInfos.MBrand+' '+this.state.vInfos.VModel} </Text></Text>
          
@@ -1385,7 +1411,7 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
            </ScrollView>   
     
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
-        onPress={() => {this.setState({VisibleAddInfo: false}); this.state.selectedIndexRentals ==2 || this.state.selectedIndexRentals ==3?this.props.navigation.navigate('CheckoutScreenEquipment',{'datas': this.state.vInfos, 'typeOfRate':this.props.typeOfRate, 'cLat': this.state.vInfos.slatitude, 'cLong': this.state.vInfos.slongitude , 'currency':this.props.currency}):this.props.navigation.navigate('CheckoutScreenRentals',{'datas': this.state.vInfos, 'typeOfRate':this.props.typeOfRate, 'cLat': this.state.vInfos.slatitude, 'cLong': this.state.vInfos.slongitude, 'currency':this.props.currency })}}
+        onPress={() => {this.setState({VisibleAddInfo: false}); this.state.selectedIndexRentals ==2 || this.state.selectedIndexRentals ==3?this.props.navigation.navigate('CheckoutScreenEquipment',{'datas': this.state.vInfos, 'typeOfRate':this.state.typeOfRate, 'cLat': this.state.vInfos.slatitude, 'cLong': this.state.vInfos.slongitude , 'currency':this.state.CountryNow[0].currency}):this.props.navigation.navigate('CheckoutScreenRentals',{'datas': this.state.vInfos, 'typeOfRate':this.state.typeOfRate, 'cLat': this.state.vInfos.slatitude, 'cLong': this.state.vInfos.slongitude, 'currency':this.state.CountryNow[0].currency })}}
       >
        <Text style={{color:'white'}}>Proceed</Text>
       </Button>

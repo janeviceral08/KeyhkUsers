@@ -94,7 +94,7 @@ export default class OrderDetailsPabili extends Component {
       this.ordercounters =  firestore();
       this.chargeref =  firestore().collection('vehicles').where('vehicle', '==', 'Motorcycle' );
       this.state = {  
-   
+        orders:this.props.route.params.orders,
      VisibleAddInfo: false,
      datas: [],
      cLong:this.props.route.params.orders.flong,
@@ -215,6 +215,9 @@ export default class OrderDetailsPabili extends Component {
         ratingModal: false,
         showURL: false,
         ItemList:[],
+        CancelledModal:false,
+        CancelledBy:'',
+        RiderCancel:[]
   };
 
   }
@@ -335,6 +338,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
       querySnapshot.forEach((doc) => {
   
         this.setState({
+          orders:doc.data(),
             rating:doc.data().rating == undefined?5:doc.data().rating,
         ratingModal: doc.data().OrderStatus=='Delivered' &&doc.data().rating == undefined? true:false,
           OrderStatus : doc.data().OrderStatus,
@@ -348,7 +352,13 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
         ratings: doc.data().DeliveredBy.rating,
         note : doc.data().Note,
         ItemList: doc.data().ItemList,
+        
+  isCancelled: doc.data().isCancelled,
+  CancelledBy: doc.data().CancelledBy == undefined? '':doc.data().CancelledBy,
        });
+        if(doc.data().OrderStatus == 'For Cancel'){
+        this.setState({CancelledModal: true})
+      }
       })
     })
   };
@@ -421,6 +431,94 @@ StartImageRotationFunction(){
     useNativeDriver: true, // Add this line
   }).start(()=>this.StartImageRotationFunction());
 }
+
+
+CancelOrder(){
+  const  datasUse={
+    userId: this.state.orders.userId,
+    id:this.state.orders.DeliveredBy.id,
+    OrderId:this.state.orders.OrderId,
+  }
+  console.log('datasUse: ', datasUse)
+  Alert.alert(
+      'Confirmation',
+      'are you sure to cancel this transaction?',
+      [
+        { text: 'cancel', onPress: () => null},
+       
+        { text: 'OK', onPress: () => {
+          const  datasUse={
+            userId: this.state.orders.userId,
+            id:this.state.orders.DeliveredBy.id,
+            OrderId:this.state.orders.OrderId,
+          }
+          console.log('datasUse: ', datasUse)
+          const updateSuccess =firestore().collection('users').doc(this.state.orders.userId);
+          updateSuccess.update({ 
+         
+            RiderIDS: firestore.FieldValue.arrayRemove(this.state.orders.DeliveredBy.id)
+          })
+          const update_RiderTransaction = firestore().collection('riders').doc(this.state.orders.DeliveredBy.id);
+          update_RiderTransaction.update({ 
+            TransactionCancelled: firestore.FieldValue.increment(1),
+            Transactionprocessing: firestore.FieldValue.increment(-1)
+        })
+
+          const ref = firestore().collection('orders').doc(this.state.orders.OrderId);
+          ref.update({ 
+            OrderStatus : "Cancelled",
+    rider_id:"",
+    DeliveredBy : "",
+            })
+            this.setState({CancelledModal:false})
+          this.props.navigation.goBack();
+        }}
+      ],
+      { cancelable: false }
+    );
+  return;
+  
+
+}
+
+
+PendingOrder(){
+
+Alert.alert(
+    'Confirmation',
+    'are you sure to move this transaction to pending?',
+    [
+      { text: 'cancel', onPress: () => null},
+     
+      { text: 'OK', onPress: () => {
+        const updateSuccess =firestore().collection('users').doc(this.state.orders.userId);
+        updateSuccess.update({ 
+       
+          RiderIDS: firestore.FieldValue.arrayRemove(this.state.orders.DeliveredBy.id)
+        })
+        const ref = firestore().collection('orders').doc(this.state.orders.OrderId);
+        ref.update({ 
+          OrderStatus : "Pending",
+          rider_id:"",
+        DeliveredBy : "",
+          })
+          this.setState({CancelledModal:false})
+        this.props.navigation.goBack();
+      }}
+    ],
+    { cancelable: false }
+  );
+return;
+
+
+}
+
+
+
+
+
+
+
 render() {
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
  //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
@@ -458,6 +556,8 @@ const deleteListItem =(item)=>{
 });
 this.setState({ItemList: NewListItem})
 }
+
+const NewTotal = parseFloat(this.props.route.params.orders.total)+parseFloat(this.props.route.params.orders.tip);
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -843,7 +943,7 @@ Reason of Cancellation:
 </View>
 
 <CardItem  style={{top: -90, flexDirection: 'column'}}>
-<Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.currency} {this.props.route.params.orders.total.toString()}</Text>
+<Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.currency} {NewTotal}</Text>
   <Text style={{fontSize: 13, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.PaymentMethod}</Text>
 <View style={{flexDirection: 'row'}}>
 <Body >
@@ -902,7 +1002,7 @@ Reason of Cancellation:
     borderRadius: 1,
     width: 1,
     zIndex: 10,
-    height: '28%', position: 'absolute', left: 21, top: '32%'
+    height: '27%', position: 'absolute', left: 21, top: '28%'
   }}>
 </View>
 <View style={{flexDirection: 'row'}}>
@@ -919,7 +1019,7 @@ Reason of Cancellation:
  </TouchableOpacity>
   </Body>
   <Body>
-  <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.currency} {this.props.route.params.orders.total.toString()}</Text>
+  <Text style={{fontSize: 18, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.currency} {NewTotal}</Text>
     <Text style={{fontSize: 13, fontWeight: 'bold', alignSelf: 'flex-end', marginRight: 10}}>{this.props.route.params.orders.PaymentMethod}</Text>
   </Body>
   </View>
@@ -972,6 +1072,37 @@ Reason of Cancellation:
                     </View>
                 </View>
                 </Modal>
+
+
+                
+                <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.CancelledModal}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                 transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT/3}]}> 
+                   
+                                             <Text style={{textAlign: 'center', fontSize: 16, fontWeight: 'bold'}}>Cancelled By {this.state.CancelledBy}</Text>
+                                             <Text style={{textAlign: 'left'}}>Reasons: </Text>
+                                            
+                                             {this.state.RiderCancel.map((info, index) =>  {return(<View style={{flexDirection: 'row',paddingLeft:30, paddingBottom:10}} key={index}> 
+                        <Text>{info.RiderName}- {info.CancelledReason}</Text>
+                    </View>)} )}
+<View style={{flexDirection: 'row', justifyContent: 'center',}}>
+                   <TouchableOpacity onPress={()=> this.PendingOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3, marginRight: 10}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Pending</Text>
+</TouchableOpacity>
+<TouchableOpacity onPress={()=> this.CancelOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Cancel</Text>
+</TouchableOpacity>
+</View>
+                </View>
+                </Modal>
+
              
              
           </Container>

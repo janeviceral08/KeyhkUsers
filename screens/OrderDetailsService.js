@@ -7,6 +7,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 // Our custom files and classes import
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 import { RadioButton, Chip, Divider } from 'react-native-paper';
 //import { StackActions, NavigationActions } from 'react-navigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -142,6 +143,10 @@ export default class OrderDetailsService extends Component {
       warningText: '',
       warningModal: false,
       ModalHelp: false,
+      CancelledModal:false,
+      CancelledBy:'',
+      RiderCancel:[],
+      CancelledReason:'',
   };
 
   }
@@ -274,9 +279,92 @@ export default class OrderDetailsService extends Component {
  
   }
 
+
+
+  CancelOrder(){
+
+    Alert.alert(
+        'Confirmation',
+        'are you sure to cancel this transaction?',
+        [
+          { text: 'cancel', onPress: () => null},
+         
+          { text: 'OK', onPress: () => {
+            
+            firestore().collection('stores').doc(this.state.datas.RentStoreId).update({
+              Transactionprocessing: firestore.FieldValue.increment(-1),
+              TransactionCancelled: firestore.FieldValue.increment(1),
+          })
+          
+            const ref = firestore().collection('orders').doc(this.state.datas.OrderId);
+            ref.update({ 
+              OrderStatus : "Cancelled",
+      rider_id:"",
+      DeliveredBy : "",
+              })
+              this.setState({CancelledModal:false})
+            this.props.navigation.goBack();
+          }}
+        ],
+        { cancelable: false }
+      );
+    return;
+    
+ 
+}
+
+
+PendingOrder(){
+
+  Alert.alert(
+      'Confirmation',
+      'are you sure to move this transaction to pending?',
+      [
+        { text: 'cancel', onPress: () => null},
+       
+        { text: 'OK', onPress: () => {
+          firestore().collection('stores').doc(this.state.datas.RentStoreId).update({
+            Transactionprocessing: firestore.FieldValue.increment(-1),
+            TransactionPending: firestore.FieldValue.increment(1),
+        })
+        
+          const ref = firestore().collection('orders').doc(this.state.datas.OrderId);
+          ref.update({ 
+            OrderStatus : "Pending",
+            })
+            this.setState({CancelledModal:false})
+          this.props.navigation.goBack();
+        }}
+      ],
+      { cancelable: false }
+    );
+  return;
+  
+
+}
+
+
+
  async componentDidMount() {
   this.StartImageRotationFunction()
     //this.setState({loading: true})
+    firestore().collection('orders').where('OrderId', '==', this.props.route.params.orders.OrderId).onSnapshot((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+  
+        this.setState({
+    
+          datas: doc.data(),
+          CancelledReason: doc.data().CancelledReason,
+    isCancelled: doc.data().isCancelled,
+    CancelledBy: doc.data().CancelledBy == undefined? '':doc.data().CancelledBy,
+       
+       });
+       if(doc.data().OrderStatus == 'For Cancel'){
+        this.setState({CancelledModal: true})
+      }
+  
+      })
+    })
  const getData= firestore().collection('charges').doc(this.props.route.params.orders.adminID);
     const doc = await getData.get();
     if (!doc.exists) {
@@ -1090,7 +1178,32 @@ console.log('out: ', out);
             </View>
             </View>
             </Modal>
-             
+            <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.CancelledModal}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                 transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT/3}]}> 
+                   
+                                             <Text style={{textAlign: 'center', fontSize: 16, fontWeight: 'bold'}}>Cancelled By {this.state.CancelledBy}</Text>
+                                             <Text style={{textAlign: 'left', marginTop: 20}}>Reasons: {this.state.CancelledReason}</Text>
+                                            
+                                            
+<View style={{flexDirection: 'row', justifyContent: 'center',}}>
+                   <TouchableOpacity onPress={()=> this.PendingOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3, marginRight: 10}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Pending</Text>
+</TouchableOpacity>
+<TouchableOpacity onPress={()=> this.CancelOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Cancel</Text>
+</TouchableOpacity>
+</View>
+                </View>
+                </Modal>
+
           </Container>
           </Root>
     );

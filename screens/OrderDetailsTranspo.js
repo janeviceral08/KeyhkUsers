@@ -139,6 +139,9 @@ export default class OrderDetailsTranspo extends Component {
       travelTime:cart.travelTime,
       MinuteRate:cart.MinuteRate,
       estTime:cart.estTime,
+      CancelledModal:false,
+        CancelledBy:'',
+        RiderCancel:[]
       
   };
 
@@ -156,10 +159,18 @@ async componentDidMount() {
 
       console.log('travelTime: ', doc.data().travelTime )
       this.setState({
+        cart: doc.data(),
         estTime:doc.data().estTime,
         MinuteRate:doc.data().MinuteRate,
         travelTime : doc.data().travelTime,
+        isCancelled: doc.data().isCancelled,
+        CancelledBy: doc.data().CancelledBy == undefined? '':doc.data().CancelledBy,
+        RiderCancel: doc.data().RiderCancel,
      });
+
+     if(doc.data().OrderStatus == 'For Cancel'){
+      this.setState({CancelledModal: true})
+    }
     })
   })
 
@@ -216,6 +227,84 @@ StartImageRotationFunction(){
     useNativeDriver: true, // Add this line
   }).start(()=>this.StartImageRotationFunction());
 }
+
+
+
+CancelOrder(){
+  const  datasUse={
+    userId: this.state.cart.userId,
+    id:this.state.cart.DeliveredBy.id,
+    OrderId:this.state.cart.OrderId,
+  }
+  console.log('datasUse: ', datasUse)
+  Alert.alert(
+      'Confirmation',
+      'are you sure to cancel this transaction?',
+      [
+        { text: 'cancel', onPress: () => null},
+       
+        { text: 'OK', onPress: () => {
+         
+          const updateSuccess =firestore().collection('users').doc(this.state.cart.userId);
+  updateSuccess.update({ 
+ 
+    RiderIDS: firestore.FieldValue.arrayRemove(this.state.cart.DeliveredBy.id)
+  })
+  const update_RiderTransaction = firestore().collection('riders').doc(this.state.cart.DeliveredBy.id);
+  update_RiderTransaction.update({ 
+    TransactionCancelled: firestore.FieldValue.increment(1),
+    Transactionprocessing: firestore.FieldValue.increment(-1)
+})
+          const ref = firestore().collection('orders').doc(this.state.cart.OrderId);
+          ref.update({ 
+            OrderStatus : "Cancelled",
+    rider_id:"",
+    DeliveredBy : "",
+            })
+            this.setState({CancelledModal:false})
+          this.props.navigation.goBack();
+        }}
+      ],
+      { cancelable: false }
+    );
+  return;
+  
+
+}
+
+
+PendingOrder(){
+
+Alert.alert(
+    'Confirmation',
+    'are you sure to move this transaction to pending?',
+    [
+      { text: 'cancel', onPress: () => null},
+     
+      { text: 'OK', onPress: () => {
+        const updateSuccess =firestore().collection('users').doc(this.state.cart.userId);
+        updateSuccess.update({ 
+       
+          RiderIDS: firestore.FieldValue.arrayRemove(this.state.cart.DeliveredBy.id)
+        })
+        const ref = firestore().collection('orders').doc(this.state.cart.OrderId);
+        ref.update({ 
+          OrderStatus : "Pending",
+          rider_id:"",
+        DeliveredBy : "",
+          })
+          this.setState({CancelledModal:false})
+        this.props.navigation.goBack();
+      }}
+    ],
+    { cancelable: false }
+  );
+return;
+
+
+}
+
+
 render() {
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
  //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
@@ -433,7 +522,7 @@ const trans={
 <View style={{ backgroundColor: '#396ba0', borderRadius: 10, width: '40%'}}>
 <Text style={{textAlign: 'center', fontSize: 13, color: 'white'}}>ETA
 </Text>
-<Text style={{textAlign: 'center', fontSize: 18, color: 'white'}}>{this.state.cart.distance === undefined? null: Math.round(((this.state.cart.estTime/60)*10)/10)} mins</Text>
+<Text style={{textAlign: 'center', fontSize: 18, color: 'white'}}>{this.state.cart.distance === undefined? null:Math.round(this.props.route.params.orders.estTime/60).toString()} mins</Text>
 </View>
 </Right>
 
@@ -619,6 +708,39 @@ const trans={
      <Image style={{  width: SCREEN_WIDTH, height:SCREEN_HEIGHT, resizeMode: 'contain'}} source={{uri: this.state.SelectedURL}} />
    </TouchableWithoutFeedback>
     </Modal>
+
+
+
+  
+    <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.CancelledModal}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                 transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT/3}]}> 
+                   
+                                             <Text style={{textAlign: 'center', fontSize: 16, fontWeight: 'bold'}}>Cancelled By {this.state.CancelledBy}</Text>
+                                             <Text style={{textAlign: 'left'}}>Reasons: </Text>
+                                            
+                                             {this.state.RiderCancel.map((info, index) =>  {return(<View style={{flexDirection: 'row',paddingLeft:30, paddingBottom:10}} key={index}> 
+                        <Text>{info.RiderName}- {info.CancelledReason}</Text>
+                    </View>)} )}
+<View style={{flexDirection: 'row', justifyContent: 'center',}}>
+                   <TouchableOpacity onPress={()=> this.PendingOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3, marginRight: 10}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Pending</Text>
+</TouchableOpacity>
+<TouchableOpacity onPress={()=> this.CancelOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Cancel</Text>
+</TouchableOpacity>
+</View>
+                </View>
+                </Modal>
+
+
                </ScrollView >
                </View>
           </Container>

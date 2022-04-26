@@ -6,6 +6,7 @@ import auth from '@react-native-firebase/auth';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 // Our custom files and classes import
@@ -176,8 +177,8 @@ export default class CheckoutTransport extends Component {
       phone:'Select Phone Number',
       warningModal: false,
       fromPlace:this.props.route.params.cityLong != 'none'?'': this.props.route.params.fromPlace,
-      flat:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLat:this.props.route.params.cLat,
-      flong:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLong:this.props.route.params.cLong,
+      flat:this.props.route.params.cityLong == 'none'?this.props.route.params.cLat:this.props.route.params.cityLat,
+      flong:this.props.route.params.cityLong == 'none'?this.props.route.params.cLong:this.props.route.params.cityLong,
        region:{ latitude:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLong:this.props.route.params.cLat,
       longitude:this.props.route.params.cityLong != 'none'?this.props.route.params.cityLat:this.props.route.params.cLong,
       // latitudeDelta: 0.0005,
@@ -227,6 +228,10 @@ export default class CheckoutTransport extends Component {
 MinuteCity:this.props.route.params.datas.MinuteCity == undefined?0:this.props.route.params.datas.MinuteCity,
 MinuteMetro:this.props.route.params.datas.MinuteMetro == undefined?0:this.props.route.params.datas.MinuteMetro,
 MinuteBase:this.props.route.params.datas.MinuteBase == undefined?0:this.props.route.params.datas.MinuteBase,
+tip50: true,
+tip100:false,
+tip200:false,
+tipcustom:false,
   };
   this.getLocation();
 
@@ -444,11 +449,11 @@ console.log("arr", arr)
 
  }
   getLocation (){
-
- const newUserLocationCountry = this.props.route.params.UserLocationCountry =='Philippines'?'vehicles':this.props.route.params.UserLocationCountry+'.vehicles';
- firestore().collection(newUserLocationCountry).where('vehicle', '==', this.props.route.params.datas.vehicle).onSnapshot((querySnapshot) => {
+console.log('this.props.route.params.selectedCityUser: ', this.props.route.params.selectedCityUser.trim())
+const newUserLocationCountry = this.props.route.params.UserLocationCountry =='Philippines'?'city':this.props.route.params.UserLocationCountry+'.city';
+ firestore().collection(newUserLocationCountry).doc(this.props.route.params.selectedCityUser.trim()).collection('vehicles').where('vehicle', '==', this.props.route.params.datas.vehicle).onSnapshot((querySnapshot) => {
     querySnapshot.forEach((doc) => {
-console.log('doc.data(): ', doc.data())
+console.log('getLocation doc.data(): ', doc.data())
       this.setState({
         succeding: doc.data().succeed,
         amount_base: this.props.route.params.typeOfRate =='Municipal Rate'?doc.data().base_fare:this.props.route.params.typeOfRate =='City Rate'?doc.data().City:doc.data().Metro,
@@ -585,9 +590,9 @@ console.log('doc.data(): ', doc.data())
       this.backAction
     );
      const newUserLocationCountry = this.props.route.params.UserLocationCountry.trim() =='Philippines'?'AppShare':this.props.route.params.UserLocationCountry.trim()+'.AppShare';
-     const newUserLocationCountryVehicles = this.props.route.params.UserLocationCountry.trim() =='Philippines'?'vehicles':this.props.route.params.UserLocationCountry.trim()+'.vehicles';
+     const newUserLocationCountryVehicles = this.props.route.params.UserLocationCountry.trim() =='Philippines'?'city':this.props.route.params.UserLocationCountry.trim()+'.city';
      console.log('newUserLocationCountry: ',newUserLocationCountry)
-     firestore().collection(newUserLocationCountryVehicles).where('succeed', '>',0).onSnapshot(this.onCollectionVehicles);
+     firestore().collection(newUserLocationCountryVehicles).doc(this.props.route.params.selectedCityUser).collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionVehicles);
     firestore().collection(newUserLocationCountry).where('label', '==', 'rides').onSnapshot((querySnapshot) => {
       querySnapshot.forEach((doc) => {
   console.log('modeOfPayment', doc.data().modeOfPayment)
@@ -1399,7 +1404,7 @@ if(this.state.fromPlace!=''){
 
 
 
-  SwitchLocation(){
+  /*SwitchLocation(){
     const DataValue={
       billing_context: this.state.billing_contextTo,
       billing_province: this.state.billing_provinceTo,
@@ -1433,7 +1438,7 @@ if(this.state.fromPlace!=''){
     console.log('Switch DataValue',DataValue)
     this.setState(DataValue)
 
-  }
+  }*/
   SwitchLocation(){
     const DataValue={
       billing_context: this.state.billing_contextTo,
@@ -1452,7 +1457,7 @@ if(this.state.fromPlace!=''){
 
                  Tolat:this.state.flat,
                  Tolong:this.state.flong,
-                
+                 
                    billing_contextTo: this.state.billing_context,
                billing_provinceTo:this.state.billing_province,
                billing_cityTo: this.state.billing_city,
@@ -1516,6 +1521,8 @@ console.log('cityLong: ', this.props.route.params.cityLong);
 console.log('cityLat: ', this.props.route.params.cityLat);
 console.log('cLat: ', this.props.route.params.cLat);
 console.log('this.state.RushHour: ', this.state.RushHour)
+
+
     return(
         <Root>
           <Container style={{backgroundColor: '#CCCCCC'}}>   
@@ -1558,6 +1565,8 @@ console.log('this.state.RushHour: ', this.state.RushHour)
 
   onRegionDidChange={() => {Keyboard.dismiss();}}
   >
+    {console.log('flong: ', this.state.flong)}
+    {console.log('flat: ', this.state.flat)}
   <MapboxGL.Camera 
   centerCoordinate={[this.state.flong, this.state.flat]} 
   zoomLevel={15}
@@ -1691,7 +1700,7 @@ console.log('region: ', region)
                }}>
  
            <Text>{item.place_name}</Text>
-           {console.log('coordinates:', item.geometry.coordinates)}</TouchableOpacity>
+</TouchableOpacity>
          </View>
         )}
         keyExtractor={item => item.id}
@@ -1807,8 +1816,7 @@ if(this.state.fromPlace!=''){
 
    }}>
  
-           <Text>{item.place_name}</Text>
-           {console.log('coordinates:', item.geometry.coordinates)}</TouchableOpacity>
+           <Text>{item.place_name}</Text></TouchableOpacity>
          </View>
         )}
         keyExtractor={item => item.id}
@@ -1916,7 +1924,7 @@ Base fare:
 
                         <Text style={{marginTop: 15, fontSize: 13, fontWeight: 'bold'}}>Number of Passengers</Text>
   
-          <ListItem icon style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+          <ListItem icon style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <Fontisto name={'persons'} size={25} color="#b5b5b5" />
@@ -1965,7 +1973,7 @@ Base fare:
                         
           <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Pickup Time</Text>
 
-          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'dashboard'} size={25} color="#b5b5b5" />
@@ -1978,9 +1986,9 @@ Base fare:
             </Body>
             <Right>       
             {this.state.AlwaysOpen==false?
-                <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({AlwaysOpen: true})}><Text style={{fontSize: 15, color: 'black'}}>Asap</Text></MaterialCommunityIcons>
+                <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="gray" onPress={()=> this.setState({AlwaysOpen: true})}><Text style={{fontSize: 15, color: 'black'}}>Asap</Text></MaterialCommunityIcons>
                 :
-              <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({AlwaysOpen: false})}><Text style={{fontSize: 15, color: 'black'}}>Asap</Text></MaterialCommunityIcons>
+              <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="green" onPress={()=> this.setState({AlwaysOpen: false})}><Text style={{fontSize: 15, color: 'black'}}>Asap</Text></MaterialCommunityIcons>
               
               
               } 
@@ -1996,7 +2004,7 @@ Base fare:
         onCancel={this.hideDatePicker}
       />
                      
-          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, marginTop:10, left: -25, }}>
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, marginTop:10, left: -25, width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialCommunityIcons name={'bag-checked'} size={25} color="#b5b5b5" />
@@ -2004,9 +2012,9 @@ Base fare:
             </Left>
             <Body>
             {this.state.ExtraBaggage==false?
-  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({ExtraBaggage: true})}><Text style={{fontSize: 15, padding: 10}}>Extra Baggage</Text></MaterialCommunityIcons>
+  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="gray" onPress={()=> this.setState({ExtraBaggage: true})}><Text style={{fontSize: 15, padding: 10}}>Extra Baggage</Text></MaterialCommunityIcons>
   :
- <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({ExtraBaggage: false})}><Text style={{fontSize: 15, padding: 10}}>Extra Baggage</Text></MaterialCommunityIcons>
+ <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="green" onPress={()=> this.setState({ExtraBaggage: false})}><Text style={{fontSize: 15, padding: 10}}>Extra Baggage</Text></MaterialCommunityIcons>
  
  
 }
@@ -2014,38 +2022,97 @@ Base fare:
             </Body>
             <Right>
 
-{this.state.willingtopay==false?
-  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="green" onPress={()=> this.setState({willingtopay: true})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
-  :
- <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="red" onPress={()=> this.setState({willingtopay: false})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
- 
- 
-}
+
             </Right>
           </ListItem>
                         
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,width: SCREEN_WIDTH/ 1.26, top: 10}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome5 name={'hand-holding-usd'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            {this.state.willingtopay==false?
+  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="gray"  onPress={()=> this.setState({willingtopay: true, tip: 50})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
+  :
+ <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="green"  onPress={()=> this.setState({willingtopay: false})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
  
-  
-         {this.state.willingtopay==false?
+ 
+}
+            </Body>
+            <Right>       
+            {this.state.willingtopay==false?null:<View style={{height: 45, flexDirection: 'row', paddingTop: 0, right: -10, }}>
+          <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    width: SCREEN_WIDTH/9, flexDirection: 'row'}} onPress={()=> this.setState({tip50: !this.state.tip50, tip: 50, tip100: false, tip200: false, tipcustom: false})}>
+
+                           
+                            <Text style={{color: this.state.tip50? "#33c37d":"#666", fontWeight: this.state.tip50?'bold': 'normal'}}>50</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    width: SCREEN_WIDTH/9, flexDirection: 'row'}} onPress={()=> this.setState({tip100: !this.state.tip100, tip: 100, tip50: false, tip200: false, tipcustom: false})}>
+    
+                            <Text style={{marginTop: 0, color: this.state.tip100? "#33c37d":"#666", fontWeight: this.state.tip100?'bold': 'normal'}}>100</Text>
+                        </TouchableOpacity>
+                      
+                        <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    alignItems: 'center',
+    width: SCREEN_WIDTH/6, flexDirection: 'row'}} onPress={()=> this.setState({tipcustom: !this.state.tipcustom,  tip: 0,tip100: false, tip200: false, tip50: false})}>
+   
+                            <Text style={{marginTop: 0,fontSize:12, color: this.state.tipcustom? "#33c37d":"#666", fontWeight: this.state.tipcustom?'bold': 'normal'}}>Custom</Text>
+                        </TouchableOpacity>
+                        <View style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    width: SCREEN_WIDTH/6,flexDirection: 'row'}}>
+     
+     <Input   placeholder={this.state.tip == 0? 'Tip Amount':this.state.tip.toString() } value={this.state.tip.toString()} onChangeText={(text) => {isNaN(text)? null:this.setState({tip: text})}} placeholderTextColor="#687373" keyboardType={'number-pad'}/>
+                        </View>
+                        </View>}
+            </Right>
+          </ListItem>
+                     
+                       
+         {/*this.state.willingtopay==false?
  null  :
- <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,marginTop: 15}}>
+ <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,marginTop: 15,width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialCommunityIcons name={'cash-plus'} size={25} color="#b5b5b5" />
               </Button>
             </Left>
             <Body>
-              <Input placeholder={'Tip Amount'}  value={this.state.tip} onChangeText={(text) => {isNaN(text)? null:this.setState({tip: text})}} placeholderTextColor="#687373" keyboardType={'number-pad'}/>
+              <Input  value={this.state.tip == 0? 'Tip Amount':this.state.tip.toString() } onChangeText={(text) => {isNaN(text)? null:this.setState({tip: text})}} placeholderTextColor="#687373" keyboardType={'number-pad'}/>
             </Body>
           </ListItem>
 
-   
+   */
 }
 
           
                     <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
 
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
@@ -2068,7 +2135,7 @@ Base fare:
               <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Passenger Description</Text>
               
   
-              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <Fontisto name={'person'} size={25} color="#b5b5b5" />
@@ -2083,7 +2150,7 @@ Base fare:
          <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Mode of payment</Text>
 
            
-         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome name={'cc-mastercard'} size={20} color="#b5b5b5" />
@@ -2107,7 +2174,7 @@ Base fare:
                     
                     <Text style={{marginTop: 15,fontSize: 13, fontWeight: 'bold'}}>Note</Text>
                       
-          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.26}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'book'} size={25} color="#b5b5b5" />
@@ -2475,7 +2542,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
      billing_cityTo: this.state.billing_cityTo,
      billing_streetTo: this.state.billing_streetTo,
      billing_postalTo: this.state.billing_postalTo,
-     billing_barangayTo:this.state.billing_barangayTo,
+     billing_barangayTo:this.state.billing_barangayTo==undefined?'':this.state.billing_barangayTo,
      Timestamp: moment().unix(),
      user_token : token,
      Note: this.state.note,
@@ -2500,6 +2567,8 @@ if(this.state.photo == ''|| this.state.photo == undefined){
      base_dist: this.state.base_dist,
     vehicle: this.state.datas.vehicle,
     ProductType: 'Transport',
+    routeForMapLong: this.state.routeForMap.features[0].geometry.coordinates.map(a => a[0]).flat(2),
+    routeForMapLat: this.state.routeForMap.features[0].geometry.coordinates.map(a => a[1]).flat(2),
     }
 console.log('datavalue: ',datavalue)
   Alert.alert(
@@ -2687,7 +2756,7 @@ if(this.state.photo == ''|| this.state.photo == undefined){
      billing_cityTo: this.state.billing_cityTo,
      billing_streetTo: this.state.billing_streetTo,
      billing_postalTo: this.state.billing_postalTo,
-     billing_barangayTo:this.state.billing_barangayTo,
+     billing_barangayTo:this.state.billing_barangayTo==undefined?'':this.state.billing_barangayTo,
      Timestamp: moment().unix(),
      user_token : token,
      Note: this.state.note,
@@ -2712,6 +2781,8 @@ if(this.state.photo == ''|| this.state.photo == undefined){
      base_dist: this.state.base_dist,
     vehicle: this.state.datas.vehicle,
     ProductType: 'Transport',
+     routeForMapLong: this.state.routeForMap.features[0].geometry.coordinates.map(a => a[0]).flat(2),
+     routeForMapLat: this.state.routeForMap.features[0].geometry.coordinates.map(a => a[1]).flat(2),
     }
 console.log('datavalue: ',datavalue)
   Alert.alert(
@@ -2733,13 +2804,20 @@ console.log('datavalue: ',datavalue)
         loading: false,
         visibleModal: true
       })
-    )  .catch((error)=>     Alert.alert(
+    )  .catch((error)=>    {  this.setState({
+      loading: false,
+      visibleModal: false,
+    })
+    Alert.alert(
         'Try Again',
         '',
         [
           {text: 'OK'},
         ]
-      ))
+      );
+    console.log('error: ', error)
+    }
+      )
 
       }} 
             ]

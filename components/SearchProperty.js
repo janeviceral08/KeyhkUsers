@@ -117,7 +117,8 @@ export default class SearchProperty extends Component {
         const itemData = items.datas.ProductType;
         const textData = 'Transport';
         return itemData.indexOf(textData) == -1
-      })})
+      })
+    })
      // this.arrayholder = products;
     }
 
@@ -126,7 +127,7 @@ export default class SearchProperty extends Component {
     this.StartImageRotationFunction()
     this.setState({loading: true})
      const userId= auth().currentUser.uid;
-     firestore().collection('products').where('storeId', '==', this.props.route.params.storeId).where('rentalType', '==', 'Property').onSnapshot(this.onCollectionUpdate);
+     firestore().collection('products').where('storeId', '==', this.props.route.params.storeId).where('rentalType', '==', 'Property').orderBy('arrange', 'asc').onSnapshot(this.onCollectionUpdate);
      
 
        if(userId){
@@ -149,7 +150,7 @@ export default class SearchProperty extends Component {
         this.setState({loading: true})
         console.log('CIty: ', this.state.City)
         const userId= auth().currentUser.uid;
-        firestore().collection('products').where('keywords', 'array-contains-any', [this.state.searchText]).where('storeId', '==', this.props.route.params.storeId).where('rentalType', '==','Property').onSnapshot((querySnapshot) => {
+        firestore().collection('products').where('keywords', 'array-contains-any', [this.state.searchText]).where('storeId', '==', this.props.route.params.storeId).where('rentalType', '==','Property').orderBy('arrange', 'asc').onSnapshot((querySnapshot) => {
             const products = [];
             querySnapshot.forEach((doc) => {
               //console.log('search: ', doc.data())

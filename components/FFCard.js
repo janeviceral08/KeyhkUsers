@@ -118,6 +118,7 @@ async addonsdeleteCart(item){
               cluster: item.cluster,     
               choice: this.getAddonsDefault(),
               qty: this.state.count,           
+              StoreCountry:this.props.StoreCountry,
                 slongitude: this.props.slongitude,
                 slatitude: this.props.slatitude,
                 adminID: item.adminID,
@@ -155,6 +156,7 @@ async addonsdeleteCart(item){
           adminID: item.adminID,
           choice: this.getAddonsDefault(),
           qty: this.state.count,
+          StoreCountry:this.props.StoreCountry,
           slongitude: this.props.slongitude,
           slatitude: this.props.slatitude,
       };
@@ -217,6 +219,7 @@ async addonsdeleteCart(item){
             let newItem = {
                 id: item.id,
                 store_name: this.props.store,
+                StoreCountry:this.props.StoreCountry,
                 slongitude: this.props.slongitude,
                 slatitude: this.props.slatitude,
                 notification_token: this.props.token,
@@ -322,8 +325,6 @@ async addonsdeleteCart(item){
         let img=[];
         let add=[];
         this.setState({ isVisibleAddons: true,
-          slongitude: this.props.slongitude,
-          slatitude: this.props.slatitude,
                         name: item.name,
                         price: item.price,
                         image: img.concat(item.featured_image),
@@ -435,6 +436,36 @@ async addonsdeleteCart(item){
               }
           }
       }
+      addToFav(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          FoodFav: firestore.FieldValue.arrayUnion(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
+
+
+      removeFav(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          FoodFav: firestore.FieldValue.arrayRemove(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
 
   rowRenderer = (type, data) => {
     const { name, price, quantity, featured_image, unit, status, id,admin_control, storeId, sale_price,sale_description, brand ,cluster, addons} = data;
@@ -457,6 +488,10 @@ async addonsdeleteCart(item){
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
+        {console.log('data.id: ', data.id)}
+         {this.state.customerInfo == undefined? null:this.state.customerInfo.FoodFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.9, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.FoodFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
+              
       <View style={{backgroundColor: 'rgba(49,49,49, 0.8)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, flexDirection: 'row' }}>
@@ -506,6 +541,19 @@ async addonsdeleteCart(item){
   async componentDidMount(){  
     this.StartImageRotationFunction()
     const userId= auth().currentUser.uid;
+    firestore().collection('users').where('userId', '==', userId).onSnapshot(
+                 querySnapshot => {
+                   
+                     querySnapshot.forEach(doc => {
+                          this.setState({   customerInfo : doc.data() })  
+                     });
+                
+                    
+                 },
+                 error => {
+                  //   console.log(error)
+                 }
+             );
     this.setState({ loading: true });   
     
     this.getAddonsDefault();
@@ -664,7 +712,7 @@ async addonsdeleteCart(item){
               
           <Header androidStatusBarColor={'#696969'}  style={{backgroundColor:'#f06767', height: 46}}>
           <View style={{flex: 1,flexDirection:'row', width: 200, height: 36, justifyContent: "center", alignItems: 'center',backgroundColor:'white', marginTop: 5,borderRadius: 30}}>
-          <TouchableOpacity style={{alignItems:'center',justifyContent:'center', flexDirection:'row',  }} onPress = {()=>{this.props.navigation.navigate('Search', {'storeId': this.props.storeId, 'store_name': this.props.store, 'currency': this.props.currency,'slongitude': this.props.slongitude,'slatitude': this.props.slatitude,'token': this.props.token})}} underlayColor = 'transparent'>
+          <TouchableOpacity style={{alignItems:'center',justifyContent:'center', flexDirection:'row',  }} onPress = {()=>{this.props.navigation.navigate('Search', {'storeId': this.props.storeId, 'store_name': this.props.store, 'currency': this.props.currency,'StoreCountry': this.props.StoreCountry,'slongitude': this.props.slongitude,'slatitude': this.props.slatitude,'token': this.props.token})}} underlayColor = 'transparent'>
               <View style={{flex: 1}}>
                 <Text style={{justifyContent: "center", alignSelf: "center"}}>Search</Text>
               </View>

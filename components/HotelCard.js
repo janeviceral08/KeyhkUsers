@@ -124,6 +124,38 @@ export default class HotelCard extends Component {
           }
       }
 
+      addToFav(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          HotelFav: firestore.FieldValue.arrayUnion(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
+
+
+      removeFav(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          HotelFav: firestore.FieldValue.arrayRemove(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
+
+
   rowRenderer = (type, data) => {
     const {StatHourPrice3,StatHourPrice6,maxGuest,StatHourPrice12,HourPrice3,HourPrice6,HourPrice12, name, price, quantity, imageArray, unit, status, id,admin_control, storeId, DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice, brand ,cluster, addons} = data;
     const newData = imageArray.filter(items => {
@@ -140,54 +172,56 @@ export default class HotelCard extends Component {
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
-      <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
+                 {this.state.customerInfo == undefined? null:this.state.customerInfo.HotelFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.9, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.HotelFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.9, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: SCREEN_WIDTH/2.9, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
+      <View style={{backgroundColor: 'rgba(49,49,49, 0.8)',   position: 'absolute',
   bottom:0, width: '100%', height:50}}>
   <Text  numberOfLines={1} style={{ fontSize: 15,
-    color: 'black',
+    color: 'white',
     padding : 1,paddingLeft: 10}}>{name}</Text>
       <View style={{height:50,flexShrink: 1, flexDirection: 'row' }}>
         
     {!StatHourPrice3?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,}}> {this.props.currency}{parseFloat(HourPrice3).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       {!StatHourPrice6?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,}}> {this.props.currency}{parseFloat(HourPrice6).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       {!StatHourPrice12?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,}}> {this.props.currency}{parseFloat(HourPrice12).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
          {!StatHourPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,}}> {this.props.currency}{parseFloat(HourPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
         
         {!StatDayPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1}}> {this.props.currency}{parseFloat(DayPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
      {!StatWeeklyPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,}}> {this.props.currency}{parseFloat(WeeklyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
      {!StatMonthlyPrice?null:
 <Text style={{ fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,}}> {this.props.currency}{parseFloat(MonthlyPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}    Good for {maxGuest}</Text>
      }
       </View>  
@@ -211,7 +245,20 @@ export default class HotelCard extends Component {
 
   async componentDidMount(){  
     this.StartImageRotationFunction()
-    const userId= await AsyncStorage.getItem('uid');
+    const userId= auth().currentUser.uid;
+    firestore().collection('users').where('userId', '==', userId).onSnapshot(
+                 querySnapshot => {
+                   
+                     querySnapshot.forEach(doc => {
+                          this.setState({   customerInfo : doc.data() })  
+                     });
+                
+                    
+                 },
+                 error => {
+                  //   console.log(error)
+                 }
+             );
     this.setState({ loading: true });   
     
 

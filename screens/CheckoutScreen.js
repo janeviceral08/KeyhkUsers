@@ -4,6 +4,7 @@ import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, Car
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 // Our custom files and classes import
 const SCREEN_WIDTH = Dimensions.get('window').width;
 import AccountInfo from './checkout/AccountInfo';
@@ -118,7 +119,13 @@ export default class Checkout extends Component {
        ImageTobeUploaded: null,
        ApprovalRequest: false,
        storeAddress: '',
-       paymentMethods:[]
+       paymentMethods:[],
+       AddTipModal:false,
+       tip50: true,
+tip100:false,
+tip200:false,
+tipcustom:false,
+tip:0,
   };
 
   }
@@ -386,9 +393,9 @@ _bootstrapAsync =async () =>{
     const { paymentMethod, minimum, selectedIndex, selectedIndices, customStyleIndex } = this.state;
     let total = 0
     if(customStyleIndex === 0){
-      total = this.state.subtotal+this.state.USERAdd  + this.calculateTotalDeliveryCharge() + this.extraKMCharges();
+      total = this.state.subtotal+this.state.USERAdd  + this.calculateTotalDeliveryCharge() + this.extraKMCharges()+ parseFloat(this.state.tip);
     }else if(customStyleIndex === 1){
-      total = this.state.subtotal+this.state.USERAdd;
+      total = this.state.subtotal+this.state.USERAdd+ this.state.tip;
     } 
     return total;
   }
@@ -541,6 +548,7 @@ const databasecharge = item.Country.trim() == 'Philippines'?'AppShare':item.Coun
       console.log('USERlong: ', item.long);
           let routeCoordinates = [];
    //       console.log('get route')
+   if(item.Country == this.state.cartItems[0].StoreCountry){
           axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;bicycle;traffic:disabled&legAttributes=shape`)
           .then(res => {
          
@@ -566,6 +574,12 @@ const databasecharge = item.Country.trim() == 'Philippines'?'AppShare':item.Coun
 
            // console.log(err)
             })
+          }else{
+            this.setState({
+               loading: false,
+             })
+          }
+
       }
       
      })
@@ -641,6 +655,7 @@ console.log('changeAddress databasecharge: ', databasecharge);
 //console.log('USERlong: ', item.long);
   let routeCoordinates = [];
  // console.log('get route')
+ if(item.Country == this.state.cartItems[0].StoreCountry){
   axios.get(`https://route.ls.hereapi.com/routing/7.2/calculateroute.json?apiKey=5fcoJoPAIOye99-ssHc6TIx73yOAhtWiU1_1p1461X4&waypoint0=geo!${from_lat},${from_long}&waypoint1=geo!${to_lat},${to_long}&mode=fastest;bicycle;traffic:disabled&legAttributes=shape`)
   .then(res => {
  
@@ -664,6 +679,11 @@ console.log('changeAddress databasecharge: ', databasecharge);
     }).catch(err => {
    // console.log(err)
     })
+  }else{
+    this.setState({
+       loading: false,
+     })
+  }
 }
 
 changePaymentMethod(item){
@@ -1584,6 +1604,81 @@ console.log('extraKMCharges: ', this.extraKMCharges());
                 />
             </View>
             </Modal>
+
+            <Modal
+      isVisible={this.state.AddTipModal}
+      animationInTiming={700}
+      animationIn='slideInUp'
+      animationOut='slideOutDown'
+      animationOutTiming={700}
+      useNativeDriver={true}
+      onBackdropPress={() => this.setState({AddTipModal: false, tip: 0})} transparent={true}>
+     <Card style={style.content}>
+       <CardItem><Body style={{flex:2, justifyContent:"center",alignContent:"center"}}><Text style={{fontSize:17, fontWeight:'bold'}}>New Total with Tip:  <NumberFormat  renderText={text => <Text style={{ paddingLeft: (SCREEN_WIDTH / 2)- 60, fontWeight: 'bold'}}>{text}</Text>} value={(Math.round(this.calculateOverAllTotal()*10)/10)- this.state.discount} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} /></Text></Body></CardItem>
+       <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,width: SCREEN_WIDTH/ 1.26, top: 10}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome5 name={'hand-holding-usd'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Right>       
+            {this.state.willingtopay==false?null:<View style={{height: 40, flexDirection: 'row', paddingTop: 0, right: -10, }}>
+          <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    width: SCREEN_WIDTH/9, flexDirection: 'row'}} onPress={()=> this.setState({tip50: !this.state.tip50, tip: 50, tip100: false, tip200: false, tipcustom: false})}>
+
+                           
+                            <Text style={{color: this.state.tip50? "#33c37d":"#666", fontWeight: this.state.tip50?'bold': 'normal'}}>50</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    width: SCREEN_WIDTH/9, flexDirection: 'row'}} onPress={()=> this.setState({tip100: !this.state.tip100, tip: 100, tip50: false, tip200: false, tipcustom: false})}>
+    
+                            <Text style={{marginTop: 0, color: this.state.tip100? "#33c37d":"#666", fontWeight: this.state.tip100?'bold': 'normal'}}>100</Text>
+                        </TouchableOpacity>
+                      
+                        <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    alignItems: 'center',
+    width: SCREEN_WIDTH/6, flexDirection: 'row'}} onPress={()=> this.setState({tipcustom: !this.state.tipcustom,  tip: 0,tip100: false, tip200: false, tip50: false})}>
+   
+                            <Text style={{marginTop: 0,fontSize:12, color: this.state.tipcustom? "#33c37d":"#666", fontWeight: this.state.tipcustom?'bold': 'normal'}}>Custom</Text>
+                        </TouchableOpacity>
+                        <View style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    width: SCREEN_WIDTH/4,flexDirection: 'row'}}>
+     
+     <Input  placeholder={this.state.tip == 0? 'Tip Amount':this.state.tip.toString() } value={this.state.tip.toString()} onChangeText={(text) => {isNaN(text)? null:this.setState({tip: text})}} placeholderTextColor="#687373" keyboardType={'number-pad'}/>
+                        </View>
+                        </View>}
+            </Right>
+          </ListItem>   
+    
+      <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 30}}
+        onPress={() => this.finalCheckout()}
+      >
+       <Text style={{color:'white'}}>Proceed to Checkout</Text>
+      </Button>
+    </Card>
+    </Modal>
           </Container>
           </Root>
     );
@@ -1626,6 +1721,22 @@ Alert.alert('Submission Complete!', 'We will process your verification')
   }
 
   async checkOut(){
+
+    Alert.alert(
+      'Do you want to add tip for rider?',
+      '',
+      [
+        {text: 'Continue without tip', onPress: () =>  this.finalCheckout()},
+        {text: 'Continue with tip', onPress: () =>  this.setState({AddTipModal: true, tip: 50})},
+        {text: 'Cancel', onPress: () =>  null}
+      ]
+      )
+
+
+   
+  }
+
+  async finalCheckout(){
     this.setState({loading: true})
     const newDocumentID = this.checkoutref.collection('orders').doc().id;
     const today = this.state.currentDate;
@@ -1676,6 +1787,7 @@ Alert.alert('Submission Complete!', 'We will process your verification')
        barangay: this.state.billing_barangay==undefined?'': this.state.billing_barangay,
        province: this.state.billing_province.toLowerCase(),
        city: this.state.billing_city,
+       billing_city: this.state.billing_city,
        arrayofCity: this.state.arrayofCity,
      },
      arrayofCity: this.state.arrayofCity,
@@ -1711,7 +1823,7 @@ Alert.alert('Submission Complete!', 'We will process your verification')
      discount: this.state.discount,
      voucherUsed: this.state.voucherCode,
      ProductType: 'Foods',
-
+    tip: this.state.tip,
     }
     console.log('datavalue: ', datavalue)
     
@@ -1760,7 +1872,40 @@ Alert.alert('Submission Complete!', 'We will process your verification')
   }
 }
 }
-
+const style = StyleSheet.create({
+  wrapper: {
+    // marginBottom: -80,
+    backgroundColor: "white",
+    height: 80,
+    width: "100%",
+    padding: 10
+  },
+  notificationContent: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start"
+  },
+ sssage: {
+    marginBottom: 2,
+    fontSize: 14
+  },
+  closeButton: {
+    position: "absolute",
+    right: 10,
+    top: 10
+  },
+  content: {
+    backgroundColor: 'white',
+    padding: 22,
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  contentTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+})
 
 const styles = {
   line: {
@@ -1789,4 +1934,7 @@ const styles = {
       borderRadius: 4,
       borderColor: 'rgba(0, 0, 0, 0.1)',
     },
+
+
+    
 };

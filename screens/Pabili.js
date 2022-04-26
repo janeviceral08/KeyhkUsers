@@ -156,7 +156,7 @@ export default class Pabili extends Component {
       voucherCode: '',
       loading: false,
       address_list:[],
-      visibleAddressModal: true,
+      visibleAddressModal: false,
       visibleAddressModalPin: false,
       //subtotal: subtotal,
       minimum: 0,
@@ -164,8 +164,8 @@ export default class Pabili extends Component {
       selectedIndices: [0],  
       customStyleIndex: 0,
       isready:0,
-      visibleAddressModalTo: false,
-      visibleAddressModalToPin: false,
+      visibleAddressModalTo: true,
+      visibleAddressModalToPin: true,
       passenger: '1',
       note: '',
       AlwaysOpen: true,
@@ -225,7 +225,14 @@ export default class Pabili extends Component {
     ListValue: [],
     pabiliList: [],
     history:[],
-    estCost:'0'
+    estCost:'0',
+    AddTipModal:false,
+    willingtopay:false,
+    tip50: true,
+tip100:false,
+tip200:false,
+tipcustom:false,
+tip:0,
       
   };
   this.getLocation();
@@ -2178,14 +2185,14 @@ console.log("province", province)
     height: Dimensions.get('window').height,}}>
       
   <MapboxGL.MapView style={{ flex: 1}} 
-
- // onPress={e => {this.state.visibleAddressModal == true? this.onRegionChange(e.geometry.coordinates):
- //         this.state.visibleAddressModalTo == true?this.onRegionChange(e.geometry.coordinates):null
- //       }}
-  //onRegionWillChange={this.onRegionWillChange}
-  //        onRegionIsChanging={this.onRegionIsChanging}
-
-//  onRegionDidChange={() => {Keyboard.dismiss(); this.setState({LocationDoneto: true, LocationDone: true,visibleAddressModalto: true})}}
+  onPress={e => {this.state.visibleAddressModal == true? this.onRegionChange(e.geometry.coordinates):
+    this.state.visibleAddressModalTo == true?this.onRegionChange(e.geometry.coordinates):null
+  }}
+//onRegionWillChange={this.onRegionWillChange}
+//        onRegionIsChanging={this.onRegionIsChanging}
+attributionEnabled={false}
+        logoEnabled={false}
+onRegionDidChange={() => {Keyboard.dismiss(); this.setState({LocationDoneto: true, LocationDone: true, keyboard: false})}}
 onUserLocationUpdate={()=> {console.log('user moved')}}
   >
   <MapboxGL.Camera 
@@ -2266,7 +2273,7 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
                        
                     <View regular style={{borderWidth: 1, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 5, width: SCREEN_WIDTH/1.2, padding: 5}} >
                         <TouchableWithoutFeedback style={{width: SCREEN_WIDTH/1.02}} onPress={()=> this.setState({visibleModalDropoff: true, visibleAddressModalTo: true,visibleAddressModal: false,visibleAddressModalToPin: true})}>
-                   <Text style={{fontSize: 17}}>{this.state.toPlace==""?'Enter Drop-off Location Here':this.state.toPlace}</Text>
+                   <Text style={{fontSize: 17}}>{this.state.toPlace==""?'Enter Drop-off Location Here':this.state.toPlace==this.props.route.params.fromPlace?'Your Location':this.state.toPlace}</Text>
                     </TouchableWithoutFeedback>
                      </View>  
                    }
@@ -2304,8 +2311,8 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
             
             <View style={{ height: 40, alignItems: 'center', marginBottom: 10}}>
 							<TouchableOpacity  style={[styles.centerElement, {backgroundColor: '#019fe8', width: SCREEN_WIDTH - 10, height: 40, borderRadius: 5, padding: 10}]} onPress={() => {this.state.uid == null?  this.props.navigation.navigate('Login') :  Alert.alert(
-      "Are you sure to proceed?",
-      "Book a rider",
+      "From: "+this.state.fromPlace,
+      "To: "+this.state.toPlace,
       [
         {
           text: "Cancel",
@@ -2364,178 +2371,288 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
                     <Input onChangeText={(text) => {isNaN(text)? null:this.setState({estCost: text})}} keyboardType={'number-pad'} value={this.state.estCost}/>
             
             </Item>
+
+            <CardItem><Body style={{flex:2, justifyContent:"center",alignContent:"center"}}><Text style={{fontSize:17, fontWeight:'bold'}}>New Total with Tip:  <NumberFormat  renderText={text => <Text style={{ paddingLeft: (SCREEN_WIDTH / 2)- 60, fontWeight: 'bold'}}>{text}</Text>} value={parseFloat(this.state.tip) + Math.round((actualAmountPay*10)/10)} displayType={'text'} thousandSeparator={true} prefix={this.props.route.params.currency} /></Text></Body></CardItem>
+            <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25,width: SCREEN_WIDTH/ 1.26, top: 10}}>
+            <Left style={{left: 10}}>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <FontAwesome5 name={'hand-holding-usd'} size={25} color="#b5b5b5" />
+              </Button>
+            </Left>
+            <Body>
+            {this.state.willingtopay==false?
+  <MaterialCommunityIcons name="checkbox-blank-outline" size={25} color="gray"  onPress={()=> this.setState({willingtopay: true, tip: 50})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
+  :
+ <MaterialCommunityIcons name="checkbox-marked-outline" size={25} color="green"  onPress={()=> this.setState({willingtopay: false, tip: 0})}><Text style={{fontSize: 15, color: 'black'}}>Tip</Text></MaterialCommunityIcons>
+ 
+ 
+}
+            </Body>
+            <Right>       
+            {this.state.willingtopay==false?null:<View style={{height: 45, flexDirection: 'row', paddingTop: 0, right: -10, }}>
+          <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    width: SCREEN_WIDTH/9, flexDirection: 'row'}} onPress={()=> this.setState({tip50: !this.state.tip50, tip: 50, tip100: false, tip200: false, tipcustom: false})}>
+
+                           
+                            <Text style={{color: this.state.tip50? "#33c37d":"#666", fontWeight: this.state.tip50?'bold': 'normal'}}>50</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    width: SCREEN_WIDTH/9, flexDirection: 'row'}} onPress={()=> this.setState({tip100: !this.state.tip100, tip: 100, tip50: false, tip200: false, tipcustom: false})}>
+    
+                            <Text style={{marginTop: 0, color: this.state.tip100? "#33c37d":"#666", fontWeight: this.state.tip100?'bold': 'normal'}}>100</Text>
+                        </TouchableOpacity>
+                      
+                        <TouchableOpacity style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRightWidth: 0,
+    alignItems: 'center',
+    width: SCREEN_WIDTH/6, flexDirection: 'row'}} onPress={()=> this.setState({tipcustom: !this.state.tipcustom,  tip: 0,tip100: false, tip200: false, tip50: false})}>
+   
+                            <Text style={{marginTop: 0,fontSize:12, color: this.state.tipcustom? "#33c37d":"#666", fontWeight: this.state.tipcustom?'bold': 'normal'}}>Custom</Text>
+                        </TouchableOpacity>
+                        <View style={{    padding: 5,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    width: SCREEN_WIDTH/6,flexDirection: 'row'}}>
+     
+     <Input   placeholder={this.state.tip == 0? 'Tip Amount':this.state.tip.toString() } value={this.state.tip.toString()} onChangeText={(text) => {isNaN(text)? null:this.setState({tip: text})}} placeholderTextColor="#687373" keyboardType={'number-pad'}/>
+                        </View>
+                        </View>}
+            </Right>
+          </ListItem>   
            </View>   
     
-      <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
+      <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 30}}
         onPress={() => this.checkOut() }
       >
        <Text style={{color:'white'}}>Procceed</Text>
       </Button>
     </Card>
     </Modal>
+
+   
           </Container>
           </Root>
     );
   }
 
 
-  async checkOut(){
-console.log('this.state.photo: ', this.state.photo)
-
-         this.setState({loading: true})
-
-    let distance = this.state.summary === undefined? null: this.state.summary.distance/1000;
-
-    let newDistance = distance - this.state.PBasekm;
-    let distanceAmount = newDistance*this.state.Psucceeding;
-     const NewdistanceAmount = distanceAmount > 0? distanceAmount: 0;
-    let amountpay= this.state.PbaseFare +NewdistanceAmount;
-
-      let distanceAmountCity = newDistance*this.state.CityPsucceeding;
-      const NewdistanceAmountCity = distanceAmountCity > 0? distanceAmountCity: 0;
-    let amountpayCity= this.state.CityPbaseFare +NewdistanceAmountCity;
-
-     let distanceAmountMetro= newDistance*this.state.MetroPsucceeding;
-        const NewdistanceAmountMetro = distanceAmountMetro > 0? distanceAmountMetro: 0;
-    let amountpayMetro= this.state.MetroPbaseFare +NewdistanceAmountMetro;
-    
-    const actualAmountPay = this.props.route.params.typeOfRate =='Municipal Rate'?amountpay:this.props.route.params.typeOfRate =='City Rate'?amountpayCity:amountpayMetro
- const typeOfRate = this.props.route.params.typeOfRate; 
 
 
-    const newDocumentID = this.checkoutref.collection('orders').doc().id;
-    
-    const today = this.state.currentDate;
-    const timeStamp= new Date().getTime();
-    const date_ordered = moment(today).format('MMMM Do YYYY, h:mm:ss a');
-    const week_no = moment(today , "MMDDYYYY").isoWeek();
-    const time =  moment(today).format('h:mm:ss a');
-    const date = moment(today).format('MMMM D, YYYY');
-    const day = moment(today).format('dddd');
-    const month = moment(today).format('MMMM');
-    const year = moment(today).format('YYYY');
-    const userId= await AsyncStorage.getItem('uid');
-    const token = await AsyncStorage.getItem('token');
-    const updatecounts =  firestore().collection('orderCounter').doc('orders');
-    const updateUserOrders =  firestore().collection('users').doc(userId);
+
+async checkOut (){
+  console.log('this.state.photo: ', this.state.photo)
+
+  this.setState({loading: true})
+
+let distance = this.state.summary === undefined? null: this.state.summary.distance/1000;
+
+let newDistance = distance - this.state.PBasekm;
+let distanceAmount = newDistance*this.state.Psucceeding;
+const NewdistanceAmount = distanceAmount > 0? distanceAmount: 0;
+let amountpay= this.state.PbaseFare +NewdistanceAmount;
+
+let distanceAmountCity = newDistance*this.state.CityPsucceeding;
+const NewdistanceAmountCity = distanceAmountCity > 0? distanceAmountCity: 0;
+let amountpayCity= this.state.CityPbaseFare +NewdistanceAmountCity;
+
+let distanceAmountMetro= newDistance*this.state.MetroPsucceeding;
+ const NewdistanceAmountMetro = distanceAmountMetro > 0? distanceAmountMetro: 0;
+let amountpayMetro= this.state.MetroPbaseFare +NewdistanceAmountMetro;
+
+const actualAmountPay = this.props.route.params.typeOfRate =='Municipal Rate'?amountpay:this.props.route.params.typeOfRate =='City Rate'?amountpayCity:amountpayMetro
+const typeOfRate = this.props.route.params.typeOfRate; 
+
+
+const newDocumentID = this.checkoutref.collection('orders').doc().id;
+
+const today = this.state.currentDate;
+const timeStamp= new Date().getTime();
+const date_ordered = moment(today).format('MMMM Do YYYY, h:mm:ss a');
+const week_no = moment(today , "MMDDYYYY").isoWeek();
+const time =  moment(today).format('h:mm:ss a');
+const date = moment(today).format('MMMM D, YYYY');
+const day = moment(today).format('dddd');
+const month = moment(today).format('MMMM');
+const year = moment(today).format('YYYY');
+const userId= await AsyncStorage.getItem('uid');
+const token = await AsyncStorage.getItem('token');
+const updatecounts =  firestore().collection('orderCounter').doc('orders');
+const updateUserOrders =  firestore().collection('users').doc(userId);
 
 const DatasValue = {
-  PickupNotifUser: false,
-  PickupNotifRider: false,
-  DropoffNotifUser: false,
-  DropoffNotifRider: false,
-  ItemList:this.state.pabiliList,
-  currency:this.props.route.params.currency,
-        Customerimage:this.state.photo,
-     OrderNo : this.state.counter,
-     OrderId: newDocumentID,
-     OrderStatus: 'Pending',
-     adminID: '',
-     originalAddress:this.props.route.params.fromPlace,
-     AccountInfo: {
-       name: this.state.account_name,
-       address: this.state.account_address,
-       phone: this.state.account_number,
-       email: this.state.account_email,
-       barangay: this.state.account_barangay==undefined?'': this.state.account_barangay,
-       city: this.state.account_city.trim(),
-       province: this.state.account_province.toLowerCase(),
-       status: this.state.account_status,
-     },
-    DeliveredBy:{
-            ColorMotor:'',
-            MBrand:'',
-            Name:'',
-            PlateNo:'',
-            VModel:'',
-            eta:0,
-            id:'',
-            ratings:0,
-            token:[],
-    },
-     Billing: {
-      context: this.state.billing_context,
-       name: this.state.account_name,
-       address: this.state.billing_street,
-       phone: this.state.account_number,
-       barangay:this.state.billing_barangay==undefined?'': this.state.billing_barangay,
-       province: this.state.billing_province.toLowerCase(),
-       billing_city: this.state.billing_city.trim(),
+PickupNotifUser: false,
+PickupNotifRider: false,
+DropoffNotifUser: false,
+DropoffNotifRider: false,
+ItemList:this.state.pabiliList,
+currency:this.props.route.params.currency,
+ Customerimage:this.state.photo,
+OrderNo : this.state.counter,
+OrderId: newDocumentID,
+OrderStatus: 'Pending',
+adminID: '',
+originalAddress:this.props.route.params.fromPlace,
+AccountInfo: {
+name: this.state.account_name,
+address: this.state.account_address,
+phone: this.state.account_number,
+email: this.state.account_email,
+barangay: this.state.account_barangay==undefined?'': this.state.account_barangay,
+city: this.state.account_city.trim(),
+province: this.state.account_province.toLowerCase(),
+status: this.state.account_status,
+},
+DeliveredBy:{
+     ColorMotor:'',
+     MBrand:'',
+     Name:'',
+     PlateNo:'',
+     VModel:'',
+     eta:0,
+     id:'',
+     ratings:0,
+     token:[],
+},
+Billing: {
+context: this.state.billing_context,
+name: this.state.account_name,
+address: this.state.billing_street,
+phone: this.state.account_number,
+barangay:this.state.billing_barangay==undefined?'': this.state.billing_barangay,
+province: this.state.billing_province.toLowerCase(),
+billing_city: this.state.billing_city.trim(),
 
-     },
-     OrderDetails: {
-      Date_Ordered: date_ordered,
-      Preffered_Delivery_Time_Date:this.state.preffered_delivery_time,
-      Week_No: week_no,
-      Year: year,
-      Month: month,
-      Time: time,
-      Date: date,
-      Day: day,
-      Timestamp: timeStamp
-     },
-     billing_contextTo: this.state.billing_contextTo,
-     billing_nameTo: this.state.account_name,
-     billing_phoneTo:this.state.account_number,
-     billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),
-     billing_cityTo: this.state.billing_cityTo,
-     billing_streetTo: this.state.billing_streetTo,
-     billing_postalTo: this.state.billing_postalTo,
-     billing_barangayTo:this.state.billing_barangayTo,
-     Timestamp: moment().unix(),
-     user_token : this.state.userToken,
-     Note: this.state.note,
-     PaymentMethod: this.state.paymentMethod,
-     DeliveredBy: '',
-     rider_id:'',
-     isCancelled: false,
-     userId: userId,
-     distance: this.state.summary.distance,
-     flat: this.state.flat,
-     flong:this.state.flong,
-     Tolong: this.state.Tolong,
-     Tolat: this.state.Tolat,
-     discount: this.state.discount,
-     voucherUsed: this.state.voucherCode,
-     km:  this.state.summary.distance/1000,
-     total: Math.round((actualAmountPay*10)/10),
-     exkm: newDistance,
-     estTime:  this.state.summary.baseTime,
-     succeding: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.Psucceeding:this.props.route.params.typeOfRate =='City Rate'?this.state.CityPsucceeding:this.state.MetroPsucceeding,
-     amount_base: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.PbaseFare:this.props.route.params.typeOfRate =='City Rate'?this.state.CityPbaseFare:this.state.MetroPbaseFare,
-     base_dist: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.PBasekm:this.props.route.params.typeOfRate =='City Rate'?this.state.PBasekm:this.state.PBasekm,
+},
+OrderDetails: {
+Date_Ordered: date_ordered,
+Preffered_Delivery_Time_Date:this.state.preffered_delivery_time,
+Week_No: week_no,
+Year: year,
+Month: month,
+Time: time,
+Date: date,
+Day: day,
+Timestamp: timeStamp
+},
+billing_contextTo: this.state.billing_contextTo,
+billing_nameTo: this.state.account_name,
+billing_phoneTo:this.state.account_number,
+billing_provinceTo: this.state.billing_provinceTo.toLowerCase(),
+billing_cityTo: this.state.billing_cityTo,
+billing_streetTo: this.state.billing_streetTo,
+billing_postalTo: this.state.billing_postalTo,
+billing_barangayTo:this.state.billing_barangayTo,
+Timestamp: moment().unix(),
+user_token : this.state.userToken,
+Note: this.state.note,
+PaymentMethod: this.state.paymentMethod,
+DeliveredBy: '',
+rider_id:'',
+isCancelled: false,
+userId: userId,
+distance: this.state.summary.distance,
+flat: this.state.flat,
+flong:this.state.flong,
+Tolong: this.state.Tolong,
+Tolat: this.state.Tolat,
+discount: this.state.discount,
+voucherUsed: this.state.voucherCode,
+km:  this.state.summary.distance/1000,
+total: Math.round((actualAmountPay*10)/10),
+exkm: newDistance,
+estTime:  this.state.summary.baseTime,
+succeding: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.Psucceeding:this.props.route.params.typeOfRate =='City Rate'?this.state.CityPsucceeding:this.state.MetroPsucceeding,
+amount_base: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.PbaseFare:this.props.route.params.typeOfRate =='City Rate'?this.state.CityPbaseFare:this.state.MetroPbaseFare,
+base_dist: this.props.route.params.typeOfRate =='Municipal Rate'?this.state.PBasekm:this.props.route.params.typeOfRate =='City Rate'?this.state.PBasekm:this.state.PBasekm,
 delivery_charge:Math.round((actualAmountPay*10)/10),
 extraKmCharge:0,
 subtotal:0,
-    ProductType: 'Foods',
-    SubProductType: 'Pabili',
-    estCost: this.state.estCost
-    
-    }
-
-    this.state.pabiliList.map((info)=>
-    firestore().collection('Pabili').doc(info.key).delete()
-    )
-
-    this.checkoutref.collection('orders').doc(newDocumentID).set(DatasValue).then(
-      updatecounts.update({ counter:   firestore.FieldValue.increment(1) }),
-      updateUserOrders.update({ ordered_times:   firestore.FieldValue.increment(1) }),
-  
-      this.setState({
-        loading: false
-      }),
-      this.props.navigation.navigate('pabiliOrderDetails',{ 'orders' : DatasValue,'currency': this.props.route.params.currency })
-    )  .catch((error)=>     Alert.alert(
-        'Try Again',
-        '',
-        [
-          {text: 'OK'},
-        ]
-      ))
-
-  }
+ProductType: 'Foods',
+SubProductType: 'Pabili',
+estCost: this.state.estCost,
+tip:this.state.tip,
 
 }
+
+this.state.pabiliList.map((info)=>
+firestore().collection('Pabili').doc(info.key).delete()
+)
+
+this.checkoutref.collection('orders').doc(newDocumentID).set(DatasValue).then(
+updatecounts.update({ counter:   firestore.FieldValue.increment(1) }),
+updateUserOrders.update({ ordered_times:   firestore.FieldValue.increment(1) }),
+
+this.setState({
+ loading: false
+}),
+this.props.navigation.navigate('pabiliOrderDetails',{ 'orders' : DatasValue,'currency': this.props.route.params.currency })
+)  .catch((error)=>     Alert.alert(
+ 'Try Again',
+ '',
+ [
+   {text: 'OK'},
+ ]
+))
+
+}
+
+}
+
+
+
+const style = StyleSheet.create({
+  wrapper: {
+    // marginBottom: -80,
+    backgroundColor: "white",
+    height: 80,
+    width: "100%",
+    padding: 10
+  },
+  notificationContent: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start"
+  },
+ sssage: {
+    marginBottom: 2,
+    fontSize: 14
+  },
+  closeButton: {
+    position: "absolute",
+    right: 10,
+    top: 10
+  },
+  content: {
+    backgroundColor: 'white',
+    padding: 22,
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  contentTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+})
 
 
 const styles = {

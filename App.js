@@ -61,6 +61,10 @@ import OrderDetailsPabili from './screens/OrderDetailsPabili';
 import pabiliOrderDetails from './screens/pabiliOrderDetails';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
+import Favorites from "./screens/Favorites";
+
+
+
 LogBox.ignoreLogs(["Require cycle:"])
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -112,6 +116,11 @@ function SettingsStack() {
         <Stack.Screen 
         name="MyVoucher" 
         component={MyVoucherScreen} 
+        options={{headerShown:false}}
+        /> 
+         <Stack.Screen 
+        name="Favorites" 
+        component={Favorites} 
         options={{headerShown:false}}
         /> 
        
@@ -187,7 +196,13 @@ function TabScreen() {
           component={VoucherScreen}
           options={{headerShown:false}}
         
+          
         />  
+         <Stack.Screen 
+        name="Favorites" 
+        component={Favorites} 
+        options={{headerShown:false}}
+        /> 
              <Stack.Screen 
             name="Account" 
             component={SettingsStack} 
@@ -280,12 +295,18 @@ function TabScreen2() {
           options={{headerShown:false}}
         
         />  
+         <Stack.Screen 
+        name="Favorites" 
+        component={Favorites} 
+        options={{headerShown:false}}
+        /> 
              <Stack.Screen 
             name="Account" 
             component={SettingsStack} 
             options={{headerShown:false}}
             
-            />   
+            />
+               
              {/* <Tab.Navigator 
     screenOptions ={{
       tabBarHideOnKeyboard: true,
@@ -444,16 +465,8 @@ function HomeStack() {
         component={Cart}
         options={{headerShown:false,tabBarVisible:false,}}
       />
-       <Stack.Screen 
-        name="Address" 
-        component={Address} 
-        options={{headerShown:false}}
-        /> 
-          <Stack.Screen 
-        name="MyVoucher" 
-        component={MyVoucherScreen} 
-        options={{headerShown:false}}
-        /> 
+    
+      
               <Stack.Screen 
         name="Checkout" 
         component={Checkout} 
@@ -498,6 +511,48 @@ function HomeStack() {
         name="CheckoutScreenEquipment" 
         component={CheckoutScreenEquipment} 
         options={{headerShown:false}}/>  
+         <Stack.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="Edit" 
+        component={Profile} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="Address" 
+        component={Address} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="wallet" 
+        component={wallet} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="MyVoucher" 
+        component={MyVoucherScreen} 
+        options={{headerShown:false}}
+        /> 
+         <Stack.Screen 
+        name="Favorites" 
+        component={Favorites} 
+        options={{headerShown:false}}
+        /> 
+       
+          <Stack.Screen
+          name="Gateway"
+          component={Gateway}
+          options={{ headerShown: false }}
+        />
+
+<Stack.Screen
+          name="GatewayDetails"
+          component={GatewayDetails}
+          options={{ headerShown: false }}
+        />
     </Stack.Navigator>
   );
 }
@@ -563,16 +618,7 @@ function HomeStack2() {
         component={Cart}
         options={{headerShown:false,tabBarVisible:false,}}
       />
-       <Stack.Screen 
-        name="Address" 
-        component={Address} 
-        options={{headerShown:false}}
-        /> 
-          <Stack.Screen 
-        name="MyVoucher" 
-        component={MyVoucherScreen} 
-        options={{headerShown:false}}
-        /> 
+      
               <Stack.Screen 
         name="Checkout" 
         component={Checkout} 
@@ -617,6 +663,48 @@ function HomeStack2() {
         name="CheckoutScreenEquipment" 
         component={CheckoutScreenEquipment} 
         options={{headerShown:false}}/>  
+         <Stack.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="Edit" 
+        component={Profile} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="Address" 
+        component={Address} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="wallet" 
+        component={wallet} 
+        options={{headerShown:false}}
+        />  
+        <Stack.Screen 
+        name="MyVoucher" 
+        component={MyVoucherScreen} 
+        options={{headerShown:false}}
+        /> 
+         <Stack.Screen 
+        name="Favorites" 
+        component={Favorites} 
+        options={{headerShown:false}}
+        /> 
+       
+          <Stack.Screen
+          name="Gateway"
+          component={Gateway}
+          options={{ headerShown: false }}
+        />
+
+<Stack.Screen
+          name="GatewayDetails"
+          component={GatewayDetails}
+          options={{ headerShown: false }}
+        />
     </Stack.Navigator>
   );
 }

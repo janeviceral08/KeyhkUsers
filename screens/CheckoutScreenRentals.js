@@ -33,6 +33,7 @@ import {imgDefault} from './images';
 import { FlatGrid } from 'react-native-super-grid';
 import { SliderBox } from "react-native-image-slider-box";
 import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
+import PhotoGrid from '../components/PhotoGrid';
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
 Logger.setLogCallback(log => {
@@ -922,8 +923,24 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true}/>
 
   
-            <MapboxGL.PointAnnotation coordinate={[ this.props.route.params.cLat, this.props.route.params.cLong]} />
-            
+              <MapboxGL.PointAnnotation
+        key="pointAnnotation"
+        id="pointAnnotation"
+        coordinate={[ this.props.route.params.cLat, this.props.route.params.cLong]} 
+      >
+        <View
+          style={{
+            height: 35,
+            width: 35,
+            backgroundColor: "red",
+            borderRadius: 50,
+            borderColor: "#fff",
+            borderWidth: 3,
+          }}
+        >
+           <MaterialCommunityIcons name="home-city" size={20} color="white" style={{justifyContent: 'center', alignSelf: 'center', padding: 5}} />
+        </View>
+      </MapboxGL.PointAnnotation>
             
        
  
@@ -1040,7 +1057,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
        
      
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Price</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome5 name={'money-bill'} size={20} color="#b5b5b5" />
@@ -1053,7 +1070,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
               
                        
                         <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Number of Person</Text>
-                        <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                        <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <Fontisto name={'persons'} size={25} size={20} color="#b5b5b5" />
@@ -1067,7 +1084,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
           </ListItem>
                     
          <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Start Date of Rental</Text>
-         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialCommunityIcons name={'calendar-clock'} size={25} color="#b5b5b5" />
@@ -1089,7 +1106,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
          
                     {this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?<Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>No of {this.state.SelectedPricing =='Weekly'? 'Week': this.state.SelectedPricing =='Monthly'? 'Month':null}</Text>: null}
              {   this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?   
-                <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
                 <Left style={{left: 10}}>
                   <Button style={{ backgroundColor: "#FFFFFF" }}>
                   <MaterialCommunityIcons name={'calendar-week'} size={25} color="#b5b5b5" />
@@ -1103,7 +1120,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
          
          <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>End Date of Rental</Text>
          {this.state.SelectedPricing =='Weekly'?
-          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+          <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
           <Left style={{left: 10}}>
             <Button style={{ backgroundColor: "#FFFFFF" }}>
             <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1116,7 +1133,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
         </ListItem>
              
               : this.state.SelectedPricing =='Monthly' ?
-              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+              <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
               <Left style={{left: 10}}>
                 <Button style={{ backgroundColor: "#FFFFFF" }}>
                 <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1128,7 +1145,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 </TouchableOpacity>  </Body>
             </ListItem>
 :
- <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+ <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
  <Left style={{left: 10}}>
    <Button style={{ backgroundColor: "#FFFFFF" }}>
    <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1149,7 +1166,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 
 }
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
@@ -1169,7 +1186,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                    
 
                  <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Mode of payment</Text>
-                 <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                 <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome name={'cc-mastercard'} size={20} color="#b5b5b5" />
@@ -1210,7 +1227,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
            
             :null}
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Note</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'book'} size={25} color="#b5b5b5" />
@@ -1225,7 +1242,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
           
 
            <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Description</Text>
-           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialIcons name={'description'} size={25} color="#b5b5b5" />
@@ -1235,25 +1252,14 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
             <Input value={this.state.datas.description} placeholderTextColor="#687373" />
              </Body>
           </ListItem>
-          
-         <FlatGrid
-      itemDimension={120}
-      data={this.state.datas.imageArray.filter(items => {
+          <PhotoGrid source={this.state.datas.imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
        
         return itemData.indexOf(textData) == -1
-      })}
-      // staticDimension={300} 
-      // fixed
-      spacing={10}
-      renderItem={({ item }) => (
-              <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:item})}>
-              <Image style={{  width: SCREEN_WIDTH/3, height: 160, resizeMode: 'contain',margin: 10}} source={{uri: item}} />
-       </TouchableWithoutFeedback>
-              
-      )}
-    />
+      })} onPressImage={uri => this.setState({showURL: true, SelectedURL:uri})} />
+
+        
      </ScrollView>   
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
         onPress={() =>{this.state.uid == null?null:this.state.storewallet < 1? null: this.state.Storestatus && !this.state.AlwaysOpen && Closing == true ?this.FinalCheckouts(): this.state.AlwaysOpen?this.FinalCheckouts():null}}

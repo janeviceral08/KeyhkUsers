@@ -104,6 +104,7 @@ async addonsdeleteCart(item){
               cluster: item.cluster,     
               choice: this.getAddonsDefault(),
               qty: this.state.count,           
+              StoreCountry: this.props.route.params.StoreCountry,
                 slongitude: this.props.route.params.slongitude,
                 slatitude: this.props.route.params.slatitude,
                 adminID: item.adminID,
@@ -141,6 +142,7 @@ async addonsdeleteCart(item){
           adminID: item.adminID,
           choice: this.getAddonsDefault(),
           qty: this.state.count,
+          StoreCountry: this.props.route.params.StoreCountry,
           slongitude: this.props.route.params.slongitude,
           slatitude: this.props.route.params.slatitude,
       };
@@ -210,6 +212,7 @@ async addonsdeleteCart(item){
             let newItem = {
                 id: item.id,
                 store_name: this.props.route.params.store_name,
+                StoreCountry: this.props.route.params.StoreCountry,
                 slongitude: this.props.route.params.slongitude,
                 slatitude: this.props.route.params.slatitude,
                 notification_token: this.props.route.params.token,
@@ -315,6 +318,7 @@ async addonsdeleteCart(item){
         let img=[];
         let add=[];
         this.setState({ isVisibleAddons: true,
+          StoreCountry: this.props.route.params.StoreCountry,
           slongitude: this.props.route.params.slongitude,
           slatitude: this.props.route.params.slatitude,
                         name: item.name,
@@ -498,15 +502,14 @@ async addonsdeleteCart(item){
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
-      <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
+      <View style={{backgroundColor: 'rgba(49,49,49, 0.8)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, flexDirection: 'row' }}>
         <Text  numberOfLines={1} style={{fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: 'white',
     padding : 1,
-    paddingHorizontal: 20,width:SCREEN_WIDTH/3.5}}>{name}</Text>
-         <Text style={{fontStyle: "italic",  fontSize: 13,  Top: 10,width:100}}>Stock :{quantity}</Text>
+    paddingHorizontal: 20,width:SCREEN_WIDTH/2}}>{name}</Text>
       </View>  
             {!admin_control || !status ? 
          <View style={styles.text}>
@@ -520,17 +523,16 @@ async addonsdeleteCart(item){
          null
       }
      
-     
-        <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>
+     {brand == ''?null: <Text style={{fontStyle: "italic", color: 'white', fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>}
        
 
         {sale_price ? 
         <View style={{flexDirection: "row"}}>
-        <Text style={styles.categoriesPrice}>{this.props.route.params.currency}{sale_price}</Text>
-        <Text style={styles.categoriesPriceSale}>{this.props.route.params.currency}{price}</Text>
+        <Text style={styles.categoriesPrice}>{this.props.route.params.currency}{sale_price}<Text style={[styles.categoriesPrice,{fontSize: 10}]}>/ {unit}</Text></Text>
+        <Text style={styles.categoriesPriceSale}>{this.props.route.params.currency}{price}<Text style={[styles.categoriesPriceSale,{fontSize: 10}]}>/ {unit}</Text></Text>
         </View> :
         <View>
-        <Text style={styles.categoriesPrice}>{this.props.route.params.currency}{price}</Text>
+        <Text style={styles.categoriesPrice}>{this.props.route.params.currency}{price}<Text style={[styles.categoriesPrice,{fontSize: 10}]}>/ {unit}</Text></Text>
         </View>
         }
         </View>

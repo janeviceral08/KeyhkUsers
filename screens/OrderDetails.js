@@ -90,6 +90,9 @@ export default class OrderDetails extends Component {
           ModalHelp: false,
           rating: 0,
         ratingModal: false,
+        CancelledModal:false,
+        CancelledBy:'',
+        RiderCancel:[]
        };
    
 
@@ -118,10 +121,14 @@ getCurretData(){
     paymentmethod: doc.data().PaymentMethod,
   discount: doc.data().discount,
   isCancelled: doc.data().isCancelled,
+  CancelledBy: doc.data().CancelledBy == undefined? '':doc.data().CancelledBy,
      
      });
      if(doc.data().OrderStatus == 'Pending'){
       this.setState({currentPosition: 0})
+    }
+    else if(doc.data().OrderStatus == 'For Cancel'){
+      this.setState({CancelledModal: true})
     }
   else if(doc.data().OrderStatus == 'Processing'|| doc.data().OrderStatus == 'On the way'){
     this.setState({currentPosition: 1, showMap: true});
@@ -257,11 +264,98 @@ if(parseFloat(this.state.rating) == 0){
 }
 
 
+CancelOrder(){
 
+    Alert.alert(
+        'Confirmation',
+        'are you sure to cancel this transaction?',
+        [
+          { text: 'cancel', onPress: () => null},
+         
+          { text: 'OK', onPress: () => {
+            const  datasUse={
+              userId: this.state.orders.userId,
+              id:this.state.orders.DeliveredBy.id,
+              storeId:this.state.orders.Products[0].storeId,
+              OrderId:this.state.orders.OrderId,
+            }
+            console.log('datasUse: ', datasUse)
+            const updateSuccess =firestore().collection('users').doc(this.state.orders.userId);
+            updateSuccess.update({ 
+            
+              RiderIDS: firestore.FieldValue.arrayRemove(this.state.orders.DeliveredBy.id)
+            })
+            const update_RiderTransaction = firestore().collection('riders').doc(this.state.orders.DeliveredBy.id);
+            update_RiderTransaction.update({ 
+              TransactionCancelled: firestore.FieldValue.increment(1),
+              Transactionprocessing: firestore.FieldValue.increment(-1)
+            })
+            const update_StoreTransaction = firestore().collection('stores').doc(this.state.orders.Products[0].storeId);
+            update_StoreTransaction.update({ 
+            TransactionCancelled: firestore.FieldValue.increment(1),
+            Transactionprocessing: firestore.FieldValue.increment(-1)
+            })
+            const ref = firestore().collection('orders').doc(this.state.orders.OrderId);
+            ref.update({ 
+              OrderStatus : "Cancelled",
+      rider_id:"",
+      DeliveredBy : "",
+              })
+              this.setState({CancelledModal:false})
+            this.props.navigation.goBack();
+          }}
+        ],
+        { cancelable: false }
+      );
+    return;
+    
+ 
+}
+
+
+PendingOrder(){
+
+  Alert.alert(
+      'Confirmation',
+      'are you sure to move this transaction to pending?',
+      [
+        { text: 'cancel', onPress: () => null},
+       
+        { text: 'OK', onPress: () => {
+          const updateSuccess =firestore().collection('users').doc(this.state.orders.userId);
+          updateSuccess.update({ 
+          
+            RiderIDS: firestore.FieldValue.arrayRemove(this.state.orders.DeliveredBy.id)
+          })
+          const update_RiderTransaction = firestore().collection('riders').doc(this.state.orders.DeliveredBy.id);
+          update_RiderTransaction.update({ 
+            Transactionprocessing: firestore.FieldValue.increment(-1)
+          })
+          const update_StoreTransaction = firestore().collection('stores').doc(this.state.orders.Products[0].storeId);
+          update_StoreTransaction.update({ 
+          Transactionprocessing: firestore.FieldValue.increment(-1)
+          })
+          const ref = firestore().collection('orders').doc(this.state.orders.OrderId);
+          ref.update({ 
+            OrderStatus : "Pending",
+            rider_id:"",
+        DeliveredBy : "",
+            })
+            this.setState({CancelledModal:false})
+          this.props.navigation.goBack();
+        }}
+      ],
+      { cancelable: false }
+    );
+  return;
+  
+
+}
 
 
   render() {
     const {orders}=this.state;
+    const riderTip = this.props.route.params.orders.tip == undefined? 0: this.props.route.params.orders.tip >0? this.props.route.params.orders.tip:0;
     return (
       <Container>
         <Header androidStatusBarColor="#2c3e50" style={{backgroundColor: '#183c57'}}>
@@ -318,6 +412,36 @@ if(parseFloat(this.state.rating) == 0){
 
                 </View>
                 </Modal>
+
+
+                <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.CancelledModal}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                 transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT/3}]}> 
+                   
+                                             <Text style={{textAlign: 'center', fontSize: 16, fontWeight: 'bold'}}>Cancelled By {this.state.CancelledBy}</Text>
+                                             <Text style={{textAlign: 'left'}}>Reasons: </Text>
+                                            
+                                             {this.state.RiderCancel.map((info, index) =>  {return(<View style={{flexDirection: 'row',paddingLeft:30, paddingBottom:10}} key={index}> 
+                        <Text>{info.RiderName}- {info.CancelledReason}</Text>
+                    </View>)} )}
+<View style={{flexDirection: 'row', justifyContent: 'center',}}>
+                   <TouchableOpacity onPress={()=> this.PendingOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3, marginRight: 10}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Pending</Text>
+</TouchableOpacity>
+<TouchableOpacity onPress={()=> this.CancelOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Cancel</Text>
+</TouchableOpacity>
+</View>
+                </View>
+                </Modal>
+
              {console.log('orders.OrderStatus: ',orders.OrderStatus)}
         <ScrollView style={{ backgroundColor: "white" }}>
         {orders.OrderStatus=='Processed' || orders.OrderStatus=='Processing' || orders.OrderStatus == 'Pending'? 
@@ -393,11 +517,11 @@ if(parseFloat(this.state.rating) == 0){
                        
                   
                   
-                    {orders.RiderCancel < 0 || orders.RiderCancel== undefined?null:  <View>
+                    {this.state.RiderCancel < 0 || this.state.RiderCancel== undefined?null:  <View>
                     <View style={{flexDirection: 'row',paddingVertical: 5,paddingHorizontal:10}}> 
                         <Text numberOfLines={5} note style={{color:'salmon', fontSize: 14, fontWeight: 'bold'}}>Cancelled By Riders:</Text>
                     </View>  
-                  {orders.RiderCancel.map((info, index) =>  {return(<View style={{flexDirection: 'row',paddingLeft:30, paddingBottom:10}} key={index}> 
+                  {this.state.RiderCancel.map((info, index) =>  {return(<View style={{flexDirection: 'row',paddingLeft:30, paddingBottom:10}} key={index}> 
                         <Text>{info.RiderName}- {info.CancelledReason}</Text>
                     </View>)} )}
                     </View> }
@@ -705,6 +829,16 @@ logoEnabled={false}
               </Text>
             </Right>
           </CardItem>:null}
+          {this.props.route.params.orders.tip == undefined? null:this.props.route.params.orders.tip> 0? <CardItem>
+            <Body>
+              <Text style={{fontSize: 15, color: 'gray'}}>Tip for Rider</Text>
+            </Body>
+            <Right>
+              <Text style={{fontSize: 15, color:'gray'}}>
+             {parseFloat(this.props.route.params.orders.tip).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
+              </Text>
+            </Right>
+          </CardItem>:null}
           <CardItem>
             <Body>
               <Text style={{fontSize: 15, color: 'tomato'}}>Discount</Text>
@@ -728,9 +862,9 @@ logoEnabled={false}
               {console.log('delivery: ', this.state.delivery)}
               {this.props.route.params.orders.USERAdd> 0?
               
-               <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.storeTotal() + this.props.route.params.orders.USERAdd - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+               <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.storeTotal() + riderTip+this.props.route.params.orders.USERAdd - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
           :
-          <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.storeTotal() - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+          <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((riderTip+ this.storeTotal() - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
               }
                </Right>:
                       <Right>
@@ -739,9 +873,9 @@ logoEnabled={false}
                       {console.log('delivery: ', this.state.delivery)}
                       {this.props.route.params.orders.USERAdd> 0?
                       
-                       <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() + this.props.route.params.orders.USERAdd +this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                       <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((riderTip+this.state.extra + this.storeTotal() + this.props.route.params.orders.USERAdd +this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
                   :
-                  <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((this.state.extra + this.storeTotal() +  this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold'}}>{this.props.route.params.orders.currency}{(Math.round((riderTip+this.state.extra + this.storeTotal() +  this.state.delivery - this.state.discount)*10)/10).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
                       }
                        </Right>
                

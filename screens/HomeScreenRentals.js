@@ -30,6 +30,9 @@ import MapView, {  Polyline,  PROVIDER_GOOGLE,  } from 'react-native-maps';
 import { SliderBox } from "react-native-image-slider-box";
 import Rider_img from '../assets/rider.png';
 import customer_img from '../assets/customer.png';
+import auth from '@react-native-firebase/auth';
+
+
 
 const BannerWidth = Dimensions.get('window').width;
 export default class HomeScreen extends Component {
@@ -192,16 +195,17 @@ console.log('backPress')
       });
       console.log('HotelList: ', Stores.length);
       this.setState({
-        HotelList: Stores,
+        HotelList: Stores.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
    onCollectionStoreRental = (querySnapshot) => {
       let Stores =[]
       querySnapshot.forEach((doc) => {
-        Stores.push(doc.data())
+        if(doc.data().wallet > 0){
+          Stores.push(doc.data())}
       });
       this.setState({
-        storesList: Stores,
+        storesList: Stores.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
 
@@ -223,7 +227,7 @@ console.log('backPress')
         Vrentals.push(doc.data())
       });
       this.setState({
-        Erentals: Vrentals,
+        Erentals: Vrentals.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
     onCollectionProducts  = (querySnapshot) => {
@@ -266,7 +270,7 @@ console.log('backPress')
      firestore().collection('stores').where('selectedAccount', '==','Hotels').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onCollectionStoreHotels);
     firestore().collection('stores').where('selectedAccount', '==','Rental').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onCollectionStoreRental);
     // firestore().collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
-    this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onVrentals)
+   // this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).orderBy('arrange', 'asc').onSnapshot(this.onVrentals)
       this.cityRef.collection('products').where('rentalType','==', 'Equipment').where('arrayofCity','array-contains-any',[this.props.selectedCityUser.trim()]).onSnapshot(this.onErentals)
   }
    async getUserCity(){
@@ -301,6 +305,7 @@ console.log('backPress')
      querySnapshot.forEach((doc) => {
       this.setState({
         City: doc.data().Address.City,
+        customerInfo: doc.data(),
      });      
      });
      this._bootstrapAsync(false,null);
@@ -451,6 +456,39 @@ console.log('backPress')
   </Card>
       )
     }
+
+    addToFav(id){
+      const uid =  auth().currentUser.uid;
+     this.setState({loading:true})
+      const updateRef = firestore().collection('users').doc(uid);
+      updateRef.update({
+        RentalEqFav: firestore.FieldValue.arrayUnion(id),
+            
+        }).then((docRef) => {   
+          this.setState({loading:false})
+          this.loadProducts()
+        }).catch((err)=> {
+          this.setState({loading:false,})
+          console.log('err: ', err)})
+    }
+  
+  
+    removeFav(id){
+      const uid =  auth().currentUser.uid;
+     this.setState({loading:true})
+      const updateRef = firestore().collection('users').doc(uid);
+      updateRef.update({
+        RentalEqFav: firestore.FieldValue.arrayRemove(id),
+            
+        }).then((docRef) => {   
+          this.setState({loading:false})
+          this.loadProducts()
+        }).catch((err)=> {
+          this.setState({loading:false,})
+          console.log('err: ', err)})
+    }
+  
+  
     rowRendererVrentals = (data) => {
         console.log('data: ', data)
         const { name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
@@ -498,7 +536,7 @@ console.log('backPress')
     </View>
    }
              
-             
+            
       </FastImage>
                
       <View style={{height:20,flexShrink: 1}}>
@@ -566,7 +604,9 @@ console.log('backPress')
     </View>
    }
              
-             
+             {this.state.customerInfo == undefined? null:this.state.customerInfo.RentalEqFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.RentalEqFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: 10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
+
       </FastImage>
                
       <View style={{height:20,flexShrink: 1}}>

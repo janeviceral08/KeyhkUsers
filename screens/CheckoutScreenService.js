@@ -953,7 +953,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
        
      
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Price</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome5 name={'money-bill'} size={20} color="#b5b5b5" />
@@ -967,7 +967,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                  
              
          <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Start Date of Service</Text>
-         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialCommunityIcons name={'calendar-clock'} size={25} color="#b5b5b5" />
@@ -989,7 +989,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                     
 
 <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>No of {this.state.datas.ratemode == 'Others'?this.state.datas.newratemode:this.state.datas.StatHourPrice == true?'Hours':this.state.datas.StatDayPrice == true?'Days':this.state.datas.StatWeeklyPrice == true?'Weeks':'Months'}</Text>
-<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialCommunityIcons name={'calendar-week'} size={25} color="#b5b5b5" />
@@ -1004,7 +1004,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 
        
          <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
-         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
@@ -1026,7 +1026,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 
      
             <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Mode of payment</Text>
-            <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+            <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome name={'cc-mastercard'} size={20} color="#b5b5b5" />
@@ -1069,7 +1069,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
             :null}
          
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Note</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'book'} size={25} color="#b5b5b5" />
@@ -1085,7 +1085,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
           
 
            <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Description</Text>
-           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialIcons name={'description'} size={25} color="#b5b5b5" />

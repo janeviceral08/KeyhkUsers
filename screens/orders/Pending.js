@@ -111,8 +111,8 @@ export default class Pending extends Component {
       const itemData = item.datas.OrderStatus;
       const textData = 'Pending';
       const textDataProcessing =  'Processing';
-     
-      return itemData === 'Processing' ? itemData.indexOf(textDataProcessing ) > -1 :  itemData.indexOf(textData ) > -1
+      const textDataCancel =  'For Cancel';
+      return itemData === 'Processing' ? itemData.indexOf(textDataProcessing ) > -1 :itemData === 'For Cancel' ? itemData.indexOf(textDataCancel ) > -1 :  itemData.indexOf(textData ) > -1
     })
 
     console.log('newOrders: ',newOrders.length)

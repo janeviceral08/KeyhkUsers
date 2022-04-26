@@ -121,6 +121,8 @@ export default class ProfileScreen extends Component {
       NumberPolice:[],
       cityOriginal:{},
       SOSMOdal: false,
+      status:'New',
+      cities:[],
       };
       this.FetchProfile();
   }
@@ -150,6 +152,7 @@ export default class ProfileScreen extends Component {
                         selectedCity: data.selectedCity,
                         selectedCountryUser: data.selectedCountry,
                         RiderIDS: data.RiderIDS == undefined? []:data.RiderIDS,
+                        status:data.status,
                       });
                     });
                 
@@ -275,7 +278,7 @@ console.log('coordsL ', coords)
 axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json?access_token=sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA`)
   .then(res => {
  let str = res.data.features[0].place_name;
-
+ console.log("str ", res.data.features[0])
 let arr = str.split(',');
 const newarrLenghtCountry= arr.length-1
 const UserLocationCountry = arr[newarrLenghtCountry]
@@ -347,6 +350,12 @@ originalCountry:  UserLocationCountry=='Philippines'?'city':UserLocationCountry.
     };
 
     setSOS(){
+      if(this.state.status != 'Verified'){
+        Alert.alert(
+          'Cannot Proceed.',
+          'You are not a verified user')
+          return;
+      }
 this.setState({SOSMOdal : true})
      /*  Alert.alert(
           'Confirmation',
@@ -379,11 +388,19 @@ this.setState({SOSMOdal : true})
           if (granted === PermissionsAndroid.RESULTS.GRANTED) {
             var loopData = ''
             var i ;
-            var message = this.state.name+' needs '+callFor+'. Last location at '+this.state.str+'. Lat: '+this.state.coords.latitude+'. Long: '+ this.state.coords.longitude;
+            let arr = this.state.str == null? 'this.state.str':this.state.str.split(',');
+    let arrs = arr== 'this.state.str'?'haha':arr.splice(0, arr.length-2);
+    let joinArrs = arr== 'this.state.str'?'haha':arrs.join();
+
+    console.log('arr', arr);
+    console.log('arrs', arrs);
+    console.log('joinArrs', joinArrs);
+            var message = this.state.name+' needs '+callFor+'. LOC: '+joinArrs+'. Lat: '+this.state.coords.latitude+'. Long: '+ this.state.coords.longitude;
             for(i=0; i < NumberData.length; i++){
               loopData += 
               DirectSms.sendDirectSms(NumberData[i], message);
               console.log('NumberData[i]', NumberData[i]);
+              console.log('message:', this.state.name+' needs '+callFor+'. Location: '+joinArrs+'. Lat: '+this.state.coords.latitude+'. Long: '+ this.state.coords.longitude)
           }
              
           } else {
@@ -397,7 +414,8 @@ this.setState({SOSMOdal : true})
 
     SOSAmbulance(){
       if(this.state.res_data.length < 1){
-        Alert.alert('Cant Get your current location')
+        Alert.alert('Cant Get your current location');
+        return;
        }
        this.sendDirectSms(this.state.NumberAmbulance, 'Ambulance');
         const newDocumentID = firestore().collection('SOS').doc().id;
@@ -417,9 +435,10 @@ this.setState({SOSMOdal : true})
             DatePressed: moment().unix(),
             callFor: 'Ambulance',
             id:newDocumentID,
+            accountOf: 'User',
           }).then(()=>{
             this.setState({SOSMOdal: false});
-            Alert.alert('S.O.S is sent to all')
+            Alert.alert('S.O.S is sent')
           }
           )
     }
@@ -427,8 +446,10 @@ this.setState({SOSMOdal : true})
 
     SOSPolice(){
       if(this.state.res_data.length < 1){
-        Alert.alert('Cant Get your current location')
+        Alert.alert('Cant Get your current location');
+        return;
        }
+
        this.sendDirectSms(this.state.NumberPolice, 'Police');
         const newDocumentID = firestore().collection('SOS').doc().id;
           firestore().collection('SOS').doc(newDocumentID).set({
@@ -441,15 +462,16 @@ this.setState({SOSMOdal : true})
             coords:this.state.coords,
             str:this.state.str,
             context: this.state.res_data,
-            CountryWikiData: this.state.res_data[this.state.res_data.length-1].wikidata,
-            CityWikiData: this.state.res_data[this.state.res_data.length-2].wikidata,
+            CountryWikiData:this.state.res_data.length> 0? this.state.res_data[this.state.res_data.length-1].wikidata:'',
+            CityWikiData:this.state.res_data.length> 0? this.state.res_data[this.state.res_data.length-2].wikidata:'',
             UserLocationCountry: this.state.UserLocationCountry,
             DatePressed: moment().unix(),
             callFor: 'Police',
             id:newDocumentID,
+            accountOf: 'User',
           }).then(()=>{
             this.setState({SOSMOdal: false});
-            Alert.alert('S.O.S is sent to all')
+            Alert.alert('S.O.S is sent')
           }
           )
     }
@@ -457,7 +479,8 @@ this.setState({SOSMOdal : true})
 
     SOSFireman(){
       if(this.state.res_data.length < 1){
-        Alert.alert('Cant Get your current location')
+        Alert.alert('Cant Get your current location');
+        return;
        }
       this.sendDirectSms(this.state.NumberFireman, 'Fireman');
         const newDocumentID = firestore().collection('SOS').doc().id;
@@ -477,9 +500,10 @@ this.setState({SOSMOdal : true})
             DatePressed: moment().unix(),
             callFor: 'Fireman',
             id:newDocumentID,
+               accountOf: 'User',
           }).then(()=>{
           this.setState({SOSMOdal: false});
-          Alert.alert('S.O.S is sent to all')
+          Alert.alert('S.O.S is sent')
         }
           )
     }
@@ -497,20 +521,37 @@ this.setState({SOSMOdal : true})
     }
     async getAllCity() {
       this.setState({loading: true})
-
+      
+      const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.toString()+'.city';
+       console.log('collect: ', collect)
+           console.log('UserLocationCountry: ', this.state.UserLocationCountry)
+                 console.log('selectedCountry: ', this.state.selectedCountry)
+        firestore().collection(collect)
+        .onSnapshot(querySnapshot => {
+          const city = [];
+          querySnapshot.docs.forEach(doc => {
+          city.push(doc.data());
+          console.log('collect data: ', doc.data())
+        });
+        console.log('city getAllCity: ', city)
+        this.setState({
+          cities: city,
+        }) 
+      }); 
+    
       const SosCity = [];
       const Soscollect= this.state.originalCountry.trim() =='Philippines'?'city':this.state.originalCountry.toString()+'.city';
       console.log('collect: ', Soscollect)
           console.log('originalCountry: ', this.state.originalCountry)
-     await  firestore().collection(Soscollect).where('country', '==', this.state.originalCountry.trim())
+       firestore().collection(Soscollect).where('country', '==', this.state.originalCountry.trim())
        .onSnapshot(querySnapshot => {
          querySnapshot.docs.forEach(doc => {
           SosCity.push(doc.data());
-         console.log('SosCity: ', doc.data())
+       //  console.log('SosCity: ', doc.data())
        });
      }); 
 
-     await  firestore().collection(Soscollect).where('arrayofCity', 'array-contains-any', [this.state.cityOriginal.text.trim()])
+       firestore().collection(Soscollect).where('arrayofCity', 'array-contains-any', [this.state.cityOriginal.text.trim()])
        .onSnapshot(querySnapshot => {
          querySnapshot.docs.forEach(doc => {
           console.log('NumberAmbulance: ', doc.data().NumberAmbulance)
@@ -525,18 +566,7 @@ this.setState({SOSMOdal : true})
      }); 
 
 
-          const city = [];
-          const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.toString()+'.city';
-           console.log('collect: ', collect)
-               console.log('UserLocationCountry: ', this.state.UserLocationCountry)
-                     console.log('selectedCountry: ', this.state.selectedCountry)
-          await  firestore().collection(collect).where('country', '==', this.state.UserLocationCountry.trim())
-            .onSnapshot(querySnapshot => {
-              querySnapshot.docs.forEach(doc => {
-              city.push(doc.data());
-              console.log('collect data: ', doc.data())
-            });
-          }); 
+     
     
              const CountryNow = this.state.AvailableOn.filter(items => {
             const itemData = items.label;
@@ -544,10 +574,9 @@ this.setState({SOSMOdal : true})
            
             return itemData.indexOf(textData) > -1
           })
-             console.log('CountryNow: ', CountryNow)
+           
       
           this.setState({
-            cities: city,
             CountryNow,
           })  
           
@@ -600,15 +629,19 @@ this.setState({SOSMOdal : true})
           firestore().collection('users').doc(userId).update({  selectedCountry: PressedCountrycode.trim()})
           console.log('PressedCountrycode: ',PressedCountrycode)
           this.setState({loading: true})
-            const city = [];
+            
             const collect= asyncselectedCountry == null?PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city':asyncselectedCountry.trim()+'.city';
-            await  firestore().collection(collect).where('country', '==', asyncselectedCountry == null?PressedCountrycode:asyncselectedCountry)
+              firestore().collection(collect)
               .onSnapshot(querySnapshot => {
+                const city = [];
                 querySnapshot.docs.forEach(doc => {
                   console.log('getCountryCity: ', doc.data().label)
                 city.push(doc.data());
                
               });
+              this.setState({
+                cities: city,
+              })  
             }); 
             if( this.state.AvailableOn.length <1){
               this.setState({
@@ -625,7 +658,7 @@ this.setState({SOSMOdal : true})
               
             this.setState({
               CountryNow:CountryNow.length < 1?[{labelRider: '', currency: '', currencyPabili:''}]: CountryNow,
-              cities: city,
+            
               loading:false,
             })  
            
@@ -641,17 +674,21 @@ changeCity (item){
 
 async getCountryCityNoUser(PressedCountrycode){
       this.setState({loading: true})
-    const city = [];
- 
+   
+ console.log('PressedCountrycode getCountryCityNoUser : ', PressedCountrycode)
     AsyncStorage.setItem('asyncselectedCountry', PressedCountrycode.trim())
     const collect= PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city';
     console.log('getCountryCityNoUser: ', collect)
-    await  firestore().collection(collect).where('country', '==', PressedCountrycode)
+     firestore().collection(collect)
       .onSnapshot(querySnapshot => {
+        const city = [];
         querySnapshot.docs.forEach(doc => {
           console.log('getCountryCity: ', doc.data().label)
         city.push(doc.data());
       })
+      this.setState({
+        cities: city,
+      })  
       });
     
     if( this.state.AvailableOn.length <1){
@@ -669,7 +706,7 @@ async getCountryCityNoUser(PressedCountrycode){
       
     this.setState({
       CountryNow:CountryNow.length < 1?[{labelRider: '', currency: '', currencyPabili:''}]: CountryNow,
-      cities: city,
+ 
       loading:false,
     })  
    
@@ -686,7 +723,8 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
 }
   render() {
     const {uid}=this.state;
-    console.log('uid: ', uid)
+    console.log('NumberPolice: ', this.state.NumberPolice)
+
     return (
       <Container>
       <CustomHeader title="Account Settings" isHome={true} Cartoff={true} navigation={this.props.navigation}/>
@@ -700,9 +738,8 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
               onBackButtonPress={() => this.setState({SOSMOdal: false})} transparent={true}>
             <View style={styles.contents}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold'}}>Confirmation</Text>
-              <Text style={{color:'black', fontWeight:'bold'}}>Which one do you need?</Text>
-              </View>
+              <Text style={{color:'tomato', fontWeight:'bold', textAlign: 'center'}}>Click on the Emergency Assistance for Help</Text>
+               </View>
          <View>
               <TouchableOpacity onPress={()=> this.SOSPolice()} style={{flexDirection: 'row', alignSelf: 'flex-end', marginBottom: 5}}>
             <View style={{justifyContent: 'flex-end'}}>
@@ -756,7 +793,8 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
               <Text> Ambulance</Text>
             </View>
           </TouchableOpacity>
-         
+          <Text style={{color:'black', fontWeight:'bold', fontSize: 14, textAlign: 'center', marginTop: 5}}>Your Information and location will be sent to some riders and the corresponding emergency department you will select</Text>
+             
           </View>
             </View>
             </Modal>
@@ -816,7 +854,8 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
 
                    <Card>
                     <Item>
-                    <Input placeholder="Search..." value={this.state.searchcity} onChangeText={(text) => {
+                      {console.log('cities: ',this.state.cities)}
+                    <Input placeholder="Search City..." value={this.state.searchcity} onChangeText={(text) => {
                       
                       
                       this.setState({newCity: this.state.cities.filter(items => {
@@ -934,8 +973,10 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
         <Card>
      {this.state.photo == ''?
       <Card.Title
+   
             title={this.state.name}
             subtitle={this.state.username}
+            titleStyle={{ color: this.state.status == 'Verified'? "#28ae07":'#4a4a4a' }}
             left={(props) => <Avatar.Text size={64} color="white" style={{backgroundColor: 'gray'}} {...props} label={this.state.name.slice(0, 1).toUpperCase()} />}
             right={ (props) =><Card transparent onPress={()=> this.signOut()} style={{marginRight: 20}}>
             <Left>
@@ -953,7 +994,8 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
      
       <Card.Title
             title={this.state.name}
-            subtitle={this.state.username}
+            subtitle={this.state.status + ' user'}
+            titleStyle={{ color: this.state.status == 'Verified'? "#28ae07":'#4a4a4a'}}
             left={(props) => <Avatar.Image size={64} color="white" style={{backgroundColor: 'gray'}} {...props} source={{uri: this.state.photo}} />}
             right={ (props) =><Card transparent onPress={()=> this.signOut()} style={{marginRight: 20}}>
             <Left>
@@ -1027,6 +1069,20 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
             <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
             </Right>
         </ListItem>*/}
+            {console.log('clat: ', this.props.route)}
+         <ListItem icon onPress={()=> this.props.navigation.navigate("Favorites",{ 'cLat': this.props.route.params.cLat, 'cLong': this.props.route.params.cLong, 'typeOfRate':this.props.route.params.typeOfRate, 'selectedCityUser': this.props.route.params.selectedCityUser, 'fromPlace': this.props.route.params.fromPlace,'UserLocationCountry': this.props.route.params.UserLocationCountry,'currency':this.props.route.params.currency, 'code':this.props.route.params.code,'cityLat': this.props.route.params.cityLat,'cityLong': this.props.route.params.cityLong})}>
+            <Left>
+              <Button style={{ backgroundColor: "#FFFFFF" }}>
+              <AntDesign name="heart" size={25} color="gray" />
+              </Button>
+            </Left>
+            <Body>
+              <Text>Favorites</Text>
+            </Body>
+            <Right>       
+            <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
+            </Right>
+          </ListItem>
           <ListItem icon onPress={()=> this.props.navigation.navigate("Vouchers")}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>

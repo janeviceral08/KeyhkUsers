@@ -298,6 +298,23 @@ export default class OrderDetailsRentals extends Component {
           mobile_help: doc.data().mobile_help,
           
        })}
+       firestore().collection('orders').where('OrderId', '==', this.props.route.params.orders.OrderId).onSnapshot((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+    
+          this.setState({
+      
+            datas: doc.data(),
+            CancelledReason: doc.data().CancelledReason,
+      isCancelled: doc.data().isCancelled,
+      CancelledBy: doc.data().CancelledBy == undefined? '':doc.data().CancelledBy,
+         
+         });
+         if(doc.data().OrderStatus == 'For Cancel'){
+          this.setState({CancelledModal: true})
+        }
+    
+        })
+      })
     this._bootstrapAsync();
 
   }
@@ -702,6 +719,71 @@ ReasonOfCancel(){
     })
     this.props.navigation.goBack();
 }
+
+
+CancelOrder(){
+
+  Alert.alert(
+      'Confirmation',
+      'are you sure to cancel this transaction?',
+      [
+        { text: 'cancel', onPress: () => null},
+       
+        { text: 'OK', onPress: () => {
+          
+          firestore().collection('stores').doc(this.state.datas.RentStoreId).update({
+            Transactionprocessing: firestore.FieldValue.increment(-1),
+            TransactionCancelled: firestore.FieldValue.increment(1),
+        })
+        
+          const ref = firestore().collection('orders').doc(this.state.datas.OrderId);
+          ref.update({ 
+            OrderStatus : "Cancelled",
+    rider_id:"",
+    DeliveredBy : "",
+            })
+            this.setState({CancelledModal:false})
+          this.props.navigation.goBack();
+        }}
+      ],
+      { cancelable: false }
+    );
+  return;
+  
+
+}
+
+
+PendingOrder(){
+
+Alert.alert(
+    'Confirmation',
+    'are you sure to move this transaction to pending?',
+    [
+      { text: 'cancel', onPress: () => null},
+     
+      { text: 'OK', onPress: () => {
+        firestore().collection('stores').doc(this.state.datas.RentStoreId).update({
+          Transactionprocessing: firestore.FieldValue.increment(-1),
+          TransactionPending: firestore.FieldValue.increment(1),
+      })
+      
+        const ref = firestore().collection('orders').doc(this.state.datas.OrderId);
+        ref.update({ 
+          OrderStatus : "Pending",
+          })
+          this.setState({CancelledModal:false})
+        this.props.navigation.goBack();
+      }}
+    ],
+    { cancelable: false }
+  );
+return;
+
+
+}
+
+
 StartImageRotationFunction(){
   this.Rotatevalue.setValue(0);
   Animated.timing(this.Rotatevalue,{
@@ -804,7 +886,25 @@ console.log('out: ', out);
   />
 
 <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true}  />
-            <MapboxGL.PointAnnotation coordinate={[this.props.route.params.orders.flat,this.props.route.params.orders.flong]} />
+
+<MapboxGL.PointAnnotation
+        key="pointAnnotation"
+        id="pointAnnotation"
+        coordinate={[this.props.route.params.orders.flat,this.props.route.params.orders.flong]}
+      >
+        <View
+          style={{
+            height: 35,
+            width: 35,
+            backgroundColor: "red",
+            borderRadius: 50,
+            borderColor: "#fff",
+            borderWidth: 3,
+          }}
+        >
+           <MaterialCommunityIcons name="home-city" size={20} color="white" style={{justifyContent: 'center', alignSelf: 'center', padding: 5}} />
+        </View>
+      </MapboxGL.PointAnnotation>
   </MapboxGL.MapView>
 
 
@@ -1086,7 +1186,32 @@ console.log('out: ', out);
     </Card>
     </Modal>
 
-           
+    <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.CancelledModal}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                 transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT/3}]}> 
+                   
+                                             <Text style={{textAlign: 'center', fontSize: 16, fontWeight: 'bold'}}>Cancelled By {this.state.CancelledBy}</Text>
+                                             <Text style={{textAlign: 'left', marginTop: 20}}>Reasons: {this.state.CancelledReason}</Text>
+                                            
+                                            
+<View style={{flexDirection: 'row', justifyContent: 'center',}}>
+                   <TouchableOpacity onPress={()=> this.PendingOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3, marginRight: 10}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Pending</Text>
+</TouchableOpacity>
+<TouchableOpacity onPress={()=> this.CancelOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Cancel</Text>
+</TouchableOpacity>
+</View>
+                </View>
+                </Modal>
+
              
           </Container>
           </Root>

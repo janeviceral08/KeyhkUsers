@@ -218,7 +218,9 @@ fetch(CLOUDINARY_URL, {
               postal:'8600',
               lat:this.state.userPoint.latitude,
               long:this.state.userPoint.longitude,
-            
+              token:[],
+              cityLong: 'none',
+              cityLat:'none',
             }]
           }).then((docRef) => {
             this.setState({

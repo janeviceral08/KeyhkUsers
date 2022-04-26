@@ -42,7 +42,8 @@ export default class Products extends Component {
       selectedFilter: 'Alphabetical-(A-Z)',
       searchEnabled: false,
       cart: [],
-      showToast: false
+      showToast: false,
+      
     };
     this.onAddToCart = this.onAddToCart.bind(this);
   }
@@ -209,7 +210,20 @@ export default class Products extends Component {
 
   async componentDidMount(){  
     this.StartImageRotationFunction()
-    const userId= await AsyncStorage.getItem('uid');
+    const userId =  auth().currentUser.uid;
+firestore().collection('users').where('userId', '==', userId).onSnapshot(
+             querySnapshot => {
+               
+                 querySnapshot.forEach(doc => {
+                      this.setState({   customerInfo : doc.data() })  
+                 });
+            
+                
+             },
+             error => {
+              //   console.log(error)
+             }
+         );
     this.setState({ loading: true });   
   
     this.loadProducts(false, true);

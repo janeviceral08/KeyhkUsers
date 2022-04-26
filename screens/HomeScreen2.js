@@ -384,7 +384,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
         Prentals.push(doc.data())
       });
       this.setState({
-        Prentals: Prentals,
+        Prentals: Prentals.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
 
@@ -394,7 +394,7 @@ console.log("UserLocationCountry ", UserLocationCountry)
         Vrentals.push(doc.data())
       });
       this.setState({
-        Vrentals: Vrentals,
+        Vrentals: Vrentals.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
     onCollectionProducts  = (querySnapshot) => {
@@ -447,9 +447,9 @@ console.log('NewValueofCityUser: ',NewValueofCityUser)
     this.setState({selectedCityUser: item, typeOfRate: NewValueofCityUser.typeOfRate})
     this.ref.where('city','==',NewCityItem).onSnapshot(this.onCollectionUpdate);
 
-   const newUserLocationCountry = asyncselectedCountry == null? this.state.UserLocationCountry.trim() =='Philippines'?'vehicles':this.state.UserLocationCountry.trim()+'.vehicles':asyncselectedCountry.trim() =='Philippines'?'vehicles': asyncselectedCountry+'.vehicles';
+   const newUserLocationCountry = asyncselectedCountry == null? this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.trim()+'.city':asyncselectedCountry.trim() =='Philippines'?'city': asyncselectedCountry+'.city';
    console.log('newUserLocationCountry: ',newUserLocationCountry)
-   firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
+   firestore().collection(newUserLocationCountry).doc(NewCityItem).collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
     this.cityRef.collection('products').where('rentalType','==', 'Property').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onPrentals)
     this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onVrentals)
      
@@ -460,7 +460,7 @@ console.log('NewValueofCityUser: ',NewValueofCityUser)
           });
        // console.log('Stores: ',city )
         this.setState({
-          dataSource: city,//.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
+          dataSource: city.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
           loading: false
         }) 
       });
@@ -717,7 +717,7 @@ let Address ='';
  
   rowRendererVrentals = (data) => {
     console.log('data: ', data)
-    const { name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
+    const { admin_control,name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
     const newData = imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
@@ -736,7 +736,9 @@ let Address ='';
               priority: FastImage.priority.normal, }} 
               resizeMode={FastImage.resizeMode.cover}
   >
- 
+  {!admin_control? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLerightft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.activate(id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: 10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.deactivate(id)}/>}
+
 {!StatHourPrice?null:
 <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
 <Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>

@@ -409,6 +409,20 @@ export default class SearchRentals extends Component {
     this.StartImageRotationFunction()
     this.setState({loading: true})
      const userId= auth().currentUser.uid;
+firestore().collection('users').where('userId', '==', userId).onSnapshot(
+             querySnapshot => {
+               
+                 querySnapshot.forEach(doc => {
+                      this.setState({   customerInfo : doc.data() })
+                     console.log('customerInfo ',doc.data())    
+                 });
+            
+                
+             },
+             error => {
+              //   console.log(error)
+             }
+         );
      //firestore().collection('products').where('city', '==', this.state.City.trim()).where('admin_control', '==', true).where('status', '==', true).onSnapshot(this.onCollectionUpdate);
      this.loadProducts(false, true);
 
@@ -492,12 +506,12 @@ export default class SearchRentals extends Component {
 					});
 				}
 			});
-			console.log('productChunk.length :', productChunk.length )
+			console.log('productChunk rentals :', productChunk.sort((a, b) => Number(b.arrange) - Number(a.arrange)) )
       console.log('limit: ',this.state.limit );
 			this.setState((prevState) => ({
-                products: prevState.products && fromComponent ? [...prevState.products, ...productChunk]: productChunk,
+                products: prevState.products && fromComponent ? [...prevState.products, ...productChunk.sort((a, b) => Number(b.arrange) - Number(a.arrange))]: productChunk.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
                 dataProvider: this.state.dataProvider.cloneWithRows(
-                    prevState.products && fromComponent ? [...prevState.products, ...productChunk]: productChunk
+                    prevState.products && fromComponent ? [...prevState.products, ...productChunk.sort((a, b) => Number(b.arrange) - Number(a.arrange))]: productChunk.sort((a, b) => Number(b.arrange) - Number(a.arrange))
                   ),
 				loading: false,
 				loadingBtn: false,
@@ -526,7 +540,7 @@ export default class SearchRentals extends Component {
                     key : doc.id
                     });
             });
-            this.setState({ data: products.filter(items => {
+            this.setState({ data: products.sort((a, b) => Number(b.datas.arrange) - Number(a.datas.arrange)).filter(items => {
         const itemData = items.datas.ProductType;
         const textData = 'Transport';
         return itemData.indexOf(textData) == -1
@@ -593,6 +607,70 @@ export default class SearchRentals extends Component {
         }
     }
 }
+
+
+addToFavHotel(id){
+  const uid =  auth().currentUser.uid;
+ this.setState({loading:true})
+  const updateRef = firestore().collection('users').doc(uid);
+  updateRef.update({
+    HotelFav: firestore.FieldValue.arrayUnion(id),
+        
+    }).then((docRef) => {   
+      this.setState({loading:false})
+      this.loadProducts()
+    }).catch((err)=> {
+      this.setState({loading:false,})
+      console.log('err: ', err)})
+}
+
+
+removeFavHotel(id){
+  const uid =  auth().currentUser.uid;
+ this.setState({loading:true})
+  const updateRef = firestore().collection('users').doc(uid);
+  updateRef.update({
+    HotelFav: firestore.FieldValue.arrayRemove(id),
+        
+    }).then((docRef) => {   
+      this.setState({loading:false})
+      this.loadProducts()
+    }).catch((err)=> {
+      this.setState({loading:false,})
+      console.log('err: ', err)})
+}
+
+addToFav(id){
+  const uid =  auth().currentUser.uid;
+ this.setState({loading:true})
+  const updateRef = firestore().collection('users').doc(uid);
+  updateRef.update({
+    RentalPropFav: firestore.FieldValue.arrayUnion(id),
+        
+    }).then((docRef) => {   
+      this.setState({loading:false})
+      this.loadProducts()
+    }).catch((err)=> {
+      this.setState({loading:false,})
+      console.log('err: ', err)})
+}
+
+
+removeFav(id){
+  const uid =  auth().currentUser.uid;
+ this.setState({loading:true})
+  const updateRef = firestore().collection('users').doc(uid);
+  updateRef.update({
+    RentalPropFav: firestore.FieldValue.arrayRemove(id),
+        
+    }).then((docRef) => {   
+      this.setState({loading:false})
+      this.loadProducts()
+    }).catch((err)=> {
+      this.setState({loading:false,})
+      console.log('err: ', err)})
+}
+
 
     rowRenderer = (type, data)  => {
         const {
@@ -674,6 +752,9 @@ export default class SearchRentals extends Component {
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
+          {this.state.customerInfo == undefined? null:this.state.customerInfo.RentalPropFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.RentalPropFav.includes(data.id)?<AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: SCREEN_WIDTH/2.7, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
+   
       <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, }}>
@@ -742,6 +823,9 @@ export default class SearchRentals extends Component {
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
+          {this.state.customerInfo == undefined? null:this.state.customerInfo.HotelFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.9, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavHotel(data.id)}/>:!this.state.customerInfo.HotelFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.9, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavHotel(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: SCREEN_WIDTH/2.9, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFavHotel(data.id)}/>}
+   
       <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, }}>
@@ -799,7 +883,7 @@ export default class SearchRentals extends Component {
     </CardItem>
 
 
-:rentalType =='Vehicle' || rentalType =='Equipment' ?
+:rentalType =='Equipment' ?
 
 <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:0.5,width:SCREEN_WIDTH/2-10 }}>
       <TouchableOpacity style={{width:SCREEN_WIDTH/2-10, flex: 1}}  onPress={()=>this.setState({vInfo: data, VisibleAddInfo: true,MonthlyPrice: data.MonthlyPrice.toString(),
@@ -810,6 +894,33 @@ export default class SearchRentals extends Component {
                   priority: FastImage.priority.normal, }} 
                   resizeMode={FastImage.resizeMode.cover}
       >
+         {this.state.customerInfo == undefined? null:this.state.customerInfo.RentalEqFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavEq(data.id)}/>:!this.state.customerInfo.RentalEqFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavEq(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: 10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFavEq(data.id)}/>}
+
+{!StatHourPrice?null:
+<View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Hour</Text>
+</View>
+}
+    
+    {!StatDayPrice?null:
+    <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Day</Text>
+</View>  }
+ {!StatWeeklyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Week</Text>
+</View>
+}
+ {!StatMonthlyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Month</Text>
+</View>
+}
       <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
   bottom:0, width: '100%'}}>
       <View style={{height:20,flexShrink: 1, }}>
@@ -834,22 +945,79 @@ export default class SearchRentals extends Component {
   <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Color : {ColorMotor}</Text>
 
         
-        <View>
+
         
-  {!StatHourPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.route.params.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
-        
-        {!StatDayPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Daily Rate : {this.props.route.params.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
-     {!StatWeeklyPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Weekly Rate : {this.props.route.params.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
-     {!StatMonthlyPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.route.params.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
         </View>
+        </FastImage>
+    </TouchableOpacity>
+    </CardItem>
+
+
+
+:rentalType =='Vehicle' ?
+
+<CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:0.5,width:SCREEN_WIDTH/2-10 }}>
+      <TouchableOpacity style={{width:SCREEN_WIDTH/2-10, flex: 1}}  onPress={()=>this.setState({vInfo: data, VisibleAddInfo: true,MonthlyPrice: data.MonthlyPrice.toString(),
+        DayPrice: data.DayPrice.toString(),
+        HourPrice: data.HourPrice.toString(),
+        WeeklyPrice: data.WeeklyPrice.toString(),})}>
+      <FastImage style={styles.productPhoto} source={{ uri: newData[0], headers: { Authorization: 'someAuthToken' },
+                  priority: FastImage.priority.normal, }} 
+                  resizeMode={FastImage.resizeMode.cover}
+      >
+         {this.state.customerInfo == undefined? null:this.state.customerInfo.RentalCarFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavCar(data.id)}/>:!this.state.customerInfo.RentalCarFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavCar(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: 10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFavCar(data.id)}/>}
+{!StatHourPrice?null:
+<View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Hour</Text>
+</View>
+}
+    
+    {!StatDayPrice?null:
+    <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Day</Text>
+</View>  }
+ {!StatWeeklyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Week</Text>
+</View>
+}
+ {!StatMonthlyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Month</Text>
+</View>
+}
+         
+        
+      <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)',   position: 'absolute',
+  bottom:0, width: '100%'}}>
+      <View style={{height:20,flexShrink: 1, }}>
+        <Text  numberOfLines={1} style={styles.categoriesStoreName}>{rentalType == 'Equipment'?name: MBrand+' '+VModel}{name}</Text>
+      </View>  
+            {!admin_control || !status ? 
+         <View style={styles.text}>
+         <Text style={styles.title}>Unavailable</Text>
+       </View>
+        :   quantity  <= 0  ?
+        <View style={styles.text}>
+        <Text style={styles.title}>Out of Stock</Text>
+      </View>
+        : 
+         null
+      }
+     
+     
+        {rentalType == 'Equipment'?<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand : {brand}</Text>:null}
+         {rentalType == 'Equipment'? <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Model : {VModel}</Text>:null}
+         {rentalType == 'Vehicle'? <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Type : {name}</Text>:null}
+  <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Color : {ColorMotor}</Text>
+
+        
+     
         
         </View>
         </FastImage>
@@ -901,6 +1069,74 @@ export default class SearchRentals extends Component {
     </Card>
         )
       }
+
+
+
+
+      addToFavEq(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          RentalEqFav: firestore.FieldValue.arrayUnion(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
+    
+    
+      removeFavEq(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          RentalEqFav: firestore.FieldValue.arrayRemove(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
+    
+
+      addToFavCar(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          RentalCarFav: firestore.FieldValue.arrayUnion(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
+    
+    
+      removeFavCar(id){
+        const uid =  auth().currentUser.uid;
+       this.setState({loading:true})
+        const updateRef = firestore().collection('users').doc(uid);
+        updateRef.update({
+          RentalCarFav: firestore.FieldValue.arrayRemove(id),
+              
+          }).then((docRef) => {   
+            this.setState({loading:false})
+            this.loadProducts()
+          }).catch((err)=> {
+            this.setState({loading:false,})
+            console.log('err: ', err)})
+      }
+
+
      openModal (){
     this.setState({   
         visibleModal: true,

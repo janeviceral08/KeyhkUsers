@@ -25,6 +25,7 @@ import { FlatGrid } from 'react-native-super-grid';
 import { SliderBox } from "react-native-image-slider-box";
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
+import auth from '@react-native-firebase/auth';
 
 
 
@@ -185,7 +186,7 @@ export default class HomeScreenService extends Component {
         Prentals.push(doc.data())
       });
       this.setState({
-        Prentals: Prentals,
+        Prentals: Prentals.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
      });
      }
 
@@ -271,6 +272,7 @@ export default class HomeScreenService extends Component {
      querySnapshot.forEach((doc) => {
       this.setState({
         City: doc.data().Address.City,
+        customerInfo:doc.data(),
      });      
      });
      this._bootstrapAsync(false,null);
@@ -335,11 +337,41 @@ export default class HomeScreenService extends Component {
     
 
    
+    addToFav(id){
+      const uid =  auth().currentUser.uid;
+     this.setState({loading:true})
+      const updateRef = firestore().collection('users').doc(uid);
+      updateRef.update({
+        ServiceFav: firestore.FieldValue.arrayUnion(id),
+            
+        }).then((docRef) => {   
+          this.setState({loading:false})
+          firestore().collection('products').where('rentalType','==', 'Services').where('arrayofCity','array-contains-any',this.props.selectedCityUser ==null? [this.state.City.trim()]: [this.props.selectedCityUser.trim()]).onSnapshot(this.onPrentals)
+        }).catch((err)=> {
+          this.setState({loading:false,})
+          console.log('err: ', err)})
+    }
   
+  
+    removeFav(id){
+      const uid =  auth().currentUser.uid;
+     this.setState({loading:true})
+      const updateRef = firestore().collection('users').doc(uid);
+      updateRef.update({
+        ServiceFav: firestore.FieldValue.arrayRemove(id),
+            
+        }).then((docRef) => {   
+          this.setState({loading:false})
+          firestore().collection('products').where('rentalType','==', 'Services').where('arrayofCity','array-contains-any',this.props.selectedCityUser ==null? [this.state.City.trim()]: [this.props.selectedCityUser.trim()]).onSnapshot(this.onPrentals)
+
+        }).catch((err)=> {
+          this.setState({loading:false,})
+          console.log('err: ', err)})
+    }
 
     rowRendererPrentals = (data) => {
       console.log('data: ', data)
-      const { ratemode,newratemode,name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,address, ameneties, ColorMotor,imageArray, brand, store_name} = data;
+      const { status,ratemode,newratemode,name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,address, ameneties, ColorMotor,imageArray, brand, store_name} = data;
       const newData = imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
@@ -355,35 +387,42 @@ export default class HomeScreenService extends Component {
         WeeklyPrice: data.WeeklyPrice.toString(),})}>
 
 
-           <Image style={styles.productPhoto} resizeMode="cover" source={{uri:newData[0]}} />
-     
+           <FastImage style={styles.productPhoto} source={{ uri: newData[0], headers: { Authorization: 'someAuthToken' },
+                  priority: FastImage.priority.normal, }} 
+                  resizeMode={FastImage.resizeMode.cover}
+                  >
+            
+           {this.state.customerInfo == undefined? null:this.state.customerInfo.ServiceFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.6, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:!this.state.customerInfo.ServiceFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  SCREEN_WIDTH/2.6, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFav(data.id)}/>:
+          <AntDesign name="heart" size={21} color="salmon"  style={{backgroundColor: "white", width: 32, marginLeft: SCREEN_WIDTH/2.6, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFav(data.id)}/>}
+    </FastImage>
     <View style={{height:20,flexShrink: 1}}>
       <Text  numberOfLines={1} style={styles.categoriesStoreName}>{name}</Text>
     </View>  
+        
+{!StatHourPrice?null:
+<Text style={{fontStyle: "italic",  fontSize: 12, paddingLeft: 20}}>Hour Rate : {this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+     }
+        
+        {!StatDayPrice?null:
+<Text style={{fontStyle: "italic",  fontSize: 12, paddingLeft: 20}}>Daily Rate : {this.props.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+     }
+     {!StatWeeklyPrice?null:
+<Text style={{fontStyle: "italic",  fontSize: 12, paddingLeft: 20}}>Weekly Rate : {this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+     }
+     {!StatMonthlyPrice?null:
+<Text style={{fontStyle: "italic",  fontSize: 12, paddingLeft: 20}}>Montly Rate : {this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
+     }
+              {ratemode =='Others'?
+<Text style={{fontStyle: "italic",  fontSize: 12, paddingLeft: 20}}>{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}/{newratemode}</Text>
+     :null
+    }
    <View style={{flexDirection: 'row'}}>
-   <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Service Provider :{store_name}</Text>
+   <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20, paddingBottom: 5}}>Service Provider :{store_name}</Text>
    
    
 </View>
 
-     
-{!StatHourPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Hour Rate : {this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
-        
-        {!StatDayPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Daily Rate : {this.props.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
-     {!StatWeeklyPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Weekly Rate : {this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
-     {!StatMonthlyPrice?null:
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Montly Rate : {this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}</Text>
-     }
-              {ratemode =='Others'?
-<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20, paddingBottom: 5}}>{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}/{newratemode}</Text>
-     :null
-    }
+ 
   </TouchableOpacity>
   </CardItem>
   </Card>

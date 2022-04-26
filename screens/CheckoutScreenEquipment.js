@@ -1216,7 +1216,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
   }
      
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Price</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <FontAwesome5 name={'money-bill'} size={20} color="#b5b5b5" />
@@ -1230,7 +1230,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                   
          {this.state.datas.rentalType =='Vehicle'? <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Number of Person</Text>:null}
          {this.state.datas.rentalType =='Vehicle'?       
-           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
            <Left style={{left: 10}}>
              <Button style={{ backgroundColor: "#FFFFFF" }}>
              <Fontisto name={'persons'} size={25} color="#b5b5b5" />
@@ -1243,7 +1243,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
             :null}
                   
          <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Start Date of Rental</Text>
-         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+         <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialCommunityIcons name={'calendar-clock'} size={25} color="#b5b5b5" />
@@ -1266,7 +1266,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 
                     {this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?<Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>No of {this.state.SelectedPricing =='Weekly'? 'Week': this.state.SelectedPricing =='Monthly'? 'Month':null}</Text>: null}
              {   this.state.SelectedPricing =='Weekly' || this.state.SelectedPricing =='Monthly' ?   
-               <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+               <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
                <Left style={{left: 10}}>
                  <Button style={{ backgroundColor: "#FFFFFF" }}>
                  <MaterialCommunityIcons name={'calendar-week'} size={25} color="#b5b5b5" />
@@ -1282,7 +1282,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
 
                    <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>End Date of Rental</Text>
                     {this.state.SelectedPricing =='Weekly'?
-                      <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                      <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
                       <Left style={{left: 10}}>
                         <Button style={{ backgroundColor: "#FFFFFF" }}>
                         <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1295,7 +1295,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                     </ListItem>
                        
                        : this.state.SelectedPricing =='Monthly' ?
-                       <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                       <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
                        <Left style={{left: 10}}>
                          <Button style={{ backgroundColor: "#FFFFFF" }}>
                          <MaterialCommunityIcons name={'calendar-check'} size={25} colorcolor="#b5b5b5" />
@@ -1308,7 +1308,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                      </ListItem>
     
 :
-<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+<ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
 <Left style={{left: 10}}>
   <Button style={{ backgroundColor: "#FFFFFF" }}>
   <MaterialCommunityIcons name={'calendar-check'} size={25} color="#b5b5b5" />
@@ -1330,7 +1330,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
   }
 
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Phone Number</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'mobile1'} size={25} color="#b5b5b5" />
@@ -1350,7 +1350,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
                   
                   
                     <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Note</Text>
-                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+                    <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <AntDesign name={'book'} size={25} color="#b5b5b5" />
@@ -1365,7 +1365,7 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
           
 
            <Text style={{marginTop: 5, fontSize: 13, fontWeight: 'bold'}}>Description</Text>
-           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25}}>
+           <ListItem icon  style={{backgroundColor: '#f7f8fa', borderRadius: 10, left: -25, width: SCREEN_WIDTH/ 1.14}}>
             <Left style={{left: 10}}>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialIcons name={'description'} size={25} color="#b5b5b5" />
