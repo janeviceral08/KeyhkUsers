@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Dimensions,  Image,FlatList,Text, TouchableOpacity, Alert ,TextInput, TouchableHighlight, ScrollView, Pressable,Animated} from 'react-native';
+import { AppState,StyleSheet, View, Dimensions,  Image,FlatList,Text, TouchableOpacity, Alert ,TextInput, TouchableHighlight, ScrollView, Pressable,Animated} from 'react-native';
 import {Card, CardItem, Thumbnail, Body, Left, Right, Title, Toast,Container, Root, Header,Button} from 'native-base';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import firestore from '@react-native-firebase/firestore';
@@ -27,10 +27,16 @@ export default class Favorites extends Component {
 
   constructor() {
     super();
+    this.onViewableItemsChanged.bind(this);
+     this.onViewableItemsChangedHotelFav.bind(this);
+      this.onViewableItemsChangedServiceFav.bind(this);
+       this.onViewableItemsChangedRentalPropFav.bind(this);
+       this.onViewableItemsChangedRentalEqFav.bind(this);
     this.ref =  firestore();
     this.annotationRef = null;
     this.unsubscribe = null;
     this.state = {
+      appState: AppState.currentState,
       //defalt false and if true cannon will be fired
       shoot: false,
       dataSource: [],
@@ -51,7 +57,12 @@ export default class Favorites extends Component {
       RentalCarFav:[],
       RentalEqFav:[],
       ServiceFav:[],
-      onScreenData: null
+      onScreenData: null,
+      onScreenDataHotelFav:null,
+      onScreenDataServiceFav:null,
+      onScreenDataRentalPropFav:null,
+      onScreenDataRentalCarFav:null,
+      onScreenDataRentalEqFav:null,
     };
     this.onAddToCart = this.onAddToCart.bind(this);
   }
@@ -609,12 +620,37 @@ checkDrink(drink, object) {
   }
 
   componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     this.setState({loading: true})
 
     
    this.component();
 
   }
+  
+
+  componentWillUnmount(){
+
+    this.appStateSubscription.remove();
+  }
+
   
   addToFav(id){
     const uid =  auth().currentUser.uid;
@@ -1067,7 +1103,52 @@ onViewableItemsChanged = ({viewableItems, changed}) => {
   
 };
 
+onViewableItemsChangedHotelFav = ({viewableItems, changed}) => {
+  console.log("Visible items are", viewableItems);
+  
+  console.log("Changed in this iteration", changed);
+  const lenghtData = viewableItems.length == 0? changed.length:viewableItems.length ;
+  this.setState({onScreenDataHotelFav:viewableItems[lenghtData-1].item == undefined?changed[lenghtData-1].item:viewableItems[lenghtData-1].item })
 
+  
+};
+
+onViewableItemsChangedRentalPropFav = ({viewableItems, changed}) => {
+  console.log("Visible items are", viewableItems);
+  
+  console.log("Changed in this iteration", changed);
+  const lenghtData = viewableItems.length == 0? changed.length:viewableItems.length ;
+  this.setState({onScreenDataRentalPropFav:viewableItems[lenghtData-1].item == undefined?changed[lenghtData-1].item:viewableItems[lenghtData-1].item })
+
+  
+};
+onViewableItemsChangedRentalCarFav = ({viewableItems, changed}) => {
+  console.log("Visible items are", viewableItems);
+  
+  console.log("Changed in this iteration", changed);
+  const lenghtData = viewableItems.length == 0? changed.length:viewableItems.length ;
+  this.setState({onScreenDataRentalCarFav:viewableItems[lenghtData-1].item == undefined?changed[lenghtData-1].item:viewableItems[lenghtData-1].item })
+
+  
+};
+onViewableItemsChangedRentalEqFav = ({viewableItems, changed}) => {
+  console.log("Visible items are", viewableItems);
+  
+  console.log("Changed in this iteration", changed);
+  const lenghtData = viewableItems.length == 0? changed.length:viewableItems.length ;
+  this.setState({onScreenDataRentalEqFav:viewableItems[lenghtData-1].item == undefined?changed[lenghtData-1].item:viewableItems[lenghtData-1].item })
+
+  
+};
+onViewableItemsChangedServiceFav = ({viewableItems, changed}) => {
+  console.log("Visible items are", viewableItems);
+  
+  console.log("Changed in this iteration", changed);
+  const lenghtData = viewableItems.length == 0? changed.length:viewableItems.length ;
+  this.setState({onScreenDataServiceFav:viewableItems[lenghtData-1].item == undefined?changed[lenghtData-1].item:viewableItems[lenghtData-1].item })
+
+  
+};
   render() {
       console.log('FoodFav: ', this.state.FoodFav)
       console.log('HotelFav: ', this.state.HotelFav)
@@ -1194,7 +1275,7 @@ numColumns={2}
               <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true}/>
               {this.state.HotelFav && this.state.HotelFav.length> 0?
                 <MapboxGL.Camera 
-                centerCoordinate={[this.state.onScreenData == null?this.state.HotelFav[0].slongitude: this.state.onScreenData.slongitude,this.state.onScreenData == null?this.state.HotelFav[0].slatitude:this.state.onScreenData.slatitude]} 
+                centerCoordinate={[this.state.onScreenDataHotelFav == null?this.state.HotelFav[0].slongitude: this.state.onScreenDataHotelFav.slongitude,this.state.onScreenDataHotelFav == null?this.state.HotelFav[0].slatitude:this.state.onScreenDataHotelFav.slatitude]} 
                 zoomLevel={15}
                 followUserMode={'normal'}
                 />
@@ -1208,10 +1289,10 @@ numColumns={2}
  <MapboxGL.MarkerView id={"marker"} coordinate={[  info.slongitude, info.slatitude]} >
   <TouchableOpacity
                 style={{
-                    height: this.state.onScreenData == null? 50:this.state.onScreenData.id == info.id?70:50,
-                    width: this.state.onScreenData == null? 100:this.state.onScreenData.id == info.id?120:100,
-                    backgroundColor: this.state.onScreenData == null? "red":this.state.onScreenData.id == info.id?"#28ae07":"red",
-                    zIndex:this.state.onScreenData == null? 0:this.state.onScreenData.id == info.id?1:0,
+                    height: this.state.onScreenDataHotelFav == null? 50:this.state.onScreenDataHotelFav.id == info.id?70:50,
+                    width: this.state.onScreenDataHotelFav == null? 100:this.state.onScreenDataHotelFav.id == info.id?120:100,
+                    backgroundColor: this.state.onScreenDataHotelFav == null? "red":this.state.onScreenDataHotelFav.id == info.id?"#28ae07":"red",
+                    zIndex:this.state.onScreenDataHotelFav == null? 0:this.state.onScreenDataHotelFav.id == info.id?1:0,
                     borderRadius: 50,
                     borderColor: "#fff",
                     borderWidth: 3,
@@ -1283,7 +1364,7 @@ numColumns={2}
 horizontal
 style={{bottom:0, position: 'absolute', flex:100}}
 
-onViewableItemsChanged={this.onViewableItemsChanged}
+onViewableItemsChanged={this.onViewableItemsChangedHotelFav}
         renderItem={({item, index})=>(
             <Card transparent style={{flex: 1, width:  SCREEN_WIDTH/2.1 , marginRight: 10 }}>
     <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:0.5 }}>
@@ -1393,7 +1474,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
             <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true}/>
             {this.state.RentalPropFav && this.state.RentalPropFav.length> 0?
               <MapboxGL.Camera 
-              centerCoordinate={[this.state.onScreenData == null?this.state.RentalPropFav[0].slatitude: this.state.onScreenData.slatitude,this.state.onScreenData == null?this.state.RentalPropFav[0].slongitude:this.state.onScreenData.slongitude]} 
+              centerCoordinate={[this.state.onScreenDataRentalPropFav == null?this.state.RentalPropFav[0].slatitude: this.state.onScreenDataRentalPropFav.slatitude,this.state.onScreenDataRentalPropFav == null?this.state.RentalPropFav[0].slongitude:this.state.onScreenDataRentalPropFav.slongitude]} 
               zoomLevel={15}
               followUserMode={'normal'}
               />
@@ -1407,10 +1488,10 @@ onViewableItemsChanged={this.onViewableItemsChanged}
  <MapboxGL.MarkerView id={"marker"}  coordinate={[info.slatitude, info.slongitude]} >
  <TouchableOpacity
                style={{
-                height: this.state.onScreenData == null? 50:this.state.onScreenData.id == info.id?70:50,
-                width: this.state.onScreenData == null? 100:this.state.onScreenData.id == info.id?120:100,
-                backgroundColor: this.state.onScreenData == null? "red":this.state.onScreenData.id == info.id?"#28ae07":"red",
-                zIndex:this.state.onScreenData == null? 0:this.state.onScreenData.id == info.id?1:0,
+                height: this.state.onScreenDataRentalPropFav == null? 50:this.state.onScreenDataRentalPropFav.id == info.id?70:50,
+                width: this.state.onScreenDataRentalPropFav == null? 100:this.state.onScreenDataRentalPropFav.id == info.id?120:100,
+                backgroundColor: this.state.onScreenDataRentalPropFav == null? "red":this.state.onScreenDataRentalPropFav.id == info.id?"#28ae07":"red",
+                zIndex:this.state.onScreenDataRentalPropFav == null? 0:this.state.onScreenDataRentalPropFav.id == info.id?1:0,
                    borderRadius: 50,
                    borderColor: "#fff",
                    borderWidth: 3,
@@ -1459,7 +1540,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
 horizontal
 style={{bottom:0, position: 'absolute', flex:100}}
 
-onViewableItemsChanged={this.onViewableItemsChanged}
+onViewableItemsChanged={this.onViewableItemsChangedRentalPropFav}
         renderItem={({item, index})=>(
             <Card transparent style={{flex: 1, width:  SCREEN_WIDTH/2.1 , marginRight: 10 }}>
   <CardItem style={{backgroundColor:'#fff1f3', paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:0.5 }}>
@@ -1550,7 +1631,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
           <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true}/>
           {this.state.RentalCarFav && this.state.RentalCarFav.length> 0?
             <MapboxGL.Camera 
-            centerCoordinate={[this.state.onScreenData == null?this.state.RentalCarFav[0].slatitude: this.state.onScreenData.slatitude,this.state.onScreenData == null?this.state.RentalCarFav[0].slongitude:this.state.onScreenData.slongitude]} 
+            centerCoordinate={[this.state.onScreenDataRentalCarFav == null?this.state.RentalCarFav[0].slatitude: this.state.onScreenDataRentalCarFav.slatitude,this.state.onScreenDataRentalCarFav == null?this.state.RentalCarFav[0].slongitude:this.state.onScreenDataRentalCarFav.slongitude]} 
             zoomLevel={15}
             followUserMode={'normal'}
             />
@@ -1565,10 +1646,10 @@ onViewableItemsChanged={this.onViewableItemsChanged}
 <MapboxGL.MarkerView id={"marker"}  coordinate={[info.slatitude, info.slongitude]} >
 <TouchableOpacity
               style={{
-                height: this.state.onScreenData == null? 50:this.state.onScreenData.id == info.id?70:50,
-                width: this.state.onScreenData == null? 100:this.state.onScreenData.id == info.id?120:100,
-                backgroundColor: this.state.onScreenData == null? "red":this.state.onScreenData.id == info.id?"#28ae07":"red",
-                zIndex:this.state.onScreenData == null? 0:this.state.onScreenData.id == info.id?1:0,
+                height: this.state.onScreenDataRentalCarFav == null? 50:this.state.onScreenDataRentalCarFav.id == info.id?70:50,
+                width: this.state.onScreenDataRentalCarFav == null? 100:this.state.onScreenDataRentalCarFav.id == info.id?120:100,
+                backgroundColor: this.state.onScreenDataRentalCarFav == null? "red":this.state.onScreenDataRentalCarFav.id == info.id?"#28ae07":"red",
+                zIndex:this.state.onScreenDataRentalCarFav == null? 0:this.state.onScreenDataRentalCarFav.id == info.id?1:0,
                borderRadius: 50,
                   borderColor: "#fff",
                   borderWidth: 3,
@@ -1619,7 +1700,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
 horizontal
 style={{bottom:0, position: 'absolute', flex:100}}
 
-onViewableItemsChanged={this.onViewableItemsChanged}
+onViewableItemsChanged={this.onViewableItemsChangedRentalCarFav}
         renderItem={({item, index})=>(
             <Card transparent style={{flex: 1, width:  SCREEN_WIDTH/2.1 , marginRight: 10 }}>
             <CardItem style={{paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:1 ,width:SCREEN_WIDTH/2-5}}>
@@ -1708,7 +1789,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
         <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true}/>
         {this.state.RentalEqFav && this.state.RentalEqFav.length> 0?
           <MapboxGL.Camera 
-          centerCoordinate={[this.state.onScreenData == null?this.state.RentalEqFav[0].slatitude: this.state.onScreenData.slatitude,this.state.onScreenData == null?this.state.RentalEqFav[0].slongitude:this.state.onScreenData.slongitude]} 
+          centerCoordinate={[this.state.onScreenDataRentalEqFav == null?this.state.RentalEqFav[0].slatitude: this.state.onScreenDataRentalEqFav.slatitude,this.state.onScreenDataRentalEqFav == null?this.state.RentalEqFav[0].slongitude:this.state.onScreenDataRentalEqFav.slongitude]} 
           zoomLevel={15}
           followUserMode={'normal'}
           />
@@ -1723,10 +1804,10 @@ onViewableItemsChanged={this.onViewableItemsChanged}
 <MapboxGL.MarkerView id={"marker"}  coordinate={[info.slatitude, info.slongitude]} >
 <TouchableOpacity
               style={{
-                  height: this.state.onScreenData == null? 50:this.state.onScreenData.id == info.id?70:50,
-                  width: this.state.onScreenData == null? 100:this.state.onScreenData.id == info.id?120:100,
-                  backgroundColor: this.state.onScreenData == null? "red":this.state.onScreenData.id == info.id?"#28ae07":"red",
-                  zIndex:this.state.onScreenData == null? 0:this.state.onScreenData.id == info.id?1:0,
+                  height: this.state.onScreenDataRentalEqFav == null? 50:this.state.onScreenDataRentalEqFav.id == info.id?70:50,
+                  width: this.state.onScreenDataRentalEqFav == null? 100:this.state.onScreenDataRentalEqFav.id == info.id?120:100,
+                  backgroundColor: this.state.onScreenDataRentalEqFav == null? "red":this.state.onScreenDataRentalEqFav.id == info.id?"#28ae07":"red",
+                  zIndex:this.state.onScreenDataRentalEqFav == null? 0:this.state.onScreenDataRentalEqFav.id == info.id?1:0,
                   borderRadius: 50,
                   borderColor: "#fff",
                   borderWidth: 3,
@@ -1777,7 +1858,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
 horizontal
 style={{bottom:0, position: 'absolute', flex:100}}
 
-onViewableItemsChanged={this.onViewableItemsChanged}
+onViewableItemsChanged={this.onViewableItemsChangedRentalEqFav}
         renderItem={({item, index})=>(
             <Card transparent style={{flex: 1, width:  SCREEN_WIDTH/2.1 , marginRight: 10 }}>
             <CardItem style={{paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:1 ,width:SCREEN_WIDTH/2-5}}>
@@ -1864,7 +1945,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
       <MapboxGL.UserLocation visible={true} showsUserHeadingIndicator={true}/>
       {this.state.ServiceFav && this.state.ServiceFav.length> 0?
         <MapboxGL.Camera 
-        centerCoordinate={[this.state.onScreenData == null?this.state.ServiceFav[0].slongitude: this.state.onScreenData.slongitude,this.state.onScreenData == null?this.state.ServiceFav[0].slatitude:this.state.onScreenData.slatitude]} 
+        centerCoordinate={[this.state.onScreenDataServiceFav == null?this.state.ServiceFav[0].slongitude: this.state.onScreenDataServiceFav.slongitude,this.state.onScreenDataServiceFav == null?this.state.ServiceFav[0].slatitude:this.state.onScreenDataServiceFav.slatitude]} 
         zoomLevel={15}
         followUserMode={'normal'}
         />
@@ -1878,10 +1959,10 @@ onViewableItemsChanged={this.onViewableItemsChanged}
         <MapboxGL.MarkerView id={"marker"}     coordinate={[  info.slongitude, info.slatitude]}  >
  <TouchableOpacity
                style={{
-                height: this.state.onScreenData == null? 50:this.state.onScreenData.id == info.id?70:50,
-                width: this.state.onScreenData == null? 100:this.state.onScreenData.id == info.id?120:100,
-                backgroundColor: this.state.onScreenData == null? "red":this.state.onScreenData.id == info.id?"#28ae07":"red",
-                zIndex:this.state.onScreenData == null? 0:this.state.onScreenData.id == info.id?1:0,
+                height: this.state.onScreenDataServiceFav == null? 50:this.state.onScreenDataServiceFav.id == info.id?70:50,
+                width: this.state.onScreenDataServiceFav == null? 100:this.state.onScreenDataServiceFav.id == info.id?120:100,
+                backgroundColor: this.state.onScreenDataServiceFav == null? "red":this.state.onScreenDataServiceFav.id == info.id?"#28ae07":"red",
+                zIndex:this.state.onScreenDataServiceFav == null? 0:this.state.onScreenDataServiceFav.id == info.id?1:0,
            
                    borderRadius: 50,
                    borderColor: "#fff",
@@ -1941,7 +2022,7 @@ onViewableItemsChanged={this.onViewableItemsChanged}
 horizontal
 style={{bottom:0, position: 'absolute', flex:100}}
 
-onViewableItemsChanged={this.onViewableItemsChanged}
+onViewableItemsChanged={this.onViewableItemsChangedServiceFav}
         renderItem={({item, index})=>(
 
 

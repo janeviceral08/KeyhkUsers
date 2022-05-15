@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {StyleSheet, FlatList, TouchableOpacity,BackHandler, Alert} from 'react-native';
+import {AppState,StyleSheet, FlatList, TouchableOpacity,BackHandler, Alert} from 'react-native';
 import { Container, Header, Content, Icon, Accordion, Text, View, Card, CardItem, Thumbnail, Body, Left, Right, Button,List,ListItem, Tabs, Tab , ScrollableTab } from "native-base";
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import firestore from '@react-native-firebase/firestore';
@@ -18,6 +18,7 @@ export default class OrderScreen extends Component {
     this.ref =  firestore();
     this.unsubscribe = null;
     this.state = {
+      appState: AppState.currentState,
       user: null,
       email: "",
       password: "",
@@ -52,9 +53,31 @@ export default class OrderScreen extends Component {
  
 
     componentDidMount() {
+      this.appStateSubscription = AppState.addEventListener(
+        "change",
+        nextAppState => {
+          if (
+            this.state.appState.match(/inactive|background/) &&
+            nextAppState === "active"
+          ) {
+            console.log("App has come to the foreground!");
+          }else{
+            console.log("Exitnow");
+            firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+            cityLat:'none',
+                        selectedCountry: '',
+                        selectedCity:'none',})
+          }
+          this.setState({ appState: nextAppState });
+        }
+      );
       this.setState({loading: true})
       this._bootstrapAsync();
     }
+
+componentWillUnmount(){
+  this.appStateSubscription.remove();
+}
 
   render() {
     return (

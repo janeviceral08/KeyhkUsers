@@ -17,6 +17,8 @@ import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import Gateway1 from './screens/Gateway1';
 import SignupNumber from './screens/SignupNumber';
+import SignUpGoogleNumber from './screens/SignUpGoogleNumber';
+import SignUpFbNumber from './screens/SignUpFbNumber';
 import SignUpScreenGoogle from './screens/SignUpScreenGoogle';
 import SignUpScreenFB from './screens/SignUpScreenFB';
 import SignUpScreenNumber from './screens/SignUpScreenNumber';
@@ -42,8 +44,15 @@ import FastFoods from './screens/Fastfoods';
 import ChatScreen from './screens/ChatScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SearchAll from './components/SearchAll';
+import SearchAllProduced from './components/SearchAllProduced';
+import SearchAllMerch from './components/SearchAllMerch';
 import SearchRentals from './components/SearchRentals';
+import SearchTaxi from './components/SearchTaxi';
+import SearchRentalsCar from './components/SearchRentalsCar';
 import SearchServices from './components/SearchServices';
+import SearchRentalsProperty from './components/SearchRentalsProperty';
+import SearchRentalsEq from './components/SearchRentalsEq';
+import SearchRentalsHotel from './components/SearchRentalsHotel';
 import CheckoutTransport from './screens/CheckoutTransport';
 import CheckoutScreenRentals from './screens/CheckoutScreenRentals';
 import HotelsMap from './screens/HotelsMap';
@@ -445,14 +454,49 @@ function HomeStack() {
         component={SearchAll}
         options={{headerShown:false,tabBarVisible:false,}}
       />
+         <Stack.Screen
+        name="SearchAllProduced"
+        component={SearchAllProduced}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+      <Stack.Screen
+        name="SearchAllMerch"
+        component={SearchAllMerch}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
        <Stack.Screen
         name="SearchRentals"
         component={SearchRentals}
         options={{headerShown:false,tabBarVisible:false,}}
       />
+         <Stack.Screen
+        name="SearchRentalsCar"
+        component={SearchRentalsCar}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+         <Stack.Screen
+        name="SearchTaxi"
+        component={SearchTaxi}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
        <Stack.Screen
         name="SearchServices"
         component={SearchServices}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+        <Stack.Screen
+        name="SearchRentalsHotel"
+        component={SearchRentalsHotel}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+        <Stack.Screen
+        name="SearchRentalsEq"
+        component={SearchRentalsEq}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+        <Stack.Screen
+        name="SearchRentalsProperty"
+        component={SearchRentalsProperty}
         options={{headerShown:false,tabBarVisible:false,}}
       />
       <Stack.Screen
@@ -598,9 +642,29 @@ function HomeStack2() {
         component={SearchAll}
         options={{headerShown:false,tabBarVisible:false,}}
       />
+         <Stack.Screen
+        name="SearchAllProduced"
+        component={SearchAllProduced}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+      <Stack.Screen
+        name="SearchAllMerch"
+        component={SearchAllMerch}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
        <Stack.Screen
         name="SearchRentals"
         component={SearchRentals}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+          <Stack.Screen
+        name="SearchRentalsCar"
+        component={SearchRentalsCar}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+         <Stack.Screen
+        name="SearchTaxi"
+        component={SearchTaxi}
         options={{headerShown:false,tabBarVisible:false,}}
       />
        <Stack.Screen
@@ -611,6 +675,21 @@ function HomeStack2() {
       <Stack.Screen
         name="SearchProperty"
         component={SearchProperty}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+          <Stack.Screen
+        name="SearchRentalsHotel"
+        component={SearchRentalsHotel}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+        <Stack.Screen
+        name="SearchRentalsEq"
+        component={SearchRentalsEq}
+        options={{headerShown:false,tabBarVisible:false,}}
+      />
+        <Stack.Screen
+        name="SearchRentalsProperty"
+        component={SearchRentalsProperty}
         options={{headerShown:false,tabBarVisible:false,}}
       />
       <Stack.Screen
@@ -781,6 +860,16 @@ const App = () => {
              <Stack.Screen
             name="SignupNumber"
             component={SignupNumber}
+            options={{headerShown:false}}
+          />
+           <Stack.Screen
+            name="SignUpGoogleNumber"
+            component={SignUpGoogleNumber}
+            options={{headerShown:false}}
+          />
+           <Stack.Screen
+            name="SignUpFbNumber"
+            component={SignUpFbNumber}
             options={{headerShown:false}}
           />
              <Stack.Screen

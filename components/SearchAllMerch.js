@@ -22,7 +22,7 @@ import {LayoutUtil} from './LayoutUtil';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 
 
-export default class SearchAll extends Component {
+export default class SearchAllMerch extends Component {
     constructor(props) {
         super(props);
         this.Rotatevalue = new Animated.Value(0);
@@ -494,7 +494,7 @@ export default class SearchAll extends Component {
  
      loadProducts(loadmore, fromComponent) {
     const self = this;
-    var productQuery =  firestore().collection('products').where('section','==','Fastfood').where('rentalType', '==', 'Foods').where('admin_control', '==', true).where('status', '==', true).where('city', '==', this.state.City.trim());
+    var productQuery =  firestore().collection('products').where('section','==','General Merchandise').where('rentalType', '==', 'Foods').where('admin_control', '==', true).where('status', '==', true).where('city', '==', this.state.City.trim());
     productQuery = this.state.searchText ===""?productQuery:productQuery.where('keywords', 'array-contains-any', [this.state.searchText.toLocaleLowerCase()]);
     
     if( this.state.searchEnabled ){
@@ -1027,7 +1027,7 @@ removeFav(id){
         <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
                 <Fontisto name="search" size={20} color={"#000000"} onPress={()=> this.loadProducts()} />
-                <Input placeholder="Search..."
+                <Input placeholder="SearchAllProduced ..."
                 onChangeText={(text) => this.setState({searchText: text})}
                 onSubmitEditing={()=> this.loadProducts()}
                 style={{marginTop: 9}} />

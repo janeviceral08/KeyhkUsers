@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, TouchableWithoutFeedback,Animated} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, TouchableWithoutFeedback,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Title, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -57,6 +57,7 @@ export default class OrderDetailsTranspo extends Component {
       this.chargeref =  firestore().collection('charges').where('status', '==', 'on process' );
       const cart = this.props.route.params.orders; 
       this.state = {  
+        appState: AppState.currentState,
             OrderStatus: cart.OrderStatus,
      adminname: cart.adminname,
       DeliveredBy: cart.DeliveredBy.Name,
@@ -151,6 +152,24 @@ export default class OrderDetailsTranspo extends Component {
 
 
 async componentDidMount() {
+  this.appStateSubscription = AppState.addEventListener(
+    "change",
+    nextAppState => {
+      if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!");
+      }else{
+        console.log("Exitnow");
+        firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+        cityLat:'none',
+                    selectedCountry: '',
+                    selectedCity:'none',})
+      }
+      this.setState({ appState: nextAppState });
+    }
+  );
   this.StartImageRotationFunction()
   
   firestore().collection('orders').where('OrderId', '==', this.props.route.params.orders.OrderId).onSnapshot((querySnapshot) => {
@@ -189,6 +208,9 @@ async componentDidMount() {
        })}
   
   }
+componentWillUnmount(){
+  this.appStateSubscription.remove();
+}
 
  footer= () => {
     return(

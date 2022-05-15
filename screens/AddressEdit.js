@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View,Image, FlatList , ScrollView,TouchableOpacity, Alert,Platform, PermissionsAndroid} from 'react-native';
+import {AppState, StyleSheet, Text, View,Image, FlatList , ScrollView,TouchableOpacity, Alert,Platform, PermissionsAndroid} from 'react-native';
 import {Card, CardItem, Thumbnail, Body, Left, Header, Right, Title,Input, Item, Button, Icon, Picker, Toast, Container, Root,Switch} from 'native-base';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import firestore from '@react-native-firebase/firestore';
@@ -91,6 +91,7 @@ constructor(props) {
             this.ref =  firestore();
             this.subscribe= null;
             this.state = {
+              appState: AppState.currentState,
               email: '',
               name: '',
               username: '',
@@ -143,6 +144,24 @@ constructor(props) {
   }
 
   async componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
    if(Platform.OS === 'android')
     {
 
@@ -181,7 +200,9 @@ console.log('coordsL ', coords)
    this.component();
   }
   
-
+componentWillUnmount(){
+  this.appStateSubscription.remove();
+}
         
   onCityUpdate = (querySnapshot) => {
     const city = [];

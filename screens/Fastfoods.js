@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Platform, StyleSheet, View, ImageBackground, Image,Dimensions } from "react-native";
+import { AppState,Platform, StyleSheet, View, ImageBackground, Image,Dimensions } from "react-native";
 import DynamicTabView from "react-native-dynamic-tab-view";
 import { Container, Header, Item, Input, Icon, Button, Text, Left, Right,Body,Title,Form, Picker } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,6 +17,7 @@ export default class FastFoods extends Component{
     const slatitude = this.props.route.params.slatitude;
     const slongitude = this.props.route.params.slongitude;
     this.state = {
+      appState: AppState.currentState,
       StoreCountry: this.props.route.params.store.Country,
       defaultIndex: 0,
       category : store.subcategory,
@@ -42,6 +43,30 @@ export default class FastFoods extends Component{
     );
   };
 
+componentDidMount(){
+  this.appStateSubscription = AppState.addEventListener(
+    "change",
+    nextAppState => {
+      if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!");
+      }else{
+        console.log("Exitnow");
+        firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+        cityLat:'none',
+                    selectedCountry: '',
+                    selectedCity:'none',})
+      }
+      this.setState({ appState: nextAppState });
+    }
+  );
+}
+
+componentWillUnmount(){
+  this.appStateSubscription.remove();
+}
 
   onChangeTab = index => {};
   

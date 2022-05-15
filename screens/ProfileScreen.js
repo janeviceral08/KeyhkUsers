@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {NativeModules, StyleSheet,View, ScrollView, Alert, Share,Dimensions, FlatList, PermissionsAndroid, BackHandler, TouchableOpacity, Image} from 'react-native'
+import {AppState,NativeModules,Animated, StyleSheet,View, ScrollView, Alert, Share,Dimensions, FlatList, PermissionsAndroid, BackHandler, TouchableOpacity, Image} from 'react-native'
 import { Container, Header, Button, ListItem, Text, Icon, Left, Body, Right, Switch, CardItem, Item,Input  } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -20,7 +20,7 @@ import Province  from './Province.json';
 import Geolocation from 'react-native-geolocation-service';
 var DirectSms = NativeModules.DirectSms;
 var {height, width } = Dimensions.get('window');
-
+import Loader from '../components/Loader';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -79,9 +79,11 @@ export async function request_device_location_runtime_permissions() {
 export default class ProfileScreen extends Component {
   constructor() {
     super();
+    this.Rotatevalue = new Animated.Value(0);
     this.backCount=0;
     this.cityRef =  firestore();
     this.state = {
+      appState: AppState.currentState,
       uid:'',
       name:'',
       email:'',
@@ -104,6 +106,8 @@ export default class ProfileScreen extends Component {
       newCity: [],
       SelectedAvailableOn:[],
       searchCountry:'',
+      searchState:'',
+      SelectedSearchState:[],
       selectedCountry:'',
       CountryNow:[{labelRider: '', currency: '', currencyPabili:''}],
       ViewCountry:false,
@@ -123,6 +127,13 @@ export default class ProfileScreen extends Component {
       SOSMOdal: false,
       status:'New',
       cities:[],
+      modalSelectedState:false,
+      SelectedCountryInfo:null,
+      states:[],
+      PressedCountry:null,
+      loading: false,
+      EmptyOperator:false,
+      Operator:'',
       };
       this.FetchProfile();
   }
@@ -236,14 +247,42 @@ export default class ProfileScreen extends Component {
 console.log('BackPressed')
     };
     componentWillUnmount() {
- 
+      this.appStateSubscription.remove();
       this.backHandler.remove();
     }
   async componentDidMount() {
-
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
+    this.StartImageRotationFunction()
     const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
 const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
-
+firestore().collection('LinkApp').onSnapshot((querySnapshot) => {
+  querySnapshot.forEach((doc) => {
+console.log('doc.data(): ', doc.data())
+    this.setState({
+      Hotel: doc.data().Hotel,
+      Operator: doc.data().Operator,
+      Rider: doc.data().Rider,
+      Store: doc.data().Store,
+   });
+  })
+})
 this.setState({asyncselectedCity,asyncselectedCountry})
     this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -252,7 +291,7 @@ this.setState({asyncselectedCity,asyncselectedCountry})
       this._bootstrapAsyncs(); 
       firestore().collection('LinkApp').onSnapshot((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-    console.log('doc.data(): ', doc.data())
+    //console.log('doc.data(): ', doc.data())
           this.setState({
             ShareLink: doc.data().ShareLink,
             ShareLinkLabel: doc.data().ShareLinkLabel,
@@ -273,20 +312,21 @@ this.setState({asyncselectedCity,asyncselectedCountry})
    Geolocation.getCurrentPosition(
          info => {
              const { coords } = info
-console.log('coordsL ', coords)
+//console.log('coordsL ', coords)
 
 axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json?access_token=sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA`)
   .then(res => {
  let str = res.data.features[0].place_name;
- console.log("str ", res.data.features[0])
+// console.log("str ", res.data.features[0])
 let arr = str.split(',');
 const newarrLenghtCountry= arr.length-1
 const UserLocationCountry = arr[newarrLenghtCountry]
-console.log("UserLocationCountry ", UserLocationCountry)
+//console.log("UserLocationCountry ", UserLocationCountry)
 
 const  result = res.data.features[0].context.find((user) => user.id.includes("region."));
-console.log("result ", result)
-
+const  short_code = res.data.features[0].context.find((user) => user.short_code);
+//console.log("short_code ", short_code)
+//console.log("short_code ", short_code)
           this.setState({
             cityOriginal: result,
             coords,
@@ -296,10 +336,12 @@ console.log("result ", result)
 originalCountry:  UserLocationCountry=='Philippines'?'city':UserLocationCountry.trim(),
             
         })
+        this.getAllStates(short_code.short_code)
         this.getAllCity()
     }).catch(err => {
-              Alert.alert('Error', 'Internet Connection is unstable')
-       console.log('Region axios: ',err)
+           //   Alert.alert('Error', 'Internet Connection is unstable')
+      console.log('Region axios: ',err)
+      this.setState({loading:false})
     })
          },
          error => console.log(error),
@@ -316,11 +358,12 @@ originalCountry:  UserLocationCountry=='Philippines'?'city':UserLocationCountry.
                      
                      AvailableOn.push(doc.data())
                  });
-                 console.log('AvailableOn ',AvailableOn)
+            //     console.log('AvailableOn ',AvailableOn)
                  this.setState({
-   AvailableOn : AvailableOn })
+   AvailableOn : AvailableOn, loading:false })
              },
              error => {
+               this.setState({loading:false})
                  console.log(error)
              }
          );
@@ -392,15 +435,15 @@ this.setState({SOSMOdal : true})
     let arrs = arr== 'this.state.str'?'haha':arr.splice(0, arr.length-2);
     let joinArrs = arr== 'this.state.str'?'haha':arrs.join();
 
-    console.log('arr', arr);
-    console.log('arrs', arrs);
-    console.log('joinArrs', joinArrs);
+   // console.log('arr', arr);
+    //console.log('arrs', arrs);
+   // console.log('joinArrs', joinArrs);
             var message = this.state.name+' needs '+callFor+'. LOC: '+joinArrs+'. Lat: '+this.state.coords.latitude+'. Long: '+ this.state.coords.longitude;
             for(i=0; i < NumberData.length; i++){
               loopData += 
               DirectSms.sendDirectSms(NumberData[i], message);
-              console.log('NumberData[i]', NumberData[i]);
-              console.log('message:', this.state.name+' needs '+callFor+'. Location: '+joinArrs+'. Lat: '+this.state.coords.latitude+'. Long: '+ this.state.coords.longitude)
+       //       console.log('NumberData[i]', NumberData[i]);
+       //       console.log('message:', this.state.name+' needs '+callFor+'. Location: '+joinArrs+'. Lat: '+this.state.coords.latitude+'. Long: '+ this.state.coords.longitude)
           }
              
           } else {
@@ -510,12 +553,12 @@ this.setState({SOSMOdal : true})
 
     _bootstrapAsync =async(selected,item, typeOfRate, city) =>{
    //   const asyncselectedCity= await AsyncStorage.getItem('asyncselectedCity');
-    console.log('selectedCity: ',this.state.selectedCity)
+  //  console.log('selectedCity: ',this.state.selectedCity)
         const NewCityItem = item.trim();
         const NewValueofCityUser = city.find( (items) => items.label === NewCityItem);
       this.setState({selectedCityUser: this.state.selectedCity == undefined?item: this.state.selectedCity == 'none'? item:this.state.selectedCity, typeOfRate: NewValueofCityUser.typeOfRate})
      const newUserLocationCountry = this.state.UserLocationCountry =='Philippines'?'vehicles':this.state.UserLocationCountry+'.vehicles';
-      firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
+  //    firestore().collection(newUserLocationCountry).where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
 
       
     }
@@ -523,17 +566,17 @@ this.setState({SOSMOdal : true})
       this.setState({loading: true})
       
       const collect= this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.toString()+'.city';
-       console.log('collect: ', collect)
-           console.log('UserLocationCountry: ', this.state.UserLocationCountry)
-                 console.log('selectedCountry: ', this.state.selectedCountry)
+      // console.log('collect: ', collect)
+      //     console.log('UserLocationCountry: ', this.state.UserLocationCountry)
+     //            console.log('selectedCountry: ', this.state.selectedCountry)
         firestore().collection(collect)
         .onSnapshot(querySnapshot => {
           const city = [];
           querySnapshot.docs.forEach(doc => {
           city.push(doc.data());
-          console.log('collect data: ', doc.data())
+      //    console.log('collect data: ', doc.data())
         });
-        console.log('city getAllCity: ', city)
+      //  console.log('city getAllCity: ', city)
         this.setState({
           cities: city,
         }) 
@@ -541,8 +584,8 @@ this.setState({SOSMOdal : true})
     
       const SosCity = [];
       const Soscollect= this.state.originalCountry.trim() =='Philippines'?'city':this.state.originalCountry.toString()+'.city';
-      console.log('collect: ', Soscollect)
-          console.log('originalCountry: ', this.state.originalCountry)
+    //  console.log('collect: ', Soscollect)
+    //      console.log('originalCountry: ', this.state.originalCountry)
        firestore().collection(Soscollect).where('country', '==', this.state.originalCountry.trim())
        .onSnapshot(querySnapshot => {
          querySnapshot.docs.forEach(doc => {
@@ -554,9 +597,9 @@ this.setState({SOSMOdal : true})
        firestore().collection(Soscollect).where('arrayofCity', 'array-contains-any', [this.state.cityOriginal.text.trim()])
        .onSnapshot(querySnapshot => {
          querySnapshot.docs.forEach(doc => {
-          console.log('NumberAmbulance: ', doc.data().NumberAmbulance)
-          console.log('NumberFireman: ', doc.data().NumberFireman)
-          console.log('NumberPolice: ', doc.data().NumberPolice)
+      //    console.log('NumberAmbulance: ', doc.data().NumberAmbulance)
+     //     console.log('NumberFireman: ', doc.data().NumberFireman)
+      //    console.log('NumberPolice: ', doc.data().NumberPolice)
             this.setState({
               NumberAmbulance:doc.data().NumberAmbulance,
               NumberFireman:doc.data().NumberFireman,
@@ -578,13 +621,14 @@ this.setState({SOSMOdal : true})
       
           this.setState({
             CountryNow,
+            loading:false,
           })  
           
          
           Geolocation.getCurrentPosition(
                 info => {
                     const { coords } = info
-    console.log('coordsL ', coords)
+  //  console.log('coordsL ', coords)
     
      axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${coords.longitude},${coords.latitude}.json?access_token=sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA`)
          .then(res => {
@@ -606,10 +650,10 @@ this.setState({SOSMOdal : true})
                     fromPlace:arr[0]+', '+arr[1]+' '+item.context[1].text+' '+UserLocation+' '+valprovince+' '+arr[3],
                    location:item.place_name, x: { latitude: coords.latitude, longitude: coords.longitude },loading:false })
     
-                       this._bootstrapAsync(true,UserLocation, null,city);
+                       this._bootstrapAsync(true,UserLocation, null,UserLocation);
           
            }).catch(err => {
-                     Alert.alert('Error', 'Internet Connection is unstable')
+               //      Alert.alert('Error', 'Internet Connection is unstable')
               console.log('Region axios: ',err)
            })
                 },
@@ -622,20 +666,61 @@ this.setState({SOSMOdal : true})
             )
        
         }
+        async getAllStates(short_code){
+          this.setState({loading: true})
+          const userId =  auth().currentUser.uid;
+    
+          console.log('getAllStates short_code: ',short_code.toUpperCase())
+        
+          firestore().collection('AvailableOn').doc(short_code.toUpperCase()).collection('states')
+          .onSnapshot(querySnapshot => {
+            const states = [];
+            querySnapshot.docs.forEach(doc => {
+     //         console.log('getCountryCity: ', doc.data().label)
+            states.push(doc.data());
+           
+          });
+          this.setState({
+            states: states,
+          
+          })  
+        }); 
+  
+     
+            this.setState({
+     
+              loading:false,
+            })  
+           
+      }
 
         async getCountryCity(PressedCountrycode){
+          this.setState({loading: true})
           const userId =  auth().currentUser.uid;
           const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
           firestore().collection('users').doc(userId).update({  selectedCountry: PressedCountrycode.trim()})
           console.log('PressedCountrycode: ',PressedCountrycode)
-          this.setState({loading: true})
-            
+          console.log('selectedCountry: ',this.state.SelectedCountryInfo)
+        
+          firestore().collection('AvailableOn').doc(this.state.SelectedCountryInfo.code).collection('states')
+          .onSnapshot(querySnapshot => {
+            const states = [];
+            querySnapshot.docs.forEach(doc => {
+     //         console.log('getCountryCity: ', doc.data().label)
+            states.push(doc.data());
+           
+          });
+          this.setState({
+            states: states,
+            modalSelectedState:true,modalSelectedCityNoUser: false,modalSelectedCity:false,
+          })  
+        }); 
             const collect= asyncselectedCountry == null?PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city':asyncselectedCountry.trim()+'.city';
               firestore().collection(collect)
               .onSnapshot(querySnapshot => {
                 const city = [];
                 querySnapshot.docs.forEach(doc => {
-                  console.log('getCountryCity: ', doc.data().label)
+         //         console.log('getCountryCity: ', doc.data().label)
                 city.push(doc.data());
                
               });
@@ -644,7 +729,7 @@ this.setState({SOSMOdal : true})
               })  
             }); 
             if( this.state.AvailableOn.length <1){
-              this.setState({
+              this.setState({  
                 CountryNow:[{labelRider: '', currency: '', currencyPabili:''}]
               })
             }
@@ -658,7 +743,7 @@ this.setState({SOSMOdal : true})
               
             this.setState({
               CountryNow:CountryNow.length < 1?[{labelRider: '', currency: '', currencyPabili:''}]: CountryNow,
-            
+            PressedCountry:PressedCountrycode,
               loading:false,
             })  
            
@@ -675,15 +760,15 @@ changeCity (item){
 async getCountryCityNoUser(PressedCountrycode){
       this.setState({loading: true})
    
- console.log('PressedCountrycode getCountryCityNoUser : ', PressedCountrycode)
+ //console.log('PressedCountrycode getCountryCityNoUser : ', PressedCountrycode)
     AsyncStorage.setItem('asyncselectedCountry', PressedCountrycode.trim())
     const collect= PressedCountrycode =='Philippines'?'city':PressedCountrycode.trim()+'.city';
-    console.log('getCountryCityNoUser: ', collect)
+   // console.log('getCountryCityNoUser: ', collect)
      firestore().collection(collect)
       .onSnapshot(querySnapshot => {
         const city = [];
         querySnapshot.docs.forEach(doc => {
-          console.log('getCountryCity: ', doc.data().label)
+     //     console.log('getCountryCity: ', doc.data().label)
         city.push(doc.data());
       })
       this.setState({
@@ -716,18 +801,73 @@ changeCityNoUser (item){
   //this.state.currentLocation.trim() == item.label
  
      console.log('asyncselectedCity: ', item.label)
-  AsyncStorage.setItem('asyncselectedCity', item.label.trim())
 this._bootstrapAsync(true, item.label, item.typeOfRate, this.state.cities);
 this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
   
 }
+
+
+
+async getCityProvince(PressedCountrycode){
+    this.setState({loading: true})
+  const userId =  auth().currentUser.uid;
+  const asyncselectedCountry= await AsyncStorage.getItem('asyncselectedCountry');
+  console.log('selectedCountry: ',this.state.selectedCountry)
+  console.log('asyncselectedCountry: ',asyncselectedCountry)
+  console.log('PressedCountrycode: ',PressedCountrycode)
+
+    const collect=  this.state.selectedCountry == null?this.state.selectedCountry =='Philippines'?'city':this.state.selectedCountry.trim()+'.city':this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.trim()+'.city';
+    console.log('collect: ',collect)
+    firestore().collection(collect).where('province', '==', PressedCountrycode)
+      .onSnapshot(querySnapshot => {
+        const city = [];
+        querySnapshot.docs.forEach(doc => {
+         console.log('getCityProvince: ', doc.data().label)
+        city.push(doc.data());
+       
+      });
+      this.setState({
+        cities: city,
+      })  
+    }); 
+
+
+      
+    this.setState({modalSelectedCity:true,
+      modalSelectedState:false,
+      loading:false,
+    })  
+   
+}
+
+StartImageRotationFunction(){
+  this.Rotatevalue.setValue(0);
+  Animated.timing(this.Rotatevalue,{
+    toValue:1,
+    duration:3000,
+    useNativeDriver: true // Add This line
+  }).start(()=>this.StartImageRotationFunction());
+}
+
+
+
   render() {
     const {uid}=this.state;
-    console.log('NumberPolice: ', this.state.NumberPolice)
+   console.log('states: ', this.state.states)
+   const RotateData = this.Rotatevalue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '368deg']
+  })
 
+  const trans={
+    transform:[
+      {rotate: RotateData}
+    ]
+  }
     return (
       <Container>
       <CustomHeader title="Account Settings" isHome={true} Cartoff={true} navigation={this.props.navigation}/>
+      <Loader loading={this.state.loading} trans={trans}/>
       <Modal
               isVisible={this.state.SOSMOdal}
               animationInTiming={500}
@@ -738,10 +878,10 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
               onBackButtonPress={() => this.setState({SOSMOdal: false})} transparent={true}>
             <View style={styles.contents}>
               <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
-              <Text style={{color:'tomato', fontWeight:'bold', textAlign: 'center'}}>Click on the Emergency Assistance for Help</Text>
+              <Text style={{color:'tomato', fontWeight:'bold', textAlign: 'center'}}>Click on the Corresponding Emergency Assistance you need for Help</Text>
                </View>
          <View>
-              <TouchableOpacity onPress={()=> this.SOSPolice()} style={{flexDirection: 'row', alignSelf: 'flex-end', marginBottom: 5}}>
+              <TouchableOpacity onPress={()=> this.SOSPolice()} style={{flexDirection: 'row',  marginBottom: 25}}>
             <View style={{justifyContent: 'flex-end'}}>
               <View style={{ backgroundColor: "#FFFFFF" , height: 27,  shadowOffset: {
       width: 0,
@@ -759,7 +899,7 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
           </TouchableOpacity>
 
 
-          <TouchableOpacity onPress={()=> this.SOSFireman()} style={{flexDirection: 'row', alignSelf: 'flex-end', marginBottom: 5}}>
+          <TouchableOpacity onPress={()=> this.SOSFireman()} style={{flexDirection: 'row',  marginBottom: 25}}>
             <View style={{justifyContent: 'flex-end'}}>
               <View style={{ backgroundColor: "#FFFFFF" , height: 27,  shadowOffset: {
       width: 0,
@@ -777,7 +917,7 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
           </TouchableOpacity>
      
 
-          <TouchableOpacity onPress={()=> this.SOSAmbulance()} style={{flexDirection: 'row', alignSelf: 'flex-end'}}>
+          <TouchableOpacity onPress={()=> this.SOSAmbulance()} style={{flexDirection: 'row',marginBottom: 10}}>
             <View style={{justifyContent: 'flex-end'}}>
               <View style={{ backgroundColor: "#FFFFFF" , height: 27,  shadowOffset: {
       width: 0,
@@ -793,8 +933,32 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
               <Text> Ambulance</Text>
             </View>
           </TouchableOpacity>
-          <Text style={{color:'black', fontWeight:'bold', fontSize: 14, textAlign: 'center', marginTop: 5}}>Your Information and location will be sent to some riders and the corresponding emergency department you will select</Text>
+          <Text style={{color:'black', fontWeight:'bold', fontSize: 14, textAlign: 'center', marginTop: 5}}>Your Personal Information and specific location will be made public.</Text>
              
+          </View>
+            </View>
+            </Modal>
+            <Modal
+              isVisible={this.state.EmptyOperator}
+              animationInTiming={500}
+              animationIn='slideInUp'
+              animationOut='slideOutDown'
+              animationOutTiming={500}
+              useNativeDriver={true}
+              onBackButtonPress={() => this.setState({EmptyOperator: false})} transparent={true}>
+            <View style={styles.contents}>
+              <View style={{justifyContent: 'center',alignItems: 'center', paddingVertical: 10}}>
+              <Text style={{color:'tomato', fontWeight:'bold', textAlign: 'center'}}>No Available Franchise Operator</Text>
+               </View>
+         <View style={{justifyContent:'center',alignItems: 'center'}}>
+              <TouchableOpacity onPress={()=> this.props.navigation.navigate('GatewayDetails',{'url': this.state.Operator, 'title': 'Be a service provider'})} style={{flexDirection: 'row',  marginBottom: 25}}>
+ 
+            <View style={{backgroundColor:'#e85017',width: SCREEN_WIDTH/2,}}>
+              <Text style={{color: 'white', textAlign:'center', padding: 3}}> Click here to join</Text>
+            </View>
+          </TouchableOpacity>
+
+
           </View>
             </View>
             </Modal>
@@ -838,9 +1002,9 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
                      <FlatList
                   data={this.state.SelectedAvailableOn.length < 1? this.state.AvailableOn:this.state.SelectedAvailableOn}
                   renderItem={({ item,index }) => (
-                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row'}} key={index} button  onPress={() => {this.getCountryCity(item.label);this.setState({selectedCountry: item.label,SelectedAvailableOn:[], searchCountry:'', ViewCountry: false, keyboardav: false});  }}>
+                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row'}} key={index} button  onPress={() => {this.getCountryCity(item.label);this.setState({selectedCountry: item.label,SelectedAvailableOn:[], searchCountry:'', ViewCountry: false, keyboardav: false,SelectedCountryInfo:item});  }}>
                        <Image style={{  width: 70, height: 50,}} resizeMethod="scale" resizeMode="contain" source={{uri: item.flag}} />
-                      <Text style={{fontSize: 17, paddingLeft: 20}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
+                      <Text style={{fontSize: 17, paddingLeft: 20}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }{item.label=="Cebu City"? '(Demo City)':null }</Text></Text>
                     </CardItem>
                   )}
                   keyExtractor = { (item,index) => index.toString() }
@@ -854,7 +1018,6 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
 
                    <Card>
                     <Item>
-                      {console.log('cities: ',this.state.cities)}
                     <Input placeholder="Search City..." value={this.state.searchcity} onChangeText={(text) => {
                       
                       
@@ -866,10 +1029,11 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
       }),searchcity:text })}} placeholderTextColor="#687373"  onFocus={()=> this.setState({keyboardav: true})} onBlur={()=> this.setState({keyboardav: false})}/>
                     </Item>
                      <FlatList
+                     style={{marginBottom: 120}}
                   data={this.state.newCity.length < 1? this.state.cities:this.state.newCity}
                   renderItem={({ item,index }) => (
-                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH,}} key={index} button  onPress={() => {this.changeCity(item)}}>
-                      <Text style={{fontSize: 17}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
+                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH,}} key={index} button  onPress={() => {item.OperatorsAvail ==0? this.setState({EmptyOperator:true}):this.changeCity(item)}}>
+                      <Text style={{fontSize: 17}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null } {item.label=="Cebu City"? '(Demo City)':null }</Text></Text>
                     </CardItem>
                   )}
                   keyExtractor = { (item,index) => index.toString() }
@@ -883,7 +1047,63 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
                 </View>
                 </Modal>
 
+                <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.modalSelectedState}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                  onBackButtonPress={() => this.setState({ modalSelectedState: false })}
+                  onBackdropPress={() => this.setState({modalSelectedState: false})} transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT,width: SCREEN_WIDTH, backgroundColor: 'white', marginLeft: -20}]}> 
+                <Card style={{ width: SCREEN_WIDTH, marginTop: this.state.keyboardav == true? 130:0}}>
+  <CardItem listItemPadding={0} >
+ <Left style={{flex:1}}>
+          <Button transparent onPress={()=> this.setState({modalSelectedState: false})}>
+                 <MaterialIcons name="arrow-back" size={25} color="black" />
+                </Button> 
+          </Left>
+          <Right>
+          <TouchableOpacity onPress={()=> this.setState({ViewCountry : !this.state.ViewCountry})}>
+          <Text>{this.state.selectedCountry == ''?this.state.UserLocationCountry:this.state.selectedCountry}</Text>
+           </TouchableOpacity>
+          </Right>
+                </CardItem>
+                </Card>
+          
+                  
+                    <Card>
+                    {this.state.states.length < 1? null: <Item>
+                    <Input placeholder="Search State..." value={this.state.searchState} onChangeText={(text) => {
+                      
+                      
+                      this.setState({SelectedSearchState: this.state.states.filter(items => {
+        const itemData = items.label;
+        const textData = text;
+       
+        return itemData.indexOf(textData) > -1
+      }),searchState:text })}} placeholderTextColor="#687373"  onFocus={()=> this.setState({keyboardav: true})} onBlur={()=> this.setState({keyboardav: false})}/>
+                    </Item>}
+                    {this.state.states.length < 1?
+                     <CardItem  style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row', justifyContent: 'center'}} >
+                    <Text style={{fontSize: 17, paddingLeft: 20}}>No Available Francise Operator</Text>
+                  </CardItem>
+                    :<FlatList
+                  data={this.state.SelectedSearchState.length> 0?this.state.SelectedSearchState: this.state.states}
+                  renderItem={({ item,index }) => (
+                    <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row'}} key={index} button  onPress={() => {this.getCityProvince(item.label);this.setState({selectedState: item.label,SelectedAvailableOn:[], searchState:'',  SelectedStateInfo:item });  }}>
+                      <Text style={{fontSize: 17, paddingLeft: 20}}>{item.label} </Text>
+                    </CardItem>
+                  )}
+                  keyExtractor = { (item,index) => index.toString() }
+                />
+}
 
+                    </Card>
+
+           
+                </View>
+                </Modal>
 
                 <Modal
                   useNativeDriver={true}
@@ -927,7 +1147,7 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
                   renderItem={({ item,index }) => (
                     <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH, flexDirection: 'row'}} key={index} button  onPress={() => {this.getCountryCityNoUser(item.label);this.setState({selectedCountry: item.label,SelectedAvailableOn:[], searchCountry:'', ViewCountry: false, keyboardav: false});  }}>
                        <Image style={{  width: 70, height: 50,}} resizeMethod="scale" resizeMode="contain" source={{uri: item.flag}} />
-                      <Text style={{fontSize: 17, paddingLeft: 20}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
+                      <Text style={{fontSize: 17, paddingLeft: 20}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null } {item.label=="Cebu City"? '(Demo City)':null }</Text></Text>
                     </CardItem>
                   )}
                   keyExtractor = { (item,index) => index.toString() }
@@ -955,7 +1175,7 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
                   data={this.state.newCity.length < 1? this.state.cities:this.state.newCity}
                   renderItem={({ item,index }) => (
                     <CardItem  bordered style={{marginTop: 0, width: SCREEN_WIDTH,}} key={index} button  onPress={() => {this.changeCityNoUser(item)}}>
-                      <Text style={{fontSize: 17}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null }</Text></Text>
+                      <Text style={{fontSize: 17}}>{item.label} <Text style={{color: 'gray'}}>{this.state.currentLocation.trim() ==item.label? '(You are here)':null } {item.label=="Cebu City"? '(Demo City)':null }</Text></Text>
                     </CardItem>
                   )}
                   keyExtractor = { (item,index) => index.toString() }
@@ -1018,7 +1238,7 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
           <ListItem itemDivider style={{backgroundColor: "#FFFFFF"}}/> 
         
         
-          <ListItem icon onPress={()=>this.setState({modalSelectedCity: true})}>
+          <ListItem icon onPress={()=>this.setState({modalSelectedState: true})}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
               <MaterialIcons name="my-location" size={25} color="gray" />
@@ -1069,7 +1289,6 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
             <MaterialIcons name="keyboard-arrow-right" size={25} color="gray" />    
             </Right>
         </ListItem>*/}
-            {console.log('clat: ', this.props.route)}
          <ListItem icon onPress={()=> this.props.navigation.navigate("Favorites",{ 'cLat': this.props.route.params.cLat, 'cLong': this.props.route.params.cLong, 'typeOfRate':this.props.route.params.typeOfRate, 'selectedCityUser': this.props.route.params.selectedCityUser, 'fromPlace': this.props.route.params.fromPlace,'UserLocationCountry': this.props.route.params.UserLocationCountry,'currency':this.props.route.params.currency, 'code':this.props.route.params.code,'cityLat': this.props.route.params.cityLat,'cityLong': this.props.route.params.cityLong})}>
             <Left>
               <Button style={{ backgroundColor: "#FFFFFF" }}>
@@ -1255,7 +1474,6 @@ this.setState({modalSelectedCityNoUser: false,newCity:[], searchcity:''})
          }
     <TouchableOpacity style={{marginLeft: SCREEN_WIDTH/1.3, marginTop: SCREEN_HEIGHT/8}}     onPress={() => {
         this.backCount++
-        console.log('this.backCount: ',this.backCount);
         if (this.backCount == 5) {
             clearTimeout(this.backTimer)
          this.setSOS()

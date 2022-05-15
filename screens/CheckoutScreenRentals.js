@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image,TouchableWithoutFeedback, FlatList, SafeAreaView, ScrollView, BackHandler,Animated} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image,TouchableWithoutFeedback, FlatList, SafeAreaView, ScrollView, BackHandler,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Card, CardItem, Body,Item, Input,List,Picker, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -68,6 +68,7 @@ export default class CheckoutScreenRentals extends Component {
       this.chargeref =  firestore().collection('charges').where('status', '==', 'on process' );
       const datas = this.props.route.params.datas; 
       this.state = {  
+        appState: AppState.currentState,
      // slatitude:cart[0].slatitude,
       //slongitude:cart[0].slongitude,
      // cartItems: cart,
@@ -316,6 +317,24 @@ export default class CheckoutScreenRentals extends Component {
     this.setState({FinalCheckout:false,VisibleAddInfo:false,warningModal:false,showURL:false})
   };
   componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     this.StartImageRotationFunction()
     this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -348,6 +367,7 @@ export default class CheckoutScreenRentals extends Component {
 
   
  componentWillUnmount() {
+  this.appStateSubscription.remove();
     this.unsubscribe && this.unsubscribe();
     this.subscribe && this.subscribe();
     this.billinglistener && this.billinglistener();

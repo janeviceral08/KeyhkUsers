@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet,TouchableWithoutFeedback, TextInput, ToastAndroid,TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid,Animated} from 'react-native'
+import {AppState,StyleSheet,TouchableWithoutFeedback, TextInput, ToastAndroid,TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List,Picker, ListItem,Header, Title, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -89,7 +89,7 @@ export default class Pabili extends Component {
       const newUserLocationCountry = this.props.route.params.UserLocationCountry == 'Philippines'?'vehicles':this.props.route.params.UserLocationCountry+'.vehicles';
       this.chargeref =  firestore().collection(newUserLocationCountry).where('vehicle', '==', 'Motorcycle' );
       this.state = {  
-   
+        appState: AppState.currentState,
      VisibleAddInfo: false,
      datas: [],
      cLong:this.props.route.params.cLong,
@@ -558,6 +558,24 @@ console.log('doc.data(): ', doc.data())
   };
 
   async componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     this.StartImageRotationFunction()
      /* this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -677,6 +695,7 @@ console.log('doc.data(): ', doc.data())
 
   
  componentWillUnmount() {
+  this.appStateSubscription.remove();
     this.unsubscribe && this.unsubscribe();
     this.subscribe && this.subscribe();
     this.billinglistener && this.billinglistener();
@@ -2254,9 +2273,10 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
    */   }
                     {!this.state.loading &&
                     <View regular style={{borderWidth: 1.5, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 5, width: SCREEN_WIDTH/1.2, padding: 5}} >
-                    <TouchableWithoutFeedback style={{width: SCREEN_WIDTH/1.02}} onPress={()=> this.setState({visibleModalPickup: true, visibleAddressModalPin: true})}>
-                   <Text style={{fontSize: 17}}>{this.state.fromPlace==""?'Enter Pickup Location Here':this.state.fromPlace==this.props.route.params.fromPlace?'Your Location':this.state.fromPlace}</Text>
+                       <TouchableWithoutFeedback style={{width: SCREEN_WIDTH/1.02}} onPress={()=> this.setState({visibleModalDropoff: true, visibleAddressModalTo: true,visibleAddressModal: false,visibleAddressModalToPin: true})}>
+                   <Text style={{fontSize: 17}}>{this.state.toPlace==""?'Enter Pickup Location Here':this.state.toPlace==this.props.route.params.fromPlace?'Your Location':this.state.toPlace}</Text>
                     </TouchableWithoutFeedback>
+                   
                          </View>}
                          </View> 
                 </CardItem>
@@ -2272,8 +2292,10 @@ onUserLocationUpdate={()=> {console.log('user moved')}}
                     {!this.state.loading &&
                        
                     <View regular style={{borderWidth: 1, borderColor: 'rgba(238, 238, 238, 1)', borderRadius: 5, width: SCREEN_WIDTH/1.2, padding: 5}} >
-                        <TouchableWithoutFeedback style={{width: SCREEN_WIDTH/1.02}} onPress={()=> this.setState({visibleModalDropoff: true, visibleAddressModalTo: true,visibleAddressModal: false,visibleAddressModalToPin: true})}>
-                   <Text style={{fontSize: 17}}>{this.state.toPlace==""?'Enter Drop-off Location Here':this.state.toPlace==this.props.route.params.fromPlace?'Your Location':this.state.toPlace}</Text>
+                    
+
+                    <TouchableWithoutFeedback style={{width: SCREEN_WIDTH/1.02}} onPress={()=> this.setState({visibleModalPickup: true, visibleAddressModalPin: true})}>
+                   <Text style={{fontSize: 17}}>{this.state.fromPlace==""?'Enter Drop-off Location Here':this.state.fromPlace==this.props.route.params.fromPlace?'Your Location':this.state.fromPlace}</Text>
                     </TouchableWithoutFeedback>
                      </View>  
                    }

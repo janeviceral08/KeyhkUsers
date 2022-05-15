@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView,Animated} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Card, CardItem, Body,Item, Input,List,Picker, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -65,6 +65,7 @@ export default class OrderDetailsRentals extends Component {
       const cart = this.props.route.params.orders; 
       const datas = this.props.route.params.orders; 
       this.state = {  
+        appState: AppState.currentState,
      // slatitude:cart[0].slatitude,
       //slongitude:cart[0].slongitude,
      // cartItems: cart,
@@ -283,6 +284,24 @@ export default class OrderDetailsRentals extends Component {
   }
 
  async componentDidMount() {
+  this.appStateSubscription = AppState.addEventListener(
+    "change",
+    nextAppState => {
+      if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!");
+      }else{
+        console.log("Exitnow");
+        firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+        cityLat:'none',
+                    selectedCountry: '',
+                    selectedCity:'none',})
+      }
+      this.setState({ appState: nextAppState });
+    }
+  );
   this.StartImageRotationFunction()
     //this.setState({loading: true})
   const getData= firestore().collection('charges').doc(this.props.route.params.orders.adminID);
@@ -321,6 +340,7 @@ export default class OrderDetailsRentals extends Component {
 
   
  componentWillUnmount() {
+  this.appStateSubscription.remove();
     this.unsubscribe && this.unsubscribe();
     this.subscribe && this.subscribe();
     this.billinglistener && this.billinglistener();

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet,View, ScrollView, Alert, Image} from 'react-native'
+import {AppState,StyleSheet,View, ScrollView, Alert, Image} from 'react-native'
 import { Container, Header, Button, ListItem, Text, Icon, Left, Body, Right, Switch, Thumbnail  } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -17,6 +17,7 @@ export default class Gateway extends Component {
   constructor() {
     super();
     this.state = {
+      appState: AppState.currentState,
       uid:'',
       name:'',
       email:'',
@@ -91,6 +92,24 @@ export default class Gateway extends Component {
     }
 
   componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
       this._bootstrapAsync(); 
       firestore().collection('LinkApp').onSnapshot((querySnapshot) => {
         querySnapshot.forEach((doc) => {
@@ -104,6 +123,12 @@ export default class Gateway extends Component {
         })
       })
   }
+
+
+componentWillUnmount(){
+  this.appStateSubscription.remove();
+}
+
 
   render() {
     const {uid}=this.state;

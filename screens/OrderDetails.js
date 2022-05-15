@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {StyleSheet, FlatList, ScrollView,Dimensions, TouchableOpacity, TouchableWithoutFeedback, Image, Alert} from 'react-native';
+import {AppState,StyleSheet, FlatList, ScrollView,Dimensions, TouchableOpacity, TouchableWithoutFeedback, Image, Alert} from 'react-native';
 import { Container, Header, Item,Input,Icon, Accordion, Text, View, Card, CardItem, Thumbnail, Body, Left, Right, Button,Toast,List,ListItem, Title } from "native-base";
 import StepIndicator from 'react-native-step-indicator'
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -54,6 +54,7 @@ export default class OrderDetails extends Component {
     const cartItems = [];
     const cart = cartItems.concat(orders.Stores)
     this.state = {
+      appState: AppState.currentState,
       orders:orders,
       user: null,
       email: "",
@@ -142,6 +143,24 @@ else if (doc.data().OrderStatus == 'Delivered'){
 }
 
   async componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
   this.getCurretData();
    const getData= firestore().collection('charges').doc(this.props.route.params.orders.adminID);
     const doc = await getData.get();
@@ -212,6 +231,7 @@ ReasonOfCancel(){
     this.props.navigation.goBack();
 }
 componentWillUnmount(){
+  this.appStateSubscription.remove();
   this.getCurretData()
 }
 

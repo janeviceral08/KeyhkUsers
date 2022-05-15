@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, TextInput, Image, TouchableOpacity, StyleSheet, Dimensions,Alert } from 'react-native';
+import { AppState,Text, View, ScrollView, TextInput, Image, TouchableOpacity, StyleSheet, Dimensions,Alert } from 'react-native';
 import {Toast, Container, Root, Form, Button,Textarea, Input, Item} from 'native-base';
 import NumberFormat from 'react-number-format';
 var { width } = Dimensions.get("window")
@@ -21,6 +21,7 @@ export default class Cart extends Component {
     super(props);
     this.storeRef  =   firestore(); 
     this.state = {
+      appState: AppState.currentState,
      dataSource: [],
      Quantity: 1,
      status: '',
@@ -39,7 +40,24 @@ export default class Cart extends Component {
 
 
   	componentDidMount() {
-
+      this.appStateSubscription = AppState.addEventListener(
+        "change",
+        nextAppState => {
+          if (
+            this.state.appState.match(/inactive|background/) &&
+            nextAppState === "active"
+          ) {
+            console.log("App has come to the foreground!");
+          }else{
+            console.log("Exitnow");
+            firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+            cityLat:'none',
+                        selectedCountry: '',
+                        selectedCity:'none',})
+          }
+          this.setState({ appState: nextAppState });
+        }
+      );
 		const {  cart } = this.state;
 		const self = this;
     
@@ -97,6 +115,7 @@ export default class Cart extends Component {
 	
 	/* On unmount, we remove the listener to avoid memory leaks from using the same reference with the off() method: */
 	componentWillUnmount() {
+    this.appStateSubscription.remove();
     this.unsubscribeCartItems && this.unsubscribeCartItems();
 		this.unsubscribeProduct && this.unsubscribeProduct();
 	}

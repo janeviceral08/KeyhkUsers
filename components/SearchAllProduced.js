@@ -22,7 +22,7 @@ import {LayoutUtil} from './LayoutUtil';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 
 
-export default class SearchAll extends Component {
+export default class SearchAllProduced extends Component {
     constructor(props) {
         super(props);
         this.Rotatevalue = new Animated.Value(0);
@@ -494,7 +494,7 @@ export default class SearchAll extends Component {
  
      loadProducts(loadmore, fromComponent) {
     const self = this;
-    var productQuery =  firestore().collection('products').where('section','==','Fastfood').where('rentalType', '==', 'Foods').where('admin_control', '==', true).where('status', '==', true).where('city', '==', this.state.City.trim());
+    var productQuery =  firestore().collection('products').where('section','==','Produce etc.').where('rentalType', '==', 'Foods').where('admin_control', '==', true).where('status', '==', true).where('city', '==', this.state.City.trim());
     productQuery = this.state.searchText ===""?productQuery:productQuery.where('keywords', 'array-contains-any', [this.state.searchText.toLocaleLowerCase()]);
     
     if( this.state.searchEnabled ){
@@ -1027,7 +1027,7 @@ removeFav(id){
         <Header searchBar rounded androidStatusBarColor={'#ee4e4e'} style={{backgroundColor: '#ee4e4e', elevation: 0}}>
           <Item style={{padding: 5}}>
                 <Fontisto name="search" size={20} color={"#000000"} onPress={()=> this.loadProducts()} />
-                <Input placeholder="Search..."
+                <Input placeholder="SearchAllProduced ..."
                 onChangeText={(text) => this.setState({searchText: text})}
                 onSubmitEditing={()=> this.loadProducts()}
                 style={{marginTop: 9}} />
@@ -1039,7 +1039,7 @@ removeFav(id){
           <Left style={{flexDirection: "row", paddingLeft: 10}}>
          { this.state.PriceOrder==false?
            <TouchableOpacity style={{flexDirection: "row"}} onPress={()=> {this.setState({PriceOrder: !this.state.PriceOrder,selectedFilter: this.state.PriceOrder==true? 'Price-Ascending':'Price-Descending' });this.loadProducts()}}>
-           <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} onPress={()=> {this.setState({PriceOrder: !this.state.PriceOrder,selectedFilter: this.state.PriceOrder==true? 'Price-Ascending':'Price-Descending'})}} style={{transform: [{ rotate: '90deg' },{rotateY: '180deg'}]}}/>
+           <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} style={{transform: [{ rotate: '90deg' },{rotateY: '180deg'}]}}/>
             <View style={{flexDirection: 'column'}}>
             <Text style={{fontSize: 9, color: 'white'}}>9</Text>
              <Text style={{fontSize: 9, color: 'white'}}>0</Text>
@@ -1047,7 +1047,7 @@ removeFav(id){
             </TouchableOpacity>
          :
          <TouchableOpacity style={{flexDirection: "row"}} onPress={()=> {this.setState({PriceOrder: !this.state.PriceOrder,selectedFilter: this.state.PriceOrder==true? 'Price-Ascending':'Price-Descending' });this.loadProducts()}}>
-           <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} onPress={()=> {this.setState({PriceOrder: !this.state.PriceOrder,selectedFilter: this.state.PriceOrder==true? 'Price-Ascending':'Price-Descending'})}} style={{transform: [{ rotate: '90deg' }]}}/>
+           <Fontisto name="arrow-swap" size={20} color={"#FFFFFF"} style={{transform: [{ rotate: '90deg' }]}}/>
             <View style={{flexDirection: 'column'}}>
             <Text style={{fontSize: 9, color: 'white'}}>0</Text>
              <Text style={{fontSize: 9, color: 'white'}}>9</Text>

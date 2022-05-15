@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, BackHandler, Keyboard,Animated} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, BackHandler, Keyboard,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Picker, Col, Badge, Card, CardItem, Body,Item, Input,List,Title,Header, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -94,6 +94,7 @@ export default class CheckoutTransport extends Component {
       this.chargeref =  firestore().collection('charges').where('status', '==', 'on process' );
       const datas = this.props.route.params.datas; 
       this.state = {  
+        appState: AppState.currentState,
      // slatitude:cart[0].slatitude,
       //slongitude:cart[0].slongitude,
      // cartItems: cart,
@@ -584,6 +585,24 @@ console.log('getLocation doc.data(): ', doc.data())
   }
 
   componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     this.StartImageRotationFunction()
       this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -623,6 +642,7 @@ console.log('getLocation doc.data(): ', doc.data())
 
   
  componentWillUnmount() {
+  this.appStateSubscription.remove();
     this.unsubscribe && this.unsubscribe();
     this.subscribe && this.subscribe();
     this.billinglistener && this.billinglistener();

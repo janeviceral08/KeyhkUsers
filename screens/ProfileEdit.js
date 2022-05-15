@@ -4,7 +4,7 @@
 
 // React native and others libraries imports
 import React, { Component } from 'react';
-import { TouchableHighlight, BackHandler,ScrollView, TouchableOpacity, Image,Animated } from 'react-native';
+import {AppState, TouchableHighlight, BackHandler,ScrollView, TouchableOpacity, Image,Animated } from 'react-native';
 import { Container, View, Grid, Col, Left, Right, Button, Icon, List,Thumbnail, ListItem, Body, Radio, Input, Item,Text,Toast, Root } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
@@ -23,6 +23,7 @@ export default class Profile extends Component {
       this.Rotatevalue = new Animated.Value(0);
       this.ref =  firestore();
       this.state = {
+        appState: AppState.currentState,
         name: '',
         email: '',
         phone: '',
@@ -92,7 +93,30 @@ updateTextInput = (text, field) => {
   this.setState(state);
 }
 componentDidMount() {
+  this.appStateSubscription = AppState.addEventListener(
+    "change",
+    nextAppState => {
+      if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!");
+      }else{
+        console.log("Exitnow");
+        firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+        cityLat:'none',
+                    selectedCountry: '',
+                    selectedCity:'none',})
+      }
+      this.setState({ appState: nextAppState });
+    }
+  );
   this.StartImageRotationFunction()
+}
+
+
+componentWillUnmount(){
+  this.appStateSubscription.remove();
 }
  
 StartImageRotationFunction(){

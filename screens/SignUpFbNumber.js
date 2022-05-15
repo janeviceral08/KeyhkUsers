@@ -35,7 +35,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 
 
-export default class SignupNumber extends Component  {
+export default class SignUpFbNumber extends Component  {
     constructor() {
         super();
         this.Rotatevalue = new Animated.Value(0);
@@ -275,7 +275,7 @@ export default class SignupNumber extends Component  {
                 >
                     <Text style={[styles.textSign, {
                         color:'#fff'
-                    }]}>Sign In</Text>
+                    }]}>Continue</Text>
                 </LinearGradient>
                 </TouchableOpacity>
             

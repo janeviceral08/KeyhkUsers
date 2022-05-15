@@ -1141,7 +1141,7 @@ elevation: 24, width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedInde
                shadowRadius: 16.00,
                elevation: 24,width: (SCREEN_WIDTH-55)/2,backgroundColor: this.state.transportSelected ==0 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({transportSelected: 0})}>
                         <MaterialIcons name={'local-taxi'} size={15} color={'#28ae07'} />
-                   <Text style={{color:'black', fontWeight: 'bold'}}> Hire a Car</Text>
+                   <Text style={{color:'black', fontWeight: 'bold'}}> Taxi/Truck </Text>
                    </TouchableOpacity>
                    <TouchableOpacity style={{shadowColor: "#000",
                shadowOffset: {
@@ -1153,6 +1153,17 @@ elevation: 24, width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedInde
                elevation: 24,width: (SCREEN_WIDTH-55)/2, backgroundColor:this.state.transportSelected ==1 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({transportSelected: 1})}>
                       <MaterialIcons name={'car-rental'} size={15} color={'#28ae07'}/>
                       <Text style={{color: 'black', fontWeight: 'bold'}}> Rent a car</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity style={{shadowColor: "#000",
+               shadowOffset: {
+                 width: 0,
+                 height: 12,
+               },
+               shadowOpacity: 0.58,
+               shadowRadius: 16.00,
+               elevation: 24,width: (SCREEN_WIDTH-55)/2, backgroundColor:this.state.transportSelected ==1 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({transportSelected: 1})}>
+                      <MaterialIcons name={'car-rental'} size={15} color={'#28ae07'}/>
+                      <Text style={{color: 'black', fontWeight: 'bold'}}> Tickets</Text>
                    </TouchableOpacity>
                
                    </View>

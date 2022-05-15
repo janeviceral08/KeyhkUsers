@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Platform, StyleSheet,  View,Image, ImageBackground,FlatList,Dimensions } from "react-native";
+import { AppState,Platform, StyleSheet,  View,Image, ImageBackground,FlatList,Dimensions } from "react-native";
 import DynamicTabView from "react-native-dynamic-tab-view";
 import { Container, Header, Item, Input, Icon, Button, Text, Left, Right,Body,Title,Form, Picker } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,6 +33,7 @@ export default class PropertyHotel extends Component{
     const slatitude = this.props.route.params.slatitude;
     const slongitude = this.props.route.params.slongitude;
     this.state = {
+      appState: AppState.currentState,
       defaultIndex: 0,
       storeImage: store.foreground,
       storeAddress: store.address+' '+store.city+' '+store.province,
@@ -61,6 +62,29 @@ export default class PropertyHotel extends Component{
     );
   };
 
+componentDidMount(){
+  this.appStateSubscription = AppState.addEventListener(
+    "change",
+    nextAppState => {
+      if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!");
+      }else{
+        console.log("Exitnow");
+        firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+        cityLat:'none',
+                    selectedCountry: '',
+                    selectedCity:'none',})
+      }
+      this.setState({ appState: nextAppState });
+    }
+  );
+}
+componentWillUnmount(){
+  this.appStateSubscription.remove();
+}
 
   onChangeTab = index => {};
   

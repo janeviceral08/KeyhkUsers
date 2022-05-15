@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, TouchableWithoutFeedback,Animated} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView, TouchableWithoutFeedback,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Card, CardItem, Body,Item, Input,List,Picker, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -34,6 +34,7 @@ import {imgDefault} from './images';
 import { FlatGrid } from 'react-native-super-grid';
 import { SliderBox } from "react-native-image-slider-box";
 import MapboxGL, { Logger } from '@react-native-mapbox-gl/maps';
+import PhotoGrid from '../components/PhotoGrid';
 MapboxGL.setAccessToken('sk.eyJ1IjoiY3l6b294IiwiYSI6ImNrdmFxNW5iODBoa2kzMXBnMGRjNXRwNHUifQ.KefOQn1CBBNu-qw1DhPblA');
 
 Logger.setLogCallback(log => {
@@ -69,6 +70,7 @@ export default class CheckoutScreenService extends Component {
       const datas = this.props.route.params.datas; 
        const typeOfRate = this.props.route.params.typeOfRate; 
       this.state = {  
+        appState: AppState.currentState,
      // slatitude:cart[0].slatitude,
       //slongitude:cart[0].slongitude,
      // cartItems: cart,
@@ -294,6 +296,24 @@ export default class CheckoutScreenService extends Component {
   }
 
   componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     this.StartImageRotationFunction()
     //this.setState({loading: true})
     firestore().collection('admin_token').where('city', '==', this.props.route.params.selectedCityUser.trim()).onSnapshot(
@@ -322,6 +342,7 @@ export default class CheckoutScreenService extends Component {
 
   
  componentWillUnmount() {
+  this.appStateSubscription.remove();
     this.unsubscribe && this.unsubscribe();
     this.subscribe && this.subscribe();
     this.billinglistener && this.billinglistener();
@@ -1095,23 +1116,15 @@ console.log('res: ', valid = startDate < currentDateselectedDate && endDate > cu
             <Input value={this.state.datas.description} placeholderTextColor="#687373" /></Body>
           </ListItem>
            
-       
-         <FlatGrid
-      itemDimension={120}
-      data={this.state.datas.imageArray.filter(items => {
+           <PhotoGrid source={this.state.datas.imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
-       
+        
         return itemData.indexOf(textData) == -1
       })}
-      
-      spacing={10}
-      renderItem={({ item }) => (
-        <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:item})}>
-              <Image style={{  width: 160, height: 160, resizeMode: 'contain',margin: 10}} source={{uri: item}} />
-       </TouchableWithoutFeedback>
-      )}
-    />
+      style={{width: SCREEN_WIDTH/1.7}}
+      onPressImage={uri => this.setState({showURL: true, SelectedURL:uri})} />
+
      </ScrollView>   
       <Button block style={{ height: 30, backgroundColor:  "#33c37d", marginTop: 10}}
         onPress={() => {this.state.uid == null?null:this.state.storewallet < 1? null:this.state.Storestatus && !this.state.AlwaysOpen && Closing == true ?this.FinalCheckouts(): this.state.AlwaysOpen?this.FinalCheckouts():null}}

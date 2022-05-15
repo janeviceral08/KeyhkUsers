@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Animated,Dimensions, StyleSheet, FlatList, Image, TouchableOpacity,TouchableWithoutFeedback, Text,View,ScrollView,PermissionsAndroid, Alert, Platform, ImageBackground} from 'react-native';
+import {AppState, Animated,Dimensions, StyleSheet, FlatList, Image,TouchableHighlight, TouchableOpacity,TouchableWithoutFeedback, Text,View,ScrollView,PermissionsAndroid, Alert, Platform, ImageBackground} from 'react-native';
 import { Container, Content, Button, Left, Right,  Card, CardItem, Header,Toast, Root,Item,Input } from 'native-base';
 var {height, width } = Dimensions.get('window');
 import Swiper from 'react-native-swiper'
@@ -170,7 +170,12 @@ export default class HomeScreen extends Component {
         ameneties: '',
         slatitude:'',
         slongitude:'',
+      
       },
+      HotelList:[],
+      storesList:[],
+      Erentals:[],
+      appState: AppState.currentState,
     }
     this.arrayholder = [];
     this.FetchProfile();
@@ -292,6 +297,24 @@ const UserLocationCountry = arr[newarrLenghtCountry]
 
 
  async  componentDidMount() {
+  this.appStateSubscription = AppState.addEventListener(
+    "change",
+    nextAppState => {
+      if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!");
+      }else{
+        console.log("Exitnow");
+        firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+        cityLat:'none',
+                    selectedCountry: '',
+                    selectedCity:'none',})
+      }
+      this.setState({ appState: nextAppState });
+    }
+  );
   this.StartImageRotationFunction()
      this.setState({loading: true})
 
@@ -419,6 +442,12 @@ console.log("UserLocationCountry ", UserLocationCountry)
       console.log('city show ', this.state.customerInfo.selectedCity == 'none'|| this.state.customerInfo.selectedCity == undefined?this.state.selectedCityUser ==null? this.state.City: this.state.selectedCityUser: this.state.customerInfo.selectedCity)
     }
    
+    componentWillUnmount() {
+      this.appStateSubscription.remove();
+    }
+
+
+
     onPrentals = (querySnapshot) => {
       let Prentals =[]
       querySnapshot.forEach((doc) => {
@@ -487,10 +516,13 @@ console.log("UserLocationCountry ", UserLocationCountry)
   const userId= await AsyncStorage.getItem('uid');
    const newUserLocationCountry = this.state.UserLocationCountry.trim() =='Philippines'?'city':this.state.UserLocationCountry.trim()+'.city';
    console.log('newUserLocationCountry: ',newUserLocationCountry)
-   firestore().collection(newUserLocationCountry).doc(NewCityItem).collection('vehicles').where('succeed', '>',0).onSnapshot(this.onCollectionProducts);
+   firestore().collection(newUserLocationCountry).doc(NewCityItem).collection('vehicles').where('vehicle','!=', '').onSnapshot(this.onCollectionProducts);
     this.cityRef.collection('products').where('rentalType','==', 'Property').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onPrentals)
     this.cityRef.collection('products').where('rentalType','==', 'Vehicle').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onVrentals)
-     
+    firestore().collection('stores').where('selectedAccount', '==','Hotels').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onCollectionStoreHotels);
+    firestore().collection('stores').where('selectedAccount', '==','Rental').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onCollectionStoreRental);
+    this.cityRef.collection('products').where('rentalType','==', 'Equipment').where('arrayofCity','array-contains-any',[NewCityItem]).onSnapshot(this.onErentals)
+
       firestore().collection('stores').where('arrayofCity','array-contains-any',[NewCityItem]).where('Account', '==', 'Food Delivery').where('wallet', '>', 0).onSnapshot(querySnapshot=>{
         const city = [];
             querySnapshot.docs.forEach(doc => {
@@ -504,6 +536,39 @@ console.log("UserLocationCountry ", UserLocationCountry)
       });
     
   }
+  onErentals = (querySnapshot) => {
+    let Vrentals =[]
+    querySnapshot.forEach((doc) => {
+      Vrentals.push(doc.data())
+    });
+    this.setState({
+      Erentals: Vrentals.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
+   });
+   }
+  onCollectionStoreHotels = (querySnapshot) => {
+    let Stores =[]
+    querySnapshot.forEach((doc) => {
+      if(doc.data().wallet > 0){
+          Stores.push(doc.data())
+      }
+      
+    });
+    console.log('HotelList: ', Stores.length);
+    this.setState({
+      HotelList: Stores.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
+   });
+   }
+ onCollectionStoreRental = (querySnapshot) => {
+    let Stores =[]
+    querySnapshot.forEach((doc) => {
+      if(doc.data().wallet > 0){
+        Stores.push(doc.data())}
+    });
+    this.setState({
+      storesList: Stores.sort((a, b) => Number(b.arrange) - Number(a.arrange)),
+   });
+   }
+
    async getUserCity(){
      
       const userId= await AsyncStorage.getItem('uid');
@@ -780,8 +845,106 @@ let Address ='';
         this.setState({loading:false,})
         console.log('err: ', err)})
   }
+  addToFavEq(id){
+    const uid =  auth().currentUser.uid;
+   this.setState({loading:true})
+    const updateRef = firestore().collection('users').doc(uid);
+    updateRef.update({
+      RentalEqFav: firestore.FieldValue.arrayUnion(id),
+          
+      }).then((docRef) => {   
+        this.setState({loading:false})
+        this.loadProducts()
+      }).catch((err)=> {
+        this.setState({loading:false,})
+        console.log('err: ', err)})
+  }
 
 
+  removeFavEq(id){
+    const uid =  auth().currentUser.uid;
+   this.setState({loading:true})
+    const updateRef = firestore().collection('users').doc(uid);
+    updateRef.update({
+      RentalEqFav: firestore.FieldValue.arrayRemove(id),
+          
+      }).then((docRef) => {   
+        this.setState({loading:false})
+        this.loadProducts()
+      }).catch((err)=> {
+        this.setState({loading:false,})
+        console.log('err: ', err)})
+  }
+
+  rowRendererErentals = (data) => {
+    console.log('data: ', data)
+    const { name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
+    const newData = imageArray.filter(items => {
+        const itemData = items;
+        const textData = 'AddImage';
+       
+        return itemData.indexOf(textData) == -1
+      });
+    return (
+      <Card transparent style={{flex: 1, justifyContent: "center", alignContent: "center"  }}>
+  <CardItem style={{paddingBottom: 0, marginBottom: 0, paddingLeft: 0, paddingRight: 0, paddingTop: 0,borderRadius: 20, borderWidth:1 ,width:SCREEN_WIDTH/2-5}}>
+  <TouchableOpacity style={{width:SCREEN_WIDTH/2-5, flex: 1}} onPress={()=>this.setState({vInfos: data, VisibleAddInfo: true,MonthlyPrice: data.MonthlyPrice.toString(),
+    DayPrice: data.DayPrice.toString(),
+    HourPrice: data.HourPrice.toString(),
+    WeeklyPrice: data.WeeklyPrice.toString(),})}>
+
+<FastImage style={styles.productPhoto} source={{ uri: newData[0], headers: { Authorization: 'someAuthToken' },
+              priority: FastImage.priority.normal, }} 
+              resizeMode={FastImage.resizeMode.cover}
+  >
+ 
+{!StatHourPrice?null:
+<View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(HourPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Hour</Text>
+</View>
+}
+    
+    {!StatDayPrice?null:
+    <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(DayPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Day</Text>
+</View>  }
+ {!StatWeeklyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(WeeklyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Week</Text>
+</View>
+}
+ {!StatMonthlyPrice?null:
+   <View style={{backgroundColor: "white", width: 70,height: 35, flexDirection: 'column',alignSelf: 'flex-end', position: 'absolute' }}>
+<Text style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{this.props.currency}{parseFloat(MonthlyPrice).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+<Text  style={{fontStyle: "italic", borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>/Month</Text>
+</View>
+}
+         
+         {this.state.customerInfo == undefined? null:this.state.customerInfo.RentalEqFav == undefined?  <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavEq(data.id)}/>:!this.state.customerInfo.RentalEqFav.includes(data.id)? <AntDesign name="hearto" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft:  10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.addToFavEq(data.id)}/>:
+      <AntDesign name="heart" size={21} color="salmon"  style={{ backgroundColor: "white", width: 32, marginLeft: 10, height: 32, marginTop: 5,padding: 5, borderRadius: 5}} onPress={()=> this.removeFavEq(data.id)}/>}
+
+  </FastImage>
+           
+  <View style={{height:20,flexShrink: 1}}>
+    <Text  numberOfLines={1} style={styles.categoriesStoreName}>{name}</Text>
+  </View>  
+ <View style={{flexDirection: 'row'}}>
+ <Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Brand :{MBrand}</Text>
+ 
+ 
+</View>
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Model : {VModel}</Text>
+<Text style={{fontStyle: "italic",  fontSize: 10, paddingLeft: 20}}>Color : {ColorMotor}</Text>
+
+
+</TouchableOpacity>
+</CardItem>
+</Card>
+    )
+  }
   rowRendererVrentals = (data) => {
     console.log('data: ', data)
     const { admin_control,name,DayPrice, HourPrice, MonthlyPrice,StatDayPrice,StatHourPrice,StatMonthlyPrice,StatWeeklyPrice,WeeklyPrice,MBrand, VModel, ColorMotor,imageArray, brand, store_name} = data;
@@ -875,6 +1038,7 @@ let Address ='';
       {rotate: RotateData}
     ]
   }
+  console.log('appState: ', this.state.appState)
   console.log('this.state.customerInfo.selectedCity: ', this.state.customerInfo.selectedCity)
    console.log('this.state.customerInfo.selectedCountry: ', this.state.customerInfo.selectedCountry)
     return (
@@ -1163,10 +1327,34 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
 <MaterialCommunityIcons name={'menu'}  size={this.state.selectedIndex == 4? 35:30} color={this.state.selectedIndex == 4?'#396ba0':'#525252'} style={{alignSelf: 'center', backgroundColor: 'white',borderRadius: 15, padding: 5}}/>
     
     </TouchableOpacity>
-    <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedIndex == 1?this.props.navigation.navigate('SearchRentals',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace }):this.state.selectedIndex == 3?this.props.navigation.navigate('SearchServices',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace':  this.state.fromPlace}):this.props.navigation.navigate('SearchAll',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
+    {this.state.selectedIndex == 0?
+      <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedcategories ==0?this.props.navigation.navigate('SearchAll',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace}):this.state.selectedcategories ==1? this.props.navigation.navigate('SearchAllProduced',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace}): this.props.navigation.navigate('SearchAllMerch',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
         
         <Fontisto name="search" size={20} color={"#525252"} style={{alignSelf: 'flex-start', backgroundColor: 'white',borderRadius: 15, padding: 9}}/>
         </TouchableOpacity>
+    :
+    this.state.selectedIndex == 1?
+    <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedIndexRentals ==0?this.props.navigation.navigate('SearchRentalsHotel',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace }):this.state.selectedIndex == 3?this.props.navigation.navigate('SearchServices',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace':  this.state.fromPlace})
+    :
+    this.state.selectedIndexRentals ==1?this.props.navigation.navigate('SearchRentalsProperty',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace })
+    :this.props.navigation.navigate('SearchRentalsEq',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace })}} underlayColor = 'transparent'>
+      
+      <Fontisto name="search" size={20} color={"#525252"} style={{alignSelf: 'flex-start', backgroundColor: 'white',borderRadius: 15, padding: 9}}/>
+      </TouchableOpacity>
+      :
+    this.state.selectedIndex == 2?
+      <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.transportSelected ==0?this.props.navigation.navigate('SearchTaxi',{'country':this.state.UserLocationCountry.trim(), 'cLat': this.state.x.latitude, 'cLong': this.state.x.longitude, 'typeOfRate':this.state.typeOfRate, 'selectedCityUser': this.state.selectedCityUser, 'fromPlace': this.state.fromPlace,'currency':this.state.CountryNow[0].currency, 'code':this.state.CountryNow[0].code,'cityLat': this.state.customerInfo.cityLat,'cityLong': this.state.customerInfo.cityLong})
+      : this.props.navigation.navigate('SearchRentalsCar',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
+        
+        <Fontisto name="search" size={20} color={"#525252"} style={{alignSelf: 'flex-start', backgroundColor: 'white',borderRadius: 15, padding: 9}}/>
+        </TouchableOpacity>
+    :
+   
+    <TouchableOpacity style={{ width: (SCREEN_WIDTH)/6}} onPress = {()=>{this.state.selectedIndex == 1?this.props.navigation.navigate('SearchRentals',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate,'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace }):this.state.selectedIndex == 3?this.props.navigation.navigate('SearchServices',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace':  this.state.fromPlace}): this.props.navigation.navigate('SearchAll',{'selectedCityUser':  this.state.selectedCityUser ==null? this.state.City:  this.state.selectedCityUser,'typeOfRate':this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency, 'fromPlace': this.state.fromPlace})}} underlayColor = 'transparent'>
+        
+        <Fontisto name="search" size={20} color={"#525252"} style={{alignSelf: 'flex-start', backgroundColor: 'white',borderRadius: 15, padding: 9}}/>
+        </TouchableOpacity>
+  }
     </View>
          
          </View>
@@ -1180,8 +1368,47 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
    :<View style={{flexDirection: 'row', marginLeft: 30, marginBottom:5}}>
       <Text style={{fontSize: 18, fontWeight: 'bold', marginLeft:2}}>Services</Text></View>
   }
-       {this.state.selectedIndex == 2?
-               <View style={{flexDirection: 'row',marginLeft: 30, marginBottom:5 }}>
+       {this.state.selectedIndex == 1?
+                     <View style={{flexDirection: 'row',marginLeft: 15  }}>
+                     <TouchableOpacity style={{shadowColor: "#000",
+                     shadowOffset: {
+                       width: 0,
+                       height: 12,
+                     },
+                     shadowOpacity: 0.58,
+                     shadowRadius: 16.00,
+                     elevation: 24,width: (SCREEN_WIDTH-50)/3,backgroundColor: this.state.selectedIndexRentals ==0 ?'#1c9fef':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 0})}>
+                              <FontAwesome5 name={'hotel'} size={15} color={this.state.selectedIndexRentals ==0 ? 'white':'#5580ad'} />
+                         <Text style={{color: this.state.selectedIndexRentals ==0 ? 'white':'black', fontSize: 13, fontWeight: 'bold'}}> Hotels etc.</Text>
+                         </TouchableOpacity>
+                         <TouchableOpacity style={{shadowColor: "#000",
+                     shadowOffset: {
+                       width: 0,
+                       height: 12,
+                     },
+                     shadowOpacity: 0.58,
+                     shadowRadius: 16.00,
+                     elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedIndexRentals ==1 ?'#1c9fef':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({selectedIndexRentals: 1})}>
+                            <MaterialIcons name={'house'} size={15} color={this.state.selectedIndexRentals ==1 ? 'white':'#5580ad'}/>
+                            <Text style={{color: this.state.selectedIndexRentals ==1 ? 'white':'black', fontSize: 13, fontWeight: 'bold'}}>  Property</Text>
+                         </TouchableOpacity>
+                     
+                         <TouchableOpacity style={{shadowColor: "#000",
+                     shadowOffset: {
+                       width: 0,
+                       height: 12,
+                     },
+                     shadowOpacity: 0.58,
+                     shadowRadius: 16.00,
+                     elevation: 24,width:(SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedIndexRentals ==3 ?'#1c9fef':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedIndexRentals: 3})}>
+                     <FontAwesome5 name={'tools'}  size={15} color={this.state.selectedIndexRentals ==3 ? 'white':'#5580ad'} />
+                     <Text style={{color: this.state.selectedIndexRentals ==3 ? 'white':'black', fontSize: 13, fontWeight: 'bold'}}> Equipment</Text>
+                     
+                         </TouchableOpacity>
+                         </View>
+       
+       :this.state.selectedIndex == 2?
+               <View style={{flexDirection: 'row',marginLeft: 15, marginBottom:5 }}>
                <TouchableOpacity style={{shadowColor: "#000",
                shadowOffset: {
                  width: 0,
@@ -1189,9 +1416,9 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
                },
                shadowOpacity: 0.58,
                shadowRadius: 16.00,
-               elevation: 24,width: (SCREEN_WIDTH-55)/2,backgroundColor: this.state.transportSelected ==0 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({transportSelected: 0})}>
-                        <MaterialIcons name={'local-taxi'} size={15} color={'#28ae07'} />
-                   <Text style={{color:'black', fontWeight: 'bold'}}> Hire a Car</Text>
+               elevation: 24,width: (SCREEN_WIDTH-50)/3,backgroundColor: this.state.transportSelected ==0 ?'#28ae07':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({transportSelected: 0})}>
+                        <MaterialIcons name={'local-taxi'} size={15} color={this.state.transportSelected ==0 ? 'white':'#28ae07'} />
+                   <Text style={{color: this.state.transportSelected ==0 ? 'white':'black', fontWeight: 'bold'}}> Taxi/Truck</Text>
                    </TouchableOpacity>
                    <TouchableOpacity style={{shadowColor: "#000",
                shadowOffset: {
@@ -1200,9 +1427,20 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
                },
                shadowOpacity: 0.58,
                shadowRadius: 16.00,
-               elevation: 24,width: (SCREEN_WIDTH-55)/2, backgroundColor:this.state.transportSelected ==1 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({transportSelected: 1})}>
-                      <MaterialIcons name={'car-rental'} size={15} color={'#28ae07'}/>
-                      <Text style={{color: 'black', fontWeight: 'bold'}}> Rent a car</Text>
+               elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.transportSelected ==1 ?'#28ae07':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10 }} onPress={()=>this.setState({transportSelected: 1})}>
+                      <MaterialIcons name={'car-rental'} size={15} color={this.state.transportSelected ==1 ? 'white':'#28ae07'}/>
+                      <Text style={{color: this.state.transportSelected ==1 ? 'white':'black', fontWeight: 'bold'}}> Rent a car</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity style={{shadowColor: "#000",
+               shadowOffset: {
+                 width: 0,
+                 height: 12,
+               },
+               shadowOpacity: 0.58,
+               shadowRadius: 16.00,
+               elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.transportSelected ==2 ?'#28ae07':'white',borderRadius: 15, padding: 5, flexDirection: 'row', }} onPress={()=>this.setState({transportSelected: 2})}>
+                      <Fontisto name={'ticket-alt'} size={15} color={this.state.transportSelected ==2 ? 'white':'#28ae07'}/>
+                      <Text style={{color:this.state.transportSelected ==2 ? 'white': 'black', fontWeight: 'bold'}}> Tickets</Text>
                    </TouchableOpacity>
                
                    </View>
@@ -1212,16 +1450,7 @@ elevation: 24,width: SCREEN_WIDTH/6}} onPress={()=>this.setState({selectedIndex:
 
    
     {this.state.selectedIndex ==0 ? <View style={{flex: 1,}}>
-  {/*    <SegmentedControlTab
-          values={this.state.categoriesStores}
-          selectedIndex={this.state.selectedcategories}
-          onTabPress={this.handleIndexChangecategories}
-tabsContainerStyle={{width: SCREEN_WIDTH-30,alignSelf: 'center',}}
-                 tabTextStyle={{ color: '#666666'}}
-            
-          tabStyle={{borderColor: '#a3b6c9',}}
-          activeTabStyle={{backgroundColor: '#666666',}}
-  />*/}
+
         <View style={{flexDirection: 'row',marginLeft: 15 }}>
 <TouchableOpacity style={{shadowColor: "#000",
 shadowOffset: {
@@ -1230,9 +1459,9 @@ shadowOffset: {
 },
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
-elevation: 24,width: (SCREEN_WIDTH-50)/3,backgroundColor: this.state.selectedcategories ==0 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 0})}>
-         <FontAwesome5 name={'hamburger'} size={15} color={'#f06767'} />
-    <Text style={{color:'black', fontWeight: 'bold'}}> Fastfood</Text>
+elevation: 24,width: (SCREEN_WIDTH-50)/3,backgroundColor: this.state.selectedcategories ==0 ?'#ee4e4e':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 0})}>
+         <FontAwesome5 name={'hamburger'} size={15} color={this.state.selectedcategories ==0 ? 'white':'#f06767'} />
+    <Text style={{color:this.state.selectedcategories ==0 ? 'white':'black', fontWeight: 'bold'}}> Fastfood</Text>
     </TouchableOpacity>
     <TouchableOpacity style={{shadowColor: "#000",
 shadowOffset: {
@@ -1241,9 +1470,9 @@ shadowOffset: {
 },
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
-elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==1 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({selectedcategories: 1})}>
-       <MaterialCommunityIcons name={'fruit-watermelon'} size={15} color={'#f06767'}/>
-       <Text style={{color: 'black', fontWeight: 'bold'}}> Produce etc.</Text>
+elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==1 ?'#ee4e4e':'white',borderRadius: 15, padding: 5, flexDirection: 'row', marginLeft: 10, marginRight: 10}} onPress={()=>this.setState({selectedcategories: 1})}>
+       <MaterialCommunityIcons name={'fruit-watermelon'} size={15} color={this.state.selectedcategories ==1 ? 'white':'#f06767'}/>
+       <Text style={{color: this.state.selectedcategories ==1 ? 'white':'black', fontWeight: 'bold'}}> Produce etc.</Text>
     </TouchableOpacity>
     <TouchableOpacity style={{shadowColor: "#000",
 shadowOffset: {
@@ -1252,13 +1481,14 @@ shadowOffset: {
 },
 shadowOpacity: 0.58,
 shadowRadius: 16.00,
-elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==2 ?'#dadada':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 2})}>
-<Fontisto name={'shopping-bag-1'}  size={17} color={'#f06767'} />
-<Text style={{color:'black', fontWeight: 'bold'}}> Merchandise</Text>
+elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcategories ==2 ?'#ee4e4e':'white',borderRadius: 15, padding: 5, flexDirection: 'row'}} onPress={()=>this.setState({selectedcategories: 2})}>
+<Fontisto name={'shopping-bag-1'}  size={17} color={this.state.selectedcategories ==2 ? 'white':'#f06767'} />
+<Text style={{color:this.state.selectedcategories ==2 ? 'white':'black', fontWeight: 'bold'}}> Merchandise</Text>
 
     </TouchableOpacity>
     </View>
       <FlatList
+       key={'1'}
                   data={this.state.dataSource.filter(items => {
       const itemData = items.section;
       const textData = this.state.categoriesStores[this.state.selectedcategories];
@@ -1315,10 +1545,146 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
         </View>
         </View>*/}
      </View>:
-     this.state.selectedIndex == 1?<View style={{ flex: 1 }}><HomeScreenRentals navigation={this.props.navigation}  typeOfRate={this.state.typeOfRate} selectedCityUser={this.state.selectedCityUser} cLat={this.state.x.latitude} cLong={this.state.x.longitude} currency={this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}/></View>:
+     this.state.selectedIndex == 1?
+     
+     <View>
+ 
+{ this.state.selectedIndexRentals == 0?    
+            
+            <FlatList
+            key={'2'}
+            style={{marginBottom: 85}}
+                         data={this.state.HotelList}
+                         renderItem={({ item }) => (
+                           <Card transparent>
+                                               <Card >
+                      
+                             
+                             <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={ () => item.status === true?this.props.navigation.navigate('PropertyHotel',{'store': item, 'cLat': item.slatitude, 'cLong': item.slongitude, "navigation" :this.props.navigation, "typeOfRate": this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency }):console.log('false')}>
+                             <View >
+                             <FastImage
+                                 style={styles.categoriesPhoto} 
+                                 source={{
+                                     uri: item.background,
+                                     headers: { Authorization: 'someAuthToken' },
+                                     priority: FastImage.priority.normal,
+                                 }}
+                                 resizeMode={FastImage.resizeMode.cover}
+                             />
+                             <View style={{    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '100',
+    fontStyle: 'italic',
+    zIndex: 3,
+    elevation: 3,
+    position:'absolute',
+    right:0,
+    flex: 1,
+    backgroundColor: 'white',
+    padding: 5,
+    maxWidth:SCREEN_WIDTH/2
+    }}>
+<Text style={{fontStyle: "italic",fontWeight: 'bold', borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{parseFloat(item.PriceArray == undefined? 0:item.PriceArray.length >0?item.PriceArray.sort((a,b)=> a.price -b.price)[0].price:0 ).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} - {parseFloat(item.PriceArray == undefined? 0:item.PriceArray.length >0?item.PriceArray.sort((a,b)=> b.price - a.price)[0].price:0).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+
+                             </View> 
+                             {item.status== true?
+                             null :
+                                   <View style={styles.subtitleclose}>
+                                   <Text style={{color:'#FFFFFF', fontStyle:'italic', fontWeight: 'bold'}}>Unavailable</Text>
+                                 </View>   
+                           }
+                         
+                             
+                               <Text style={styles.categoriesName}>{item.name}  </Text>          
+                               <Text note style={styles.categoriesAddress}>{item.address}</Text>     
+                             </View>
+                           </TouchableHighlight> 
+       
+                           </Card>
+                           </Card>
+                         )}
+                         keyExtractor = { (item,index) => index.toString() }
+                       />
+        : this.state.selectedIndexRentals == 1?
+        <FlatList
+        key={'3'}
+        style={{marginBottom: 85}}
+                     data={this.state.storesList}
+                     renderItem={({ item }) => (
+                       <Card transparent>
+                            <Card  style={{flex:1, marginHorizontal: 20}}>
+                  
+                         
+                         <TouchableHighlight underlayColor='rgba(73,182,77,1,0.9)' onPress={ () => item.status === true?this.props.navigation.navigate('PropertyRent',{'store': item, 'cLat': item.slatitude, 'cLong': item.slongitude, "navigation" :this.props.navigation,  "typeOfRate": this.state.typeOfRate, 'currency':this.state.CountryNow.length == 0?'':this.state.CountryNow[0].currency}):console.log('false')}>
+                         <View >
+                         <FastImage
+                             style={styles.categoriesPhoto} 
+                             source={{
+                                 uri: item.background,
+                                 headers: { Authorization: 'someAuthToken' },
+                                 priority: FastImage.priority.normal,
+                             }}
+                             resizeMode={FastImage.resizeMode.cover}
+                         />
+                      
+
+<View style={{    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '100',
+    fontStyle: 'italic',
+    zIndex: 3,
+    elevation: 3,
+    position:'absolute',
+    right:0,
+    flex: 1,
+    backgroundColor: 'white',
+    padding: 5,
+    maxWidth:SCREEN_WIDTH/2
+    }}>
+<Text style={{fontStyle: "italic",fontWeight: 'bold', borderRadius: 5,  fontSize: 10, paddingLeft: 5}}>{parseFloat(item.PriceArray == undefined? 0:item.PriceArray.length >0?item.PriceArray.sort((a,b)=> a.price -b.price)[0].price:0 ).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} - {parseFloat(item.PriceArray == undefined? 0:item.PriceArray.length >0?item.PriceArray.sort((a,b)=> b.price - a.price)[0].price:0).toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} </Text>
+
+                             </View> 
+                         {item.status== true?
+                         null :
+                               <View style={styles.subtitleclose}>
+                               <Text style={{color:'#FFFFFF', fontStyle:'italic', fontWeight: 'bold'}}>Unavailable</Text>
+                             </View>   
+                       }
+                     
+                         
+                           <Text style={styles.categoriesName}>{item.name}  </Text>          
+                           <Text note style={styles.categoriesAddress}>{item.address}</Text>     
+                         </View>
+                       </TouchableHighlight> 
+   
+                       </Card>
+                       </Card>
+                     )}
+                     keyExtractor = { (item,index) => index.toString() }
+                   />
+        :
+        <FlatList
+        key={'#'}
+        data={this.state.Erentals}
+        ItemSeparatorComponent={this.ListViewItemSeparator}
+        renderItem={({ item }) => this.rowRendererErentals(item)}
+        enableEmptySections={true}
+        style={{ marginTop: 10, marginBottom: 35 }}
+        numColumns={2}
+        columnWrapperStyle={{justifyContent:'space-between'}}
+        keyExtractor={(item, index) => index.toString()}
+        />
+
+        }
+          
+          
+          
+          </View>
+     :
      this.state.selectedIndex == 2?<View>
  
 { this.state.transportSelected == 0?    <FlatList
+ key={'4'}
           data={this.state.carsAvailable}
           ItemSeparatorComponent={this.ListViewItemSeparator}
           renderItem={({ item }) => this.rowRenderer(item.datas)}
@@ -1330,7 +1696,7 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
           refreshing={this.state.loading}
                   onRefresh={this.getData}
           />
-        :
+        : this.state.transportSelected == 1?
         <FlatList
         key={'_'}
         data={this.state.Vrentals}
@@ -1344,7 +1710,12 @@ elevation: 24,width: (SCREEN_WIDTH-50)/3, backgroundColor:this.state.selectedcat
         refreshing={this.state.loading}
         onRefresh={this.getData}
         />
-        
+        :<View style={{ justifyContent: 'center', alignSelf: 'center', backgroundColor: 'white', padding: 5, marginTop: 50 }}>
+                      
+        <Text style={{textAlign: 'center'}}>Coming Soon</Text>
+        <Text>This feature is not yet available</Text>
+        </View>
+
         }
           
           

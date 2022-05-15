@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, ActivityIndicator,Dimensions, Alert, Image, FlatList,TouchableWithoutFeedback, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid,Animated} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, ActivityIndicator,Dimensions, Alert, Image, FlatList,TouchableWithoutFeedback, SafeAreaView, ScrollView, BackHandler, Keyboard, PermissionsAndroid,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Input,List,Header,Title, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -93,7 +93,8 @@ export default class pabiliOrderDetails extends Component {
       this.ordercounters =  firestore();
       this.chargeref =  firestore().collection('vehicles').where('vehicle', '==', 'Motorcycle' );
       this.state = {  
-   
+        appState: AppState.currentState,
+        orders:this.props.route.params.orders,
      VisibleAddInfo: false,
      datas: [],
      cLong:this.props.route.params.orders.flong,
@@ -213,6 +214,9 @@ export default class pabiliOrderDetails extends Component {
         ratingModal: false,
         ItemList:[],
         showURL: false,
+        CancelledModal:false,
+        CancelledBy:'',
+        RiderCancel:[]
   };
 
   }
@@ -282,6 +286,24 @@ if(parseFloat(this.state.rating) == 0){
   };
 
   async componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     this.StartImageRotationFunction()
      /* this.backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -316,6 +338,7 @@ this.setState({ x: { latitude: coords.latitude, longitude: coords.longitude },})
 
   
  componentWillUnmount() {
+  this.appStateSubscription.remove();
     this.unsubscribe && this.unsubscribe();
     this.subscribe && this.subscribe();
 
@@ -382,6 +405,7 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
       querySnapshot.forEach((doc) => {
   
         this.setState({
+          orders:doc.data(),
                rating:doc.data().rating == undefined?5:doc.data().rating,
         ratingModal: doc.data().OrderStatus=='Delivered' &&doc.data().rating == undefined? true:false,
           OrderStatus : doc.data().OrderStatus,
@@ -395,7 +419,12 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
         ratings: doc.data().DeliveredBy.rating,
         note : doc.data().Note,
         ItemList: doc.data().ItemList,
+        isCancelled: doc.data().isCancelled,
+        CancelledBy: doc.data().CancelledBy == undefined? '':doc.data().CancelledBy,
        });
+       if(doc.data().OrderStatus == 'For Cancel'){
+        this.setState({CancelledModal: true})
+      }
       })
     })
   };
@@ -424,6 +453,97 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
       useNativeDriver: true, // Add this line
     }).start(()=>this.StartImageRotationFunction());
   }
+
+
+
+  
+
+CancelOrder(){
+  const  datasUse={
+    userId: this.state.orders.userId,
+    id:this.state.orders.DeliveredBy.id,
+    OrderId:this.state.orders.OrderId,
+  }
+  console.log('datasUse: ', datasUse)
+  Alert.alert(
+      'Confirmation',
+      'are you sure to cancel this transaction?',
+      [
+        { text: 'cancel', onPress: () => null},
+
+        { text: 'OK', onPress: () => {
+          const  datasUse={
+            userId: this.state.orders.userId,
+            id:this.state.orders.DeliveredBy.id,
+            OrderId:this.state.orders.OrderId,
+          }
+          console.log('datasUse: ', datasUse)
+          const updateSuccess =firestore().collection('users').doc(this.state.orders.userId);
+          updateSuccess.update({ 
+
+            RiderIDS: firestore.FieldValue.arrayRemove(this.state.orders.DeliveredBy.id)
+          })
+          const update_RiderTransaction = firestore().collection('riders').doc(this.state.orders.DeliveredBy.id);
+          update_RiderTransaction.update({ 
+            TransactionCancelled: firestore.FieldValue.increment(1),
+            Transactionprocessing: firestore.FieldValue.increment(-1)
+        })
+
+          const ref = firestore().collection('orders').doc(this.state.orders.OrderId);
+          ref.update({ 
+            OrderStatus : "Cancelled",
+    rider_id:"",
+    DeliveredBy : "",
+            })
+            this.setState({CancelledModal:false})
+          this.props.navigation.goBack();
+        }}
+      ],
+      { cancelable: false }
+    );
+  return;
+
+
+}
+
+
+PendingOrder(){
+
+Alert.alert(
+    'Confirmation',
+    'are you sure to move this transaction to pending?',
+    [
+      { text: 'cancel', onPress: () => null},
+
+      { text: 'OK', onPress: () => {
+        const updateSuccess =firestore().collection('users').doc(this.state.orders.userId);
+        updateSuccess.update({ 
+
+          RiderIDS: firestore.FieldValue.arrayRemove(this.state.orders.DeliveredBy.id)
+        })
+        const ref = firestore().collection('orders').doc(this.state.orders.OrderId);
+        ref.update({ 
+          OrderStatus : "Pending",
+          rider_id:"",
+        DeliveredBy : "",
+          })
+          this.setState({CancelledModal:false})
+        this.props.navigation.goBack();
+      }}
+    ],
+    { cancelable: false }
+  );
+return;
+
+
+}
+
+
+
+
+
+
+
   render() {
 //console.log('selectedCityUser Homescreen: ',this.state.selectedCityUser)
    //  console.log('UserLocationCountry typeOfRate: ', this.state.UserLocationCountry)
@@ -527,6 +647,35 @@ firestore().collection('orders').where('OrderId', '==', this.props.route.params.
           <Loader loading={this.state.loading} trans={trans}/>     
      <Loader loading={this.state.isLoading} trans={trans}/>  
      
+     <Modal
+                  useNativeDriver={true}
+                  isVisible={this.state.CancelledModal}
+                  onSwipeComplete={this.close}
+                  swipeDirection={['up', 'left', 'right', 'down']}
+                  style={styles.view}
+                 transparent={true}>
+                <View style={[styles.content,{height: SCREEN_HEIGHT/3}]}> 
+
+                                             <Text style={{textAlign: 'center', fontSize: 16, fontWeight: 'bold'}}>Cancelled By {this.state.CancelledBy}</Text>
+                                             <Text style={{textAlign: 'left'}}>Reasons: </Text>
+
+                                             {this.state.RiderCancel.map((info, index) =>  {return(<View style={{flexDirection: 'row',paddingLeft:30, paddingBottom:10}} key={index}> 
+                        <Text>{info.RiderName}- {info.CancelledReason}</Text>
+                    </View>)} )}
+<View style={{flexDirection: 'row', justifyContent: 'center',}}>
+                   <TouchableOpacity onPress={()=> this.PendingOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3, marginRight: 10}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Pending</Text>
+</TouchableOpacity>
+<TouchableOpacity onPress={()=> this.CancelOrder()} style={{borderColor: '#396ba0', borderWidth: 1, borderRadius: 10, backgroundColor: '#396ba0', padding: 10, marginTop: 10,    justifyContent: 'center',
+    alignSelf: 'center', width: SCREEN_WIDTH/3}}>
+<Text style={{color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: 15}}>Cancel</Text>
+</TouchableOpacity>
+</View>
+                </View>
+                </Modal>
+
+
 <Modal
                   useNativeDriver={true}
                   isVisible={this.state.ratingModal}

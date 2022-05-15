@@ -25,7 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import Loader from '../components/Loader';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+//import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 import messaging from '@react-native-firebase/messaging';
 GoogleSignin.configure({
     offlineAccess: true,
@@ -121,7 +121,7 @@ messaging().getToken().then(token => {
 
       async onFacebookButtonPress() {
         // Attempt login with permissions
-        const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+      /*  const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
       
         if (result.isCancelled) {
           throw 'User cancelled the login process';
@@ -162,8 +162,9 @@ messaging().getToken().then(token => {
               })
 */
 
-         
+         /*
            }).catch(error => this.setState({ errorMessage: error.message, loading: false }));
+           */
       }
 
 
@@ -305,7 +306,7 @@ messaging().getToken().then(token => {
                 </TouchableOpacity>
                 </View>
                 </View>
-                <TouchableOpacity
+               {/* <TouchableOpacity
                     onPress={() => this.props.navigation.navigate('Signup')}
                     style={[styles.signIn, {
                         borderColor: '#ee4e4e',
@@ -316,7 +317,7 @@ messaging().getToken().then(token => {
                     <Text style={[styles.textSign, {
                         color: '#ee4e4e'
                     }]}>Sign Up</Text>
-                </TouchableOpacity>
+                  </TouchableOpacity>*/}
                 <TouchableOpacity  onPress={() => this.props.navigation.navigate('Gateway1')}>
                 <Text style={{color: '#ee4e4e', marginTop:15, justifyContent: "center", alignSelf: "center"}}>Entrepreneur Registration</Text>
             </TouchableOpacity>

@@ -26,7 +26,7 @@ import { SliderBox } from "react-native-image-slider-box";
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 import auth from '@react-native-firebase/auth';
-
+import PhotoGrid from '../components/PhotoGrid';
 
 
 const BannerWidth = Dimensions.get('window').width;
@@ -507,24 +507,16 @@ export default class HomeScreenService extends Component {
               <Text style={{color:'tomato', fontWeight:'bold'}}>Detailed Information</Text>
               </View>
         <Text>Photos</Text>
-        <FlatGrid
-      itemDimension={120}
-      data={this.state.vInfo.imageArray.filter(items => {
+        <PhotoGrid source={this.state.vInfo.imageArray.filter(items => {
         const itemData = items;
         const textData = 'AddImage';
-       
+        
         return itemData.indexOf(textData) == -1
       })}
-      // staticDimension={300} 
-      // fixed
-      spacing={10}
-      renderItem={({ item }) => (
-        <TouchableWithoutFeedback onPress={()=> this.setState({showURL: true, SelectedURL:item})}>
-              <Image style={{  width: 160, height: 160, resizeMode: 'contain',margin: 10}} source={{uri: item}} />
-       </TouchableWithoutFeedback>
-      )}
-    />
-             
+      style={{width: SCREEN_WIDTH/1.7}}
+      onPressImage={uri => this.setState({showURL: true, SelectedURL:uri})} />
+      
+    
          <Text style={{marginTop: 15, fontSize: 14, fontWeight: 'bold'}}>Label: <Text style={{marginTop: 15, fontSize: 13, fontWeight: 'normal'}}>{this.state.vInfo.name}</Text></Text>
         
      

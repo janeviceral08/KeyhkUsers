@@ -104,8 +104,8 @@ export default class SearchRentals extends Component {
       showToast: false,
   
       },
-      SliderminimumValue:[0, 50000],
-      SlidermaximumValue:100000,
+      SliderminimumValue:[0, 5000],
+      SlidermaximumValue:10000,
    setSliderminimumValue: false,
         };
     
@@ -441,7 +441,7 @@ firestore().collection('users').where('userId', '==', userId).onSnapshot(
      loadProducts(loadmore, fromComponent) {
     const self = this;
     var productQuery =  firestore().collection('products').where('SearchType', '==', 'Rentals').where('admin_control', '==', true).where('status', '==', true).where('city', '==', this.state.City.trim());
-    productQuery = this.state.searchText ===""?productQuery:productQuery.where('keywords', 'array-contains-any', [this.state.searchText]);
+    productQuery = this.state.searchText ===""?productQuery:productQuery.where('keywords', 'array-contains-any', [this.state.searchText.toLowerCase()]);
     
     if( this.state.searchEnabled ){
 			/* If request is from a search (onChangeSearch();), we clear out the product list then load the new search results */
@@ -1313,33 +1313,11 @@ removeFav(id){
           minMarkerOverlapDistance={10}
         />
            <View style={{flexDirection: 'row'}}>
-           <View style={{flexDirection: 'column'}}>
-          <Text style={{color: 'gray', fontWeight: 'bold', fontSize:13}}>Min</Text>
-              <View style={{borderRadius: 5, borderColor: 'gray', borderWidth: 1, flexDirection: 'row', width: SCREEN_WIDTH/3, height: 40}}>
-              <Text style={{color: 'gray', fontWeight: 'bold', fontSize:15, justifyContent: 'center', alignSelf: 'center'}}>{this.props.route.params.currency}</Text>
-              <Input
-              keyboardType={'number-pad'}
-              value={this.state.SliderminimumValue[0].toString()}
-              onChangeText={(text) => {isNaN(text)? this.setState({SliderminimumValue: [text, this.state.SliderminimumValue[1]]}):null}}
-            style={{ justifyContent: 'center', alignSelf: 'center'}}
-      />
-                </View>
-                </View>
+   
               
 
 
-                <View style={{flexDirection: 'column', position: 'absolute', right: 0}}>
-          <Text style={{color: 'gray', fontWeight: 'bold', fontSize:13}}>Max</Text>
-              <View style={{borderRadius: 5, borderColor: 'gray', borderWidth: 1, flexDirection: 'row', width: SCREEN_WIDTH/3, height: 40}}>
-              <Text style={{color: 'gray', fontWeight: 'bold', fontSize:15, justifyContent: 'center', alignSelf: 'center'}}>{this.props.route.params.currency}</Text>
-              <Input 
-                 keyboardType={'number-pad'}
-              value={this.state.SliderminimumValue[1].toString()}
-              onChangeText={(text) => {isNaN(text)? this.setState({SliderminimumValue: [this.state.SliderminimumValue[0], text]}):null}}
-            style={{ justifyContent: 'center', alignSelf: 'center'}}
-      />
-                </View>
-                </View>
+        
                 </View>
              
                 <Button bordered  block style={{marginVertical: 10, justifyContent: "center", textAlign: 'center', borderColor:'#019fe8'}} onPress={()=> this.loadProducts()}>

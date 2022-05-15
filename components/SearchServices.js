@@ -438,7 +438,7 @@ export default class SearchServices extends Component {
      loadProducts(loadmore, fromComponent) {
     const self = this;
     var productQuery =  firestore().collection('products').where('rentalType', '==', 'Services').where('admin_control', '==', true).where('status', '==', true).where('city', '==', this.state.City.trim());
-    productQuery = this.state.searchText ===""?productQuery:productQuery.where('keywords', 'array-contains-any', [this.state.searchText]);
+    productQuery = this.state.searchText ===""?productQuery:productQuery.where('keywords', 'array-contains-any', [this.state.searchText.toLowerCase()]);
     
     if( this.state.searchEnabled ){
 			/* If request is from a search (onChangeSearch();), we clear out the product list then load the new search results */

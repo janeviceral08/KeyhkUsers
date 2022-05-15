@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView,Animated} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image, FlatList, SafeAreaView, ScrollView,Animated} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge, Card, CardItem, Body,Item, Picker,Input,List, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -45,6 +45,7 @@ export default class Checkout extends Component {
       const cart = this.props.route.params.cartItems; 
       const subtotal = this.props.route.params.subtotal; 
       this.state = {  
+        appState: AppState.currentState,
       slatitude:cart[0].slatitude,
       slongitude:cart[0].slongitude,
       cartItems: cart,
@@ -218,6 +219,24 @@ tip:0,
   }
 
   componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     this.StartImageRotationFunction()
     this.setState({loading: true})
     firestore().collection('admin_token').where('city', '==', this.props.route.params.cartItems[0].city).onSnapshot(
@@ -261,6 +280,7 @@ tip:0,
   }
   
   componentWillUnmount() {
+    this.appStateSubscription.remove();
     this.unsubscribe && this.unsubscribe();
     this.subscribe && this.subscribe();
     this.billinglistener && this.billinglistener();

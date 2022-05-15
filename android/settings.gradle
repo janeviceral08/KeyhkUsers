@@ -3,8 +3,7 @@ include ':react-native-webview'
 project(':react-native-webview').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-webview/android')
 include ':react-native-otp-verify'
 project(':react-native-otp-verify').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-otp-verify/android')
-include ':react-native-fbsdk-next'
-project(':react-native-fbsdk-next').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fbsdk-next/android')
+
 include ':react-native-sms'
 project(':react-native-sms').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-sms/android')
 include ':react-native-immediate-phone-call'

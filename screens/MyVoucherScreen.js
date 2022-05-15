@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View,Image, FlatList } from 'react-native';
+import { AppState,StyleSheet, Text, View,Image, FlatList } from 'react-native';
 import {Card, CardItem, Thumbnail, Body, Left, Header, Right, Title, Segment, Button} from 'native-base';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -14,6 +14,7 @@ export default class MyVoucherScreen extends Component {
     this.ref =  firestore();
     this.unsubscribe = null;
     this.state = {
+      appState: AppState.currentState,
       //defalt false and if true cannon will be fired
       shoot: false,
       dataSource: [],
@@ -58,6 +59,24 @@ export default class MyVoucherScreen extends Component {
   }
 
   componentDidMount() {
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
     //Time out to fire the cannon
     this.unsubscribe = this.ref.collection('vouchers').onSnapshot(this.onCollectionUpdate) ;
     
@@ -66,7 +85,9 @@ export default class MyVoucherScreen extends Component {
   }
   
 
-  
+  componentWillUnmount(){
+    this.appStateSubscription.remove();
+  }
 
 	
  async onClaimVoucher(data) {

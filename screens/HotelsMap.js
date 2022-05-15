@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image,TouchableWithoutFeedback, FlatList, SafeAreaView, ScrollView} from 'react-native'
+import {AppState,StyleSheet, TextInput, TouchableOpacity, Dimensions, Alert, Image,TouchableWithoutFeedback, FlatList, SafeAreaView, ScrollView} from 'react-native'
 import { Container, View, Left, Right, Button, Icon, Grid, Col, Badge,Title, Card, CardItem, Body,Item, Input,List,Picker, ListItem, Thumbnail,Text,Form, Textarea,Toast, Root, Header } from 'native-base';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -50,6 +50,7 @@ export default class HotelsMap extends Component {
   constructor(props) {
       super(props);
       this.state = {  
+        appState: AppState.currentState,
      cLong:this.props.route.params.cLong,
      cLat:this.props.route.params.cLat,
    
@@ -70,6 +71,33 @@ export default class HotelsMap extends Component {
   };
 
   }
+
+
+componentDidMount(){
+  this.appStateSubscription = AppState.addEventListener(
+    "change",
+    nextAppState => {
+      if (
+        this.state.appState.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        console.log("App has come to the foreground!");
+      }else{
+        console.log("Exitnow");
+        firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+        cityLat:'none',
+                    selectedCountry: '',
+                    selectedCity:'none',})
+      }
+      this.setState({ appState: nextAppState });
+    }
+  );
+}
+
+
+componentWillUnmount(){
+  this.appStateSubscription.remove();
+}
 
   render() {
     return(

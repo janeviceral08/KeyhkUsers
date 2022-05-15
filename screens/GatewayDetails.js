@@ -1,5 +1,5 @@
 import React,{Component} from 'react';
-import { 
+import { AppState,
     Text, 
     TouchableOpacity, 
     Dimensions,
@@ -17,7 +17,37 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { WebView } from 'react-native-webview';
 
 export default class GatewayDetails extends Component {
-       
+  constructor() {
+    super();
+    this.state = {
+  appState: AppState.currentState,
+    }
+  }
+  componentDidMount(){
+    this.appStateSubscription = AppState.addEventListener(
+      "change",
+      nextAppState => {
+        if (
+          this.state.appState.match(/inactive|background/) &&
+          nextAppState === "active"
+        ) {
+          console.log("App has come to the foreground!");
+        }else{
+          console.log("Exitnow");
+          firestore().collection('users').doc(auth().currentUser.uid).update({    cityLong: 'none',
+          cityLat:'none',
+                      selectedCountry: '',
+                      selectedCity:'none',})
+        }
+        this.setState({ appState: nextAppState });
+      }
+    );
+  }
+
+  componentWillUnmount(){
+    this.appStateSubscription.remove();
+  }
+
     render() {
       return (
         <Container style={{flex: 1,backgroundColor: '#fdfdfd'}}>
